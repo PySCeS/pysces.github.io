@@ -1,0 +1,87 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.71)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Instantiating a model object</TITLE>
+<META NAME="description" CONTENT="Instantiating a model object">
+<META NAME="keywords" CONTENT="PySCeS-QuickReference">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="PySCeS-QuickReference.css">
+
+<LINK REL="next" HREF="node6.html">
+<LINK REL="previous" HREF="node4.html">
+<LINK REL="up" HREF="node3.html">
+<LINK REL="next" HREF="node6.html">
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html159"
+  HREF="node6.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.gif"></A> 
+<A NAME="tex2html155"
+  HREF="node3.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.gif"></A> 
+<A NAME="tex2html149"
+  HREF="node4.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.gif"></A> 
+<A NAME="tex2html157"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html160"
+  HREF="node6.html">Loading a model</A>
+<B> Up:</B> <A NAME="tex2html156"
+  HREF="node3.html">Running PySCeS</A>
+<B> Previous:</B> <A NAME="tex2html150"
+  HREF="node4.html">Starting a PySCeS session</A>
+ &nbsp; <B>  <A NAME="tex2html158"
+  HREF="node1.html">Contents</A></B> 
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H2><A NAME="SECTION00032000000000000000">
+Instantiating a model object</A>
+</H2>
+<BLOCKQUOTE>
+This guide uses the test models, supplied with <I>PySCeS</I>, as
+examples. To copy them to the redefined input file directory use
+the <TT>pysces.CopyModels()</TT> command.
+
+</BLOCKQUOTE>
+Before modelling, a <I>PySCeS</I> model object needs to be instantiated.
+As a convention we use <TT>mod</TT> as the instantiated model
+instance. The following code creates such an instance using the
+test input file, <code>pysces_test_linear1.psc</code>:
+<PRE>
+ &gt;&gt;&gt; mod = pysces.model('pysces_test_linear1')
+ Assuming extension is .psc
+ Using model directory: /home/bgoli/pscmodels
+ /home/bgoli/pysces/linear1.psc loading ..... Done.
+</PRE>
+When instantiating a new model object, <I>PySCeS</I> input files are
+assumed to have a <TT>.psc</TT> extension (if not supplied). If
+the specified input file does not exist in the input file
+directory (e.g.&nbsp;misspelled filename) a list of existing input
+files is shown and the user is given an opportunity to enter the
+correct name.
+
+<P>
+<BR><HR>
+<ADDRESS>
+Brett Olivier
+2007-09-21
+</ADDRESS>
+</BODY>
+</HTML>

@@ -1,0 +1,327 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pysces.PyscesInterfaces &mdash; PySCeS User Guide v0.9</title>
+    
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.9.3',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="search" type="application/opensearchdescription+xml"
+          title="Search within PySCeS User Guide v0.9"
+          href="../../_static/opensearch.xml"/>
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+    <link rel="top" title="PySCeS User Guide v0.9" href="../../userguide.html" />
+    <link rel="up" title="Module code" href="../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for pysces.PyscesInterfaces</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">PySCeS - Python Simulator for Cellular Systems (http://pysces.sourceforge.net)</span>
+
+<span class="sd">Copyright (C) 2004-2016 B.G. Olivier, J.M. Rohwer, J.-H.S Hofmeyr all rights reserved,</span>
+
+<span class="sd">Brett G. Olivier (bgoli@users.sourceforge.net)</span>
+<span class="sd">Triple-J Group for Molecular Cell Physiology</span>
+<span class="sd">Stellenbosch University, South Africa.</span>
+
+<span class="sd">Permission to use, modify, and distribute this software is given under the</span>
+<span class="sd">terms of the PySceS (BSD style) license. See LICENSE.txt that came with</span>
+<span class="sd">this distribution for specifics.</span>
+
+<span class="sd">NO WARRANTY IS EXPRESSED OR IMPLIED.  USE AT YOUR OWN RISK.</span>
+<span class="sd">Brett G. Olivier</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">pysces.version</span> <span class="kn">import</span> <span class="n">__version__</span>
+<span class="n">__doc__</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span>
+<span class="s">          PyscesInterfaces</span>
+<span class="s">          ----------------</span>
+
+<span class="s">          Interfaces converting to and from PySCeS models - makes use of Brett&#39;s Core2</span>
+<span class="s">          &quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">pysces</span> <span class="kn">import</span> <span class="n">model_dir</span><span class="p">,</span> <span class="n">output_dir</span>
+<span class="kn">from</span> <span class="nn">pysces.core2.PyscesCore2</span> <span class="kn">import</span> <span class="n">NewCore</span>
+<span class="kn">from</span> <span class="nn">pysces.core2.PyscesCore2Interfaces</span> <span class="kn">import</span> <span class="n">PscToCore</span><span class="p">,</span> <span class="n">SbmlToCore</span><span class="p">,</span> <span class="n">CoreToPsc</span><span class="p">,</span> <span class="n">CoreToSBML</span>
+
+<div class="viewcode-block" id="Core2interfaces"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesInterfaces.Core2interfaces">[docs]</a><span class="k">class</span> <span class="nc">Core2interfaces</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Defines interfaces for translating PySCeS model objects into and from other formats.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">core</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">sbml</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">core2sbml</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">core2psc</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">sbml2core</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">sbml_level</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">sbml_version</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="k">def</span> <span class="nf">__buildPscComponents__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Builds the PSC file</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">core2psc</span><span class="o">.</span><span class="n">setHeader</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">core2psc</span><span class="o">.</span><span class="n">setFixed</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">core2psc</span><span class="o">.</span><span class="n">setCompartments</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">core2psc</span><span class="o">.</span><span class="n">setFunctions</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">core2psc</span><span class="o">.</span><span class="n">setReactions</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">core2psc</span><span class="o">.</span><span class="n">setAssignmentRules</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">core2psc</span><span class="o">.</span><span class="n">setRateRules</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">core2psc</span><span class="o">.</span><span class="n">setEvents</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">core2psc</span><span class="o">.</span><span class="n">setSpecies</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">core2psc</span><span class="o">.</span><span class="n">setParameters</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">core2psc</span><span class="o">.</span><span class="n">setNotes</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__buildSbmlComponents__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The SBML file build commands</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">core2sbml</span><span class="o">.</span><span class="n">createModel</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">core2sbml</span><span class="o">.</span><span class="n">setDescription</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">core2sbml</span><span class="o">.</span><span class="n">setUnits</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">core2sbml</span><span class="o">.</span><span class="n">setCompartments</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">core2sbml</span><span class="o">.</span><span class="n">setSpecies</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">core2sbml</span><span class="o">.</span><span class="n">setParameters</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">core2sbml</span><span class="o">.</span><span class="n">setReactions</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">core2sbml</span><span class="o">.</span><span class="n">setEvents</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">core2sbml</span><span class="o">.</span><span class="n">setRules</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Core2interfaces.writeMod2PSC"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesInterfaces.Core2interfaces.writeMod2PSC">[docs]</a>    <span class="k">def</span> <span class="nf">writeMod2PSC</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mod</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">directory</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">iValues</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">getstrbuf</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Writes a PySCeS model object to a PSC file.</span>
+
+<span class="sd">        - *filename*: writes &lt;filename&gt;.psc or &lt;model_name&gt;.psc if None</span>
+<span class="sd">        - *directory*: (optional) an output directory</span>
+<span class="sd">        - *iValues*: if True then the models initial values are used (or the current values if False).</span>
+<span class="sd">        - *getstrbuf*: if True a StringIO buffer is returned instead of writing to disk</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">core</span> <span class="o">=</span> <span class="n">NewCore</span><span class="p">(</span><span class="n">mod</span><span class="p">,</span> <span class="n">iValues</span><span class="o">=</span><span class="n">iValues</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">core</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">,</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">Please set a PySCeS model or Core2 object&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">core2psc</span> <span class="o">=</span> <span class="n">CoreToPsc</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">core</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">iValues</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">core2psc</span><span class="o">.</span><span class="n">SPECIES_CURRENT_VALUE</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">core2psc</span><span class="o">.</span><span class="n">FIXED_SPECIES_CURRENT_VALUE</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">core2psc</span><span class="o">.</span><span class="n">PARAMETER_CURRENT_VALUE</span> <span class="o">=</span> <span class="bp">True</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__buildPscComponents__</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">filename</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span> <span class="n">filename</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">name</span>
+        <span class="k">if</span> <span class="n">filename</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">:]</span> <span class="o">!=</span> <span class="s">&#39;.psc&#39;</span><span class="p">:</span> <span class="n">filename</span> <span class="o">+=</span> <span class="s">&#39;.psc&#39;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">getstrbuf</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">core2psc</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">directory</span><span class="p">,</span> <span class="n">getstrbuf</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">core2psc</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">directory</span><span class="p">,</span> <span class="n">getstrbuf</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Core2interfaces.writeMod2SBML"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesInterfaces.Core2interfaces.writeMod2SBML">[docs]</a>    <span class="k">def</span> <span class="nf">writeMod2SBML</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mod</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">directory</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">iValues</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">getdocument</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">getstrbuf</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Writes a PySCeS model object to an SBML file.</span>
+
+<span class="sd">        - *filename*: writes &lt;filename&gt;.xml or &lt;model_name&gt;.xml if None</span>
+<span class="sd">        - *directory*: (optional) an output directory</span>
+<span class="sd">        - *iValues*: if True then the models initial values are used (or the current values if False).</span>
+<span class="sd">        - *getdocument*: if True an SBML document object is returned instead of writing to disk or</span>
+<span class="sd">        - *getstrbuf*: if True a StringIO buffer is returned instead of writing to disk</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">core</span> <span class="o">=</span> <span class="n">NewCore</span><span class="p">(</span><span class="n">mod</span><span class="p">,</span> <span class="n">iValues</span><span class="o">=</span><span class="n">iValues</span><span class="p">)</span>
+        <span class="c">##  assert os.sys.platform != &#39;win32&#39;, &#39;\nSBML translation currently only supported on Linux (Mac?)&#39;</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">core</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">,</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">Please set a PySCeS model or Core2 object&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">core2sbml</span> <span class="o">=</span> <span class="n">CoreToSBML</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">core</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">core2sbml</span><span class="o">.</span><span class="n">level</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sbml_level</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">core2sbml</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sbml_version</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">core2sbml</span><span class="o">.</span><span class="n">SBML</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">,</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">Problems loading SBML/Python interface&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__buildSbmlComponents__</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">filename</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span> <span class="n">filename</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">name</span>
+        <span class="k">if</span> <span class="n">filename</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">:]</span> <span class="o">!=</span> <span class="s">&#39;.xml&#39;</span><span class="p">:</span> <span class="n">filename</span> <span class="o">+=</span> <span class="s">&#39;.xml&#39;</span>
+        <span class="k">if</span> <span class="n">getdocument</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">core2sbml</span><span class="o">.</span><span class="n">getSBMLdocument</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">getstrbuf</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">core2sbml</span><span class="o">.</span><span class="n">getSBMLFileAsStrBuf</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">core2sbml</span><span class="o">.</span><span class="n">writeSBML2file</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">directory</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Core2interfaces.readSBMLToCore"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesInterfaces.Core2interfaces.readSBMLToCore">[docs]</a>    <span class="k">def</span> <span class="nf">readSBMLToCore</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">directory</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reads the SBML file specified with filename and converts it into</span>
+<span class="sd">        a core2 object pysces.interface.core</span>
+
+<span class="sd">        - *filename*: the SBML file</span>
+<span class="sd">        - *directory*: (optional) the SBML file directory None means try the current working directory</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">directory</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">fpath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">fpath</span><span class="p">),</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">File </span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s"> does not exist!&quot;</span> <span class="o">%</span> <span class="n">fpath</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">sbml2core</span> <span class="o">=</span> <span class="n">SbmlToCore</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sbml2core</span><span class="o">.</span><span class="n">getSbmlStringFromDisk</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">Dir</span><span class="o">=</span><span class="n">directory</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sbml2core</span><span class="o">.</span><span class="n">getSbmlModel</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sbml2core</span><span class="o">.</span><span class="n">getParsedModel</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sbml2core</span><span class="o">.</span><span class="n">getUnits</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">core</span> <span class="o">=</span> <span class="n">NewCore</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sbml2core</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Core2interfaces.readMod2Core"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesInterfaces.Core2interfaces.readMod2Core">[docs]</a>    <span class="k">def</span> <span class="nf">readMod2Core</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mod</span><span class="p">,</span> <span class="n">iValues</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convert a PySCeS model object to core2</span>
+
+<span class="sd">        - *iValues*: if True then the models initial values are used (or the current values if False).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">core</span> <span class="o">=</span> <span class="n">NewCore</span><span class="p">(</span><span class="n">mod</span><span class="p">,</span> <span class="n">iValues</span><span class="o">=</span><span class="n">iValues</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Core2interfaces.writeCore2PSC"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesInterfaces.Core2interfaces.writeCore2PSC">[docs]</a>    <span class="k">def</span> <span class="nf">writeCore2PSC</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">directory</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">getstrbuf</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Writes a Core2 object to a PSC file.</span>
+
+<span class="sd">        - *filename*: writes &lt;filename&gt;.xml or &lt;model_name&gt;.xml if None</span>
+<span class="sd">        - *directory*: (optional) an output directory</span>
+<span class="sd">        - *getstrbuf*: if True a StringIO buffer is returned instead of writing to disk</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">core</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">,</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">Please set a PySCeS model or Core2 object&quot;</span>
+        <span class="c">##  print &#39;Using existing self.core&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">core2psc</span> <span class="o">=</span> <span class="n">CoreToPsc</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">core</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__buildPscComponents__</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">filename</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span> <span class="n">filename</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">name</span>
+        <span class="k">if</span> <span class="n">filename</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">:]</span> <span class="o">!=</span> <span class="s">&#39;.psc&#39;</span><span class="p">:</span> <span class="n">filename</span> <span class="o">+=</span> <span class="s">&#39;.psc&#39;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">getstrbuf</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">core2psc</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">directory</span><span class="p">,</span> <span class="n">getstrbuf</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">core2psc</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">directory</span><span class="p">,</span> <span class="n">getstrbuf</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Core2interfaces.writeCore2SBML"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesInterfaces.Core2interfaces.writeCore2SBML">[docs]</a>    <span class="k">def</span> <span class="nf">writeCore2SBML</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">directory</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">getdocument</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Writes Core2 object to an SBML file.</span>
+
+<span class="sd">        - *filename*: writes &lt;filename&gt;.xml or &lt;model_name&gt;.xml if None</span>
+<span class="sd">        - *directory*: (optional) an output directory</span>
+<span class="sd">        - *getdocument*: if True an SBML document object is returned instead of writing to disk or</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">core</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">,</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">Please set a PySCeS model or Core2 object&quot;</span>
+        <span class="c">##  print &#39;Using existing self.core&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">core2sbml</span> <span class="o">=</span> <span class="n">CoreToSBML</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">core</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">core2sbml</span><span class="o">.</span><span class="n">level</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sbml_level</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">core2sbml</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sbml_version</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">core2sbml</span><span class="o">.</span><span class="n">SBML</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">,</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">Problems loading SBML/Python interface&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__buildSbmlComponents__</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">filename</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span> <span class="n">filename</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">name</span>
+        <span class="k">if</span> <span class="n">filename</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">:]</span> <span class="o">!=</span> <span class="s">&#39;.xml&#39;</span><span class="p">:</span> <span class="n">filename</span> <span class="o">+=</span> <span class="s">&#39;.xml&#39;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">getdocument</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">core2sbml</span><span class="o">.</span><span class="n">writeSBML2file</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">directory</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">core2sbml</span><span class="o">.</span><span class="n">getSBMLdocument</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="Core2interfaces.convertSBML2PSC"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesInterfaces.Core2interfaces.convertSBML2PSC">[docs]</a>    <span class="k">def</span> <span class="nf">convertSBML2PSC</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sbmlfile</span><span class="p">,</span> <span class="n">sbmldir</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">pscfile</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">pscdir</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convert an SBML file to a PySCeS MDL input file.</span>
+
+<span class="sd">        - *sbmlfile*: the SBML file name</span>
+<span class="sd">        - *sbmldir*: the directory of SBML files (if None current working directory is assumed)</span>
+<span class="sd">        - *pscfile*: the output PSC file name (if None *sbmlfile*.psc is used)</span>
+<span class="sd">        - *pscdir*: the PSC output directory (if None the pysces.model_dir is used)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">sbmldir</span> <span class="o">==</span> <span class="bp">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">sbmldir</span><span class="p">):</span>
+            <span class="n">sbmldir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">sbmldir</span><span class="p">,</span><span class="n">sbmlfile</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">,</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">SBML file </span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s"> does not exist!&#39;</span> <span class="o">%</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">sbmldir</span><span class="p">,</span><span class="n">sbmlfile</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">pscdir</span> <span class="o">==</span> <span class="bp">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">pscdir</span><span class="p">):</span>
+            <span class="n">pscdir</span> <span class="o">=</span> <span class="n">model_dir</span>
+        <span class="k">if</span> <span class="n">pscfile</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">pscfile</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">.psc&#39;</span> <span class="o">%</span> <span class="n">sbmlfile</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">readSBMLToCore</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">sbmlfile</span><span class="p">,</span> <span class="n">directory</span><span class="o">=</span><span class="n">sbmldir</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">writeCore2PSC</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">pscfile</span><span class="p">,</span> <span class="n">directory</span><span class="o">=</span><span class="n">pscdir</span><span class="p">,</span> <span class="n">getstrbuf</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+        <span class="k">print</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">SBML2PSC</span><span class="se">\n</span><span class="s">in : </span><span class="si">%s</span><span class="se">\n</span><span class="s">out: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">sbmldir</span><span class="p">,</span><span class="n">sbmlfile</span><span class="p">),</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">pscdir</span><span class="p">,</span><span class="n">pscfile</span><span class="p">))</span>
+
+    <span class="c"># coming soon for now use writeMod2SBML</span>
+    <span class="c">##  def convertPSC2SBML(self, pscfile, pscdir=None, sbmlfile=None, sbmldir=None):</span>
+        <span class="c">##  &quot;&quot;&quot;</span>
+        <span class="c">##  Convert an SBML file to a PySCeS MDL input file.</span>
+
+        <span class="c">##  - *pscfile*: the input PSC file name</span>
+        <span class="c">##  - *pscdir*: the PSC input directory (if None pysces.model_dir is used)</span>
+        <span class="c">##  - *sbmlfile*: the SBML file name (if None *pscfile*.xml is used)</span>
+        <span class="c">##  - *sbmldir*: the directory of the SBML output file (if None the pysces.output_dir is used)</span>
+        <span class="c">##  &quot;&quot;&quot;</span>
+        <span class="c">##  if pscdir == None or not os.path.exists(pscdir):</span>
+            <span class="c">##  pscdir = model_dir</span>
+        <span class="c">##  if not os.path.exists(os.path.join(pscdir,pscfile)):</span>
+            <span class="c">##  raise RuntimeError, &#39;\nPSC file \&quot;%s\&quot; does not exist!&#39; % os.path.join(pscdir,pscfile)</span>
+        <span class="c">##  if sbmldir == None or not os.path.exists(sbml):</span>
+            <span class="c">##  sbmldir = output_dir</span>
+        <span class="c">##  if sbmlfile == None:</span>
+            <span class="c">##  sbmlfile = &#39;%s.xml&#39; % pscfile</span>
+        <span class="c">##  self.readSBMLToCore(filename=sbmlfile, directory=sbmldir)</span>
+        <span class="c">##  self.writeCore2PSC(filename=pscfile, directory=pscdir, getstrbuf=False)</span>
+        <span class="c">##  print &#39;\nSBML2PSC\nin : %s\nout: %s&#39; % (os.path.join(sbmldir,sbmlfile),os.path.join(pscdir,pscfile))</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../userguide.html">
+              <img class="logo" src="../../_static/pysces_logo_2.gif" alt="Logo"/>
+            </a></p><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../userguide.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2004-2016, Brett Oliver, Johann Rohwer, Jannie Hofmeyr.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

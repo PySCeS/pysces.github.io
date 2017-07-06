@@ -1,0 +1,97 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.71)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Structural Analysis - new objects</TITLE>
+<META NAME="description" CONTENT="Structural Analysis - new objects">
+<META NAME="keywords" CONTENT="PySCeS-QuickReference">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="PySCeS-QuickReference.css">
+
+<LINK REL="next" HREF="node12.html">
+<LINK REL="previous" HREF="node10.html">
+<LINK REL="up" HREF="node8.html">
+<LINK REL="next" HREF="node12.html">
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html241"
+  HREF="node12.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.gif"></A> 
+<A NAME="tex2html237"
+  HREF="node8.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.gif"></A> 
+<A NAME="tex2html231"
+  HREF="node10.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.gif"></A> 
+<A NAME="tex2html239"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html242"
+  HREF="node12.html">Time simulation</A>
+<B> Up:</B> <A NAME="tex2html238"
+  HREF="node8.html">PySCeS: core analysis functions</A>
+<B> Previous:</B> <A NAME="tex2html232"
+  HREF="node10.html">Structural Analysis - legacy</A>
+ &nbsp; <B>  <A NAME="tex2html240"
+  HREF="node1.html">Contents</A></B> 
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H2><A NAME="SECTION00043000000000000000">
+Structural Analysis - new objects</A>
+</H2>
+<I>PySCeS</I> now includes object oriented access to a models structural
+properties using the following attributes:
+
+<UL>
+<LI>mod.Nmatrix, mod.Nrmatrix
+</LI>
+<LI>mod.Lmatrix, mod.L0matrix
+</LI>
+<LI>mod.Kmatrix, mod.K0matrix
+</LI>
+</UL>
+All new structural objects have an <TT>array</TT> attribute which
+holds the reference matrix as well as ridx and cidx which hold the
+row and column indexes (relative to the stoichiometric matrix) as
+well as the following methods:
+
+<UL>
+<LI><TT>getLabels()</TT> return the matrix labels as tuple([rows], [columns])
+</LI>
+<LI><TT>getColsByName()</TT> extract column(s) with label
+</LI>
+<LI><TT>getRowsByName()</TT> extract row(s) with label
+</LI>
+<LI><TT>getIndexes()</TT> return the matrix indices (relative to the Stoichiometric matrix) as tuple((rows), (columns))
+</LI>
+<LI><TT>getColsByIdx()</TT> extract column(s) referenced by index
+</LI>
+<LI><TT>getRowsByIdx()</TT> extract row(s) referenced by index
+</LI>
+</UL>
+In future releases this will be the preferred way of accessing a
+model's structural properties.
+
+<P>
+<BR><HR>
+<ADDRESS>
+Brett Olivier
+2007-09-21
+</ADDRESS>
+</BODY>
+</HTML>

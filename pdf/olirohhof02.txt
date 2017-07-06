@@ -1,0 +1,8 @@
+@ARTICLE{OliRohHof02,
+  author = {Brett G. Olivier and Johann M. Rohwer and Jan-Hendrik S. Hofmeyr},
+  year = 2002,
+  title = {Modelling Cellular Processes with {Python} and {SciPy}},
+  journal = {Mol.\ Biol.\ Rep.},
+  volume = 29,
+  pages = {249--254}
+}

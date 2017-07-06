@@ -1,0 +1,127 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.71)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Write_array()</TITLE>
+<META NAME="description" CONTENT="Write_array()">
+<META NAME="keywords" CONTENT="PySCeS-QuickReference">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="PySCeS-QuickReference.css">
+
+<LINK REL="next" HREF="node28.html">
+<LINK REL="previous" HREF="node26.html">
+<LINK REL="up" HREF="node26.html">
+<LINK REL="next" HREF="node28.html">
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html436"
+  HREF="node28.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.gif"></A> 
+<A NAME="tex2html432"
+  HREF="node26.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.gif"></A> 
+<A NAME="tex2html426"
+  HREF="node26.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.gif"></A> 
+<A NAME="tex2html434"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html437"
+  HREF="node28.html">Write_array_latex()</A>
+<B> Up:</B> <A NAME="tex2html433"
+  HREF="node26.html">Writing formatted arrays</A>
+<B> Previous:</B> <A NAME="tex2html427"
+  HREF="node26.html">Writing formatted arrays</A>
+ &nbsp; <B>  <A NAME="tex2html435"
+  HREF="node1.html">Contents</A></B> 
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H3><A NAME="SECTION00062100000000000000">
+<TT>Write_array()</TT></A>
+</H3>
+
+<P>
+The basic array writer is the <code>Write_array()</code> method. Using the
+default settings this method writes a `tab delimited' array to a
+file. It is trivial to change this to a `comma delimited' format by
+using the <TT>separator&nbsp;=&nbsp;' '</TT> argument. Numbers in the array are
+formatted using the global number format.
+
+<P>
+If column headings are supplied using the <TT>Col&nbsp;=&nbsp;[]</TT>
+argument they are written above the relevant column and if
+necessary truncated to fit the column width. If a column name is
+truncated it is marked with a <TT>*</TT> and the full length name
+is written as a comment after the array data. Similarly row data
+can be supplied using the <TT>Row&nbsp;=&nbsp;[]</TT> argument in which case
+the row names are displayed as a comment which is written after
+the array data.
+
+<P>
+Finally, if the <code>close_file</code> argument is enabled the supplied
+file object is automatically closed after writing the array. The full
+call to the method is:
+<PRE>
+ mod.Write_array(input, File=None, Row=None, Col=None, separator='  ')
+</PRE>
+which generates the array
+<PRE>
+## Write_array_linear1_11:12:23
+#s0             s1             s2
+-3.0043e-001   0.0000e+000   0.0000e+000
+ 1.5022e+000  -5.0217e-001   0.0000e+000
+ 0.0000e+000   1.5065e+000  -5.0650e-001
+ 0.0000e+000   0.0000e+000   1.0130e+000
+# Row: R1  R2  R3  R4
+</PRE>
+By default, each time an array is written, <I>PySCeS</I> includes an
+array header consisting of the model name and the time the array
+was written. This behaviour can be disabled by setting:
+<code>mod.write_array_header = 0</code>
+
+<P>
+<HR>
+<!--Navigation Panel-->
+<A NAME="tex2html436"
+  HREF="node28.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.gif"></A> 
+<A NAME="tex2html432"
+  HREF="node26.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.gif"></A> 
+<A NAME="tex2html426"
+  HREF="node26.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.gif"></A> 
+<A NAME="tex2html434"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html437"
+  HREF="node28.html">Write_array_latex()</A>
+<B> Up:</B> <A NAME="tex2html433"
+  HREF="node26.html">Writing formatted arrays</A>
+<B> Previous:</B> <A NAME="tex2html427"
+  HREF="node26.html">Writing formatted arrays</A>
+ &nbsp; <B>  <A NAME="tex2html435"
+  HREF="node1.html">Contents</A></B> 
+<!--End of Navigation Panel-->
+<ADDRESS>
+Brett Olivier
+2007-09-21
+</ADDRESS>
+</BODY>
+</HTML>

@@ -1,0 +1,141 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.71)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Structural Analysis - legacy</TITLE>
+<META NAME="description" CONTENT="Structural Analysis - legacy">
+<META NAME="keywords" CONTENT="PySCeS-QuickReference">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="PySCeS-QuickReference.css">
+
+<LINK REL="next" HREF="node11.html">
+<LINK REL="previous" HREF="node9.html">
+<LINK REL="up" HREF="node8.html">
+<LINK REL="next" HREF="node11.html">
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html229"
+  HREF="node11.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.gif"></A> 
+<A NAME="tex2html225"
+  HREF="node8.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.gif"></A> 
+<A NAME="tex2html219"
+  HREF="node9.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.gif"></A> 
+<A NAME="tex2html227"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html230"
+  HREF="node11.html">Structural Analysis - new</A>
+<B> Up:</B> <A NAME="tex2html226"
+  HREF="node8.html">PySCeS: core analysis functions</A>
+<B> Previous:</B> <A NAME="tex2html220"
+  HREF="node9.html">Structural Analysis</A>
+ &nbsp; <B>  <A NAME="tex2html228"
+  HREF="node1.html">Contents</A></B> 
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H2><A NAME="SECTION00042000000000000000">
+Structural Analysis - legacy</A>
+</H2>
+
+<UL>
+<LI><TT>mod.nmatrix</TT>, <B>N</B>: displayed with <TT>mod.showN()</TT>
+</LI>
+<LI><TT>mod.kmatrix</TT>, <B>K</B>: displayed with <TT>mod.showK()</TT>
+</LI>
+<LI><TT>mod.lmatrix</TT>, <B>L</B>: displayed with <TT>mod.showL()</TT>
+    (an identity matrix means <B>L</B> does not exist i.e.&nbsp;no linear
+    dependence).
+</LI>
+<LI>If there are linear dependencies in the differential
+    equations then the reduced stoichiometric matrix of linearly
+    independent, differential equations <B>Nr</B> is available as <TT>mod.nrmatrix</TT>
+    and is displayed with <TT>mod.showNr()</TT>. If there is no dependence <!-- MATH
+ $\textbf{Nr} = \textbf{N}$
+ -->
+<IMG
+ WIDTH="72" HEIGHT="16" ALIGN="BOTTOM" BORDER="0"
+ SRC="img2.gif"
+ ALT="$\textbf{Nr} = \textbf{N}$">.
+</LI>
+<LI>In the case where there is linear dependence the moiety conservation
+    sums can be displayed by using <TT>mod.showConserved()</TT>. The conservation totals are calculated
+    from the initial values of the variable species as defined in the model file.
+</LI>
+<LI>When the <B>K</B> and <B>L</B> matrices exist, their dependent
+    parts (<B>K<IMG
+ WIDTH="12" HEIGHT="33" ALIGN="MIDDLE" BORDER="0"
+ SRC="img3.gif"
+ ALT="$_{0}$"></B>, <B>L<IMG
+ WIDTH="12" HEIGHT="33" ALIGN="MIDDLE" BORDER="0"
+ SRC="img3.gif"
+ ALT="$_{0}$"></B>) are available as <TT>mod.kzeromatrix</TT> and
+    <TT>mod.lzeromatrix</TT>
+</LI>
+<LI><TT>mod.showConserved()</TT> prints any moiety
+    conserved relationships (if present).
+</LI>
+<LI><TT>mod.showFluxRelationships()</TT> shows the
+    relationships between dependent and independent fluxes at
+    steady state.
+
+<P>
+</LI>
+</UL>
+If the <TT>mod.showX()</TT> methods are used the various matrices'
+row and column titles are displayed with the matrix. Additionally,
+all of the <TT>mod.showX()</TT> methods accept an open file object as
+an argument. If this file argument is present the method's results
+are output to a file and not printed to the screen. Alternatively,
+the order of each matrix dimension, relative to the stoichiometric
+matrix, is available as either a row or column array (e.g.
+<TT>mod.krow, mod.lrow, mod.kzerocol</TT>).
+
+<P>
+<HR>
+<!--Navigation Panel-->
+<A NAME="tex2html229"
+  HREF="node11.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.gif"></A> 
+<A NAME="tex2html225"
+  HREF="node8.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.gif"></A> 
+<A NAME="tex2html219"
+  HREF="node9.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.gif"></A> 
+<A NAME="tex2html227"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html230"
+  HREF="node11.html">Structural Analysis - new</A>
+<B> Up:</B> <A NAME="tex2html226"
+  HREF="node8.html">PySCeS: core analysis functions</A>
+<B> Previous:</B> <A NAME="tex2html220"
+  HREF="node9.html">Structural Analysis</A>
+ &nbsp; <B>  <A NAME="tex2html228"
+  HREF="node1.html">Contents</A></B> 
+<!--End of Navigation Panel-->
+<ADDRESS>
+Brett Olivier
+2007-09-21
+</ADDRESS>
+</BODY>
+</HTML>

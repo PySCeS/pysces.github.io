@@ -1,0 +1,36 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>KeyValueData</title>
+  </head>
+  <body>
+  	<h1 align="center">KeyValueData</h1>
+<h2>Specification</h2>
+  	<p>Here is the initial specification of a prototype SBML annotation that holds typed key:value pairs. Useful for stroring arbitrary metadata not easily encoded using the legitimate SBML annotation mechanisms. Especially big thanks to Frank Bergmann whose <a href="http://128.208.17.26/sbwWiki/_media/sysbio/sysbio/parametersets/2010-02-22_-_managingmultipleparametersets.pdf">ParameterSets</a> provided the inspiration for this annotation and whose extremely useful comments and suggestions helped me out tremendously.</p>
+  <pre>&lt;listOfKeyValueData xmlns=&quot;<a href="http://pysces.sourceforge.net/KeyValueData">http://pysces.sourceforge.net/KeyValueData</a>&quot;&gt;
+	<s>&lt;data id=&quot;Node0&quot; type=&quot;sbmlId&quot; value=&quot;1&quot;/&gt;</s>
+	&lt;data id=&quot;MyDogsName&quot; type=&quot;string&quot; value=&quot;Woof&quot;/&gt;
+	&lt;data id=&quot;needvacation&quot; type=&quot;boolean&quot; value=&quot;true&quot;/&gt;
+	&lt;data id=&quot;Trustlevel&quot; type=&quot;integer&quot; value=&quot;-5&quot;/&gt;
+	&lt;data id=&quot;deltaG&quot; type=&quot;double&quot; value=&quot;2335066.4573&quot;/&gt;
+&lt;/listOfKeyValueData&gt;</pre>
+  	<p>where <strong>id</strong> is a case <s>in</s>sensitive string conforming to the requirements of an SBML sid and <strong>type</strong> is one of:</p>
+  	<ul>
+  	  <li><em><s>sbmlId</s></em><s>: an SBML sid</s> doesn't make sense in the metadata context if you want to set SBML parameters then use Frank's <a href="http://128.208.17.26/sbwWiki/_media/sysbio/sysbio/parametersets/2010-02-22_-_managingmultipleparametersets.pdf">ParameterSets</a></li>
+  	  <li><em>string</em>: a sequence of UTF8 characters</li>
+  	  <li><em>boolean</em>: true, false, 1, 0</li>
+  	  <li><em>integer</em>: signed integer</li>
+  	  <li> <em>double</em>: double float</li>
+  </ul>
+  	<p>If you are interesting in dicussing this annotation please contact me here [-spaces]: b g o l i [at] u s e r s [dot] s o u r c e f o r g e [dot] n e t</p>
+  	<h2>Practical example</h2>
+  	<p>This annotation was developed to enable the metatdata encoded in &quot;old school&quot; SBML L2V1 genome scale reconstructions that used an arbitrary block of HTML code located in the &lt;notes/&gt; element to be slightly more strictly encoded in SBML L3. Here is an example of the old reaction &lt;notes/&gt; <em>HTML</em> encoded as <em>KeyValueData</em> in an &lt;annotation/&gt;: </p>
+  <pre>&lt;reaction id=&quot;R_DAPE&quot; name=&quot;diaminopimelate epimerase&quot; reversible=&quot;true&quot;&gt;
+      &lt;notes&gt;<br />        &lt;html:p&gt;SUBSYSTEM: Citric Acid Cycle&lt;/html:p&gt;<br />        &lt;html:p&gt;NAME: Citrate lyase#ABBREVIATION:CitDEF#&lt;/html:p&gt;<br />        &lt;html:p&gt;EC Number: 4.1.3.6&lt;/html:p&gt;<br />        &lt;html:p&gt;GENE ASSOCIATION: (b0616 and b0615 and b0617)&lt;/html:p&gt;<br />        &lt;html:p&gt;Equation: [c] : cit --&amp;gt; ac + oaa&lt;/html:p&gt;<br />        &lt;html:p&gt;genes: &lt;/html:p&gt;<br />        &lt;html:p&gt;proteins: &lt;/html:p&gt;<br />        &lt;html:p&gt;LOCUS: b0617#ABBREVIATION:citD#ECNUMBERS:4.1.3.6#&lt;/html:p&gt;<br />        &lt;html:p&gt;Abbreviation: R_CITL&lt;/html:p&gt;<br />        &lt;html:p&gt;Synonyms: _0&lt;/html:p&gt;<br />        &lt;html:p&gt;Confidence Level: 4&lt;/html:p&gt;<br />      &lt;/notes&gt;
+<br />      &lt;annotation&gt;<br />        &lt;listOfKeyValueData xmlns=&quot;http://pysces.sourceforge.net/KeyValueData&quot;&gt;<br />          &lt;data id=&quot;subsystem&quot; type=&quot;string&quot; value=&quot;Citric Acid Cycle&quot;/&gt;<br />          &lt;data id=&quot;name&quot; type=&quot;string&quot; value=&quot;Citrate lyase#ABBREVIATION:CitDEF#&quot;/&gt;<br />          &lt;data id=&quot;ec_number&quot; type=&quot;string&quot; value=&quot;4.1.3.6&quot;/&gt;<br />          &lt;data id=&quot;gene_association&quot; type=&quot;string&quot; value=&quot;(b0616 and b0615 and b0617)&quot;/&gt;<br />          &lt;data id=&quot;equation&quot; type=&quot;string&quot; value=&quot;[c] : cit --&amp;gt; ac + oaa&quot;/&gt;<br />          &lt;data id=&quot;genes&quot; type=&quot;string&quot;/&gt;<br />          &lt;data id=&quot;proteins&quot; type=&quot;string&quot;/&gt;<br />          &lt;data id=&quot;locus&quot; type=&quot;string&quot; value=&quot;b0617#ABBREVIATION:citD#ECNUMBERS:4.1.3.6#&quot;/&gt;<br />          &lt;data id=&quot;abbreviation&quot; type=&quot;string&quot; value=&quot;R_CITL&quot;/&gt;<br />          &lt;data id=&quot;synonyms&quot; type=&quot;string&quot; value=&quot;_0&quot;/&gt;<br />          &lt;data id=&quot;confidence_level&quot; type=&quot;string&quot; value=&quot;4&quot;/&gt;<br />        &lt;/listOfKeyValueData&gt;<br />      &lt;/annotation&gt;
+&lt;/reaction&gt;</pre>
+
+<h6 align="center">&copy; Brett G. Olivier Amsterdam 2012</h6>
+  </body>
+</html>

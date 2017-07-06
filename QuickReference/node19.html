@@ -1,0 +1,84 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.71)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Control coefficients</TITLE>
+<META NAME="description" CONTENT="Control coefficients">
+<META NAME="keywords" CONTENT="PySCeS-QuickReference">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="PySCeS-QuickReference.css">
+
+<LINK REL="next" HREF="node20.html">
+<LINK REL="previous" HREF="node18.html">
+<LINK REL="up" HREF="node17.html">
+<LINK REL="next" HREF="node20.html">
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html338"
+  HREF="node20.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.gif"></A> 
+<A NAME="tex2html334"
+  HREF="node17.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.gif"></A> 
+<A NAME="tex2html328"
+  HREF="node18.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.gif"></A> 
+<A NAME="tex2html336"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html339"
+  HREF="node20.html">Response coefficients</A>
+<B> Up:</B> <A NAME="tex2html335"
+  HREF="node17.html">Metabolic Control Analysis</A>
+<B> Previous:</B> <A NAME="tex2html329"
+  HREF="node18.html">Elasticities</A>
+ &nbsp; <B>  <A NAME="tex2html337"
+  HREF="node1.html">Contents</A></B> 
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H3><A NAME="SECTION00047200000000000000">
+Control coefficients</A>
+</H3>
+Both control coefficients and elasticities can be calculated using
+a single method, <TT>mod.doMca()</TT>.
+
+<UL>
+<LI><TT>mod.showCC()</TT> displays the complete set of flux
+  and concentration control coefficients.
+</LI>
+<LI>Individual control coefficients are generated as either <code>mod.ccSpecies_Rate</code>
+  for a concentration control coefficient, e.g. <code>mod.ccs1_R4</code>.
+</LI>
+<LI>Similarly, <code>mod.ccJFlux_Rate</code> is a flux control coefficient e.g. <code>mod.ccJR1_R4</code>.
+</LI>
+</UL>
+As it is generally common practice to use scaled elasticities and
+control coefficients <I>PySCeS</I> calculated these by default. However,
+it is possible to generate unscaled elasticities and control
+coefficients by setting the attribute <code>mod.mode_mca_scaled=0</code>
+in which case the model attributes are attached as
+<TT>mod.uec</TT> and <TT>mod.ucc</TT> respectively.
+
+<P>
+<BR><HR>
+<ADDRESS>
+Brett Olivier
+2007-09-21
+</ADDRESS>
+</BODY>
+</HTML>

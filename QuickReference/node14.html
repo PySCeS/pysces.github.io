@@ -1,0 +1,133 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.71)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Simulation results - legacy</TITLE>
+<META NAME="description" CONTENT="Simulation results - legacy">
+<META NAME="keywords" CONTENT="PySCeS-QuickReference">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="PySCeS-QuickReference.css">
+
+<LINK REL="previous" HREF="node13.html">
+<LINK REL="up" HREF="node12.html">
+<LINK REL="next" HREF="node15.html">
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html277"
+  HREF="node15.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.gif"></A> 
+<A NAME="tex2html273"
+  HREF="node12.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.gif"></A> 
+<A NAME="tex2html269"
+  HREF="node13.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.gif"></A> 
+<A NAME="tex2html275"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html278"
+  HREF="node15.html">Steady-state analysis</A>
+<B> Up:</B> <A NAME="tex2html274"
+  HREF="node12.html">Time simulation</A>
+<B> Previous:</B> <A NAME="tex2html270"
+  HREF="node13.html">Simulation results</A>
+ &nbsp; <B>  <A NAME="tex2html276"
+  HREF="node1.html">Contents</A></B> 
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H3><A NAME="SECTION00044200000000000000">
+Simulation results - legacy</A>
+</H3>
+<BLOCKQUOTE>
+This sections is included for backwards compatibility and it is
+highly recommended that any new code use the <code>data_sim</code>
+object described in the previous section.
+
+</BLOCKQUOTE>
+After any simulation has been completed the variable species
+concentration changes over time are stored in the array
+<code>mod.sim_res</code>. If the change in reaction rates over time is
+required, these can easily be generated using the
+<code>mod.Fix_Sim()</code> method:
+<PRE>
+ sim_rates = mod.Fix_Sim(mod.sim_res,flux=1)
+</PRE>
+The <code>mod.Fix_Sim()</code> method outputs an array with time as the
+first column followed by either the species concentrations (no
+second argument or <TT>flux=0</TT>) or reaction rates (second
+argument <TT>flux=1</TT>) whose order is given by
+<TT>mod.species</TT> or <TT>mod.reactions</TT> respectively. If
+called without any argument <code>mod.Fix_Sim()</code> returns
+<code>mod.sim_res</code> with <code>time</code> as the first column.
+
+<P>
+Low level simulation parameters include:
+
+<UL>
+<LI>Simulation end time: <code>mod.sim_end</code>
+</LI>
+<LI>Number of points in the simulation: <code>mod.sim_points</code>
+</LI>
+<LI>LSODA maximum steps: <code>mod.lsoda_mxstep</code>. The default value,
+    zero, causes LSODA to auto-adjust this parameter as necessary (to a maximum of 500). In systems that
+    require more steps, the <TT>mod.Simulate()</TT> method automatically tries to adjust this parameter to a larger value.
+</LI>
+<LI><code>mod.mode_sim_init</code> defaults to zero and the variable species are
+    initialized with their initial values. A value of one initializes the variables with a small value.
+</LI>
+<LI><code>mod.sim_time</code>: the time array used by <TT>mod.Simulate()</TT>.
+</LI>
+<LI><code>mod.data_sim_add_rates</code>: automatically calculate
+    and output reaction rates.
+</LI>
+</UL>
+For the advanced user many more of LSODA's options are available
+for tweaking and are fully described in the <I>PySCeS</I> 
+<I>Reference Manual</I>.
+
+<P>
+<HR>
+<!--Navigation Panel-->
+<A NAME="tex2html277"
+  HREF="node15.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.gif"></A> 
+<A NAME="tex2html273"
+  HREF="node12.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.gif"></A> 
+<A NAME="tex2html269"
+  HREF="node13.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.gif"></A> 
+<A NAME="tex2html275"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html278"
+  HREF="node15.html">Steady-state analysis</A>
+<B> Up:</B> <A NAME="tex2html274"
+  HREF="node12.html">Time simulation</A>
+<B> Previous:</B> <A NAME="tex2html270"
+  HREF="node13.html">Simulation results</A>
+ &nbsp; <B>  <A NAME="tex2html276"
+  HREF="node1.html">Contents</A></B> 
+<!--End of Navigation Panel-->
+<ADDRESS>
+Brett Olivier
+2007-09-21
+</ADDRESS>
+</BODY>
+</HTML>

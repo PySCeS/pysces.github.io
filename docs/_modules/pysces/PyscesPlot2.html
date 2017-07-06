@@ -1,0 +1,1600 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pysces.PyscesPlot2 &mdash; PySCeS User Guide v0.9</title>
+    
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.9.3',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="search" type="application/opensearchdescription+xml"
+          title="Search within PySCeS User Guide v0.9"
+          href="../../_static/opensearch.xml"/>
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+    <link rel="top" title="PySCeS User Guide v0.9" href="../../userguide.html" />
+    <link rel="up" title="Module code" href="../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for pysces.PyscesPlot2</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">PySCeS - Python Simulator for Cellular Systems (http://pysces.sourceforge.net)</span>
+
+<span class="sd">Copyright (C) 2004-2016 B.G. Olivier, J.M. Rohwer, J.-H.S Hofmeyr all rights reserved,</span>
+
+<span class="sd">Brett G. Olivier (bgoli@users.sourceforge.net)</span>
+<span class="sd">Triple-J Group for Molecular Cell Physiology</span>
+<span class="sd">Stellenbosch University, South Africa.</span>
+
+<span class="sd">Permission to use, modify, and distribute this software is given under the</span>
+<span class="sd">terms of the PySceS (BSD style) license. See LICENSE.txt that came with</span>
+<span class="sd">this distribution for specifics.</span>
+
+<span class="sd">NO WARRANTY IS EXPRESSED OR IMPLIED.  USE AT YOUR OWN RISK.</span>
+<span class="sd">Brett G. Olivier</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">pysces.version</span> <span class="kn">import</span> <span class="n">__version__</span>
+<span class="kn">import</span> <span class="nn">subprocess</span><span class="o">,</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">shutil</span><span class="o">,</span> <span class="nn">time</span><span class="o">,</span> <span class="nn">math</span><span class="o">,</span> <span class="nn">itertools</span><span class="o">,</span> <span class="nn">copy</span>
+<span class="kn">from</span> <span class="nn">getpass</span> <span class="kn">import</span> <span class="n">getuser</span>
+<span class="kn">import</span> <span class="nn">numpy</span><span class="o">,</span> <span class="nn">scipy</span>
+
+
+<span class="n">__doc__</span> <span class="o">=</span> <span class="s">&#39;&#39;&#39;</span>
+<span class="s">            PyscesPlot2</span>
+<span class="s">            -----------</span>
+
+<span class="s">            PyscesPlot2 is a new graphics susbsystem for PySCeS which will include a</span>
+<span class="s">            Unified Plotting Interface which can take advantage of different plotting</span>
+<span class="s">            backends via a common user interface.</span>
+<span class="s">            &#39;&#39;&#39;</span>
+
+<div class="viewcode-block" id="PlotBase"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.PlotBase">[docs]</a><span class="k">class</span> <span class="nc">PlotBase</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Abstract class defining the Unified Plotting Interface methods. These methods should</span>
+<span class="sd">    be overridden and the class extended by interface specific subclasses.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">CommonStyleDefs</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;points&#39;</span> <span class="p">:</span> <span class="s">&#39;&#39;</span><span class="p">,</span>
+                       <span class="s">&#39;lines&#39;</span> <span class="p">:</span>  <span class="s">&#39;&#39;</span>
+                      <span class="p">}</span>
+
+<div class="viewcode-block" id="PlotBase.plot"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.PlotBase.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">format</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plot a single line data[y] vs data[x] where:</span>
+
+<span class="sd">        - *data* the data array</span>
+<span class="sd">        - *x* x column index</span>
+<span class="sd">        - *y* y column index</span>
+<span class="sd">        - *title* is the line key</span>
+<span class="sd">        - *format* is the XXX format string (default=&#39;&#39;)</span>
+
+<span class="sd">        Format can also be the *CommonStyle* &#39;lines&#39; or &#39;points&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div>
+<div class="viewcode-block" id="PlotBase.plotLines"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.PlotBase.plotLines">[docs]</a>    <span class="k">def</span> <span class="nf">plotLines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="p">[],</span> <span class="n">titles</span><span class="o">=</span><span class="p">[],</span> <span class="n">formats</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;&#39;</span><span class="p">]):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plot a multiple lines data[y1, y2, ] vs data[x] where:</span>
+
+<span class="sd">        - *data* the data array</span>
+<span class="sd">        - *x* x column index</span>
+<span class="sd">        - *y* is a list of line indexes, if empty all of y not including x is plotted</span>
+<span class="sd">        - *titles* is a list of line keys, if empty Line1,Line2,Line3 is used</span>
+<span class="sd">        - *formats* is a list (per line) of XXX format strings.</span>
+
+<span class="sd">        If *formats* only contains a single item, this format is used for all lines</span>
+<span class="sd">        and can also be the *CommonStyle* &#39;lines&#39; or &#39;points&#39;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div>
+<div class="viewcode-block" id="PlotBase.splot"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.PlotBase.splot">[docs]</a>    <span class="k">def</span> <span class="nf">splot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">titles</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">format</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plot a surface data[z] vs data[y] vs data[x] where:</span>
+
+<span class="sd">        - *data* the data array</span>
+<span class="sd">        - *x* x column index</span>
+<span class="sd">        - *y* y column index</span>
+<span class="sd">        - *z* z column index</span>
+<span class="sd">        - *title* is the surface key</span>
+<span class="sd">        - *format* is the XXX format string (default=&#39;&#39;)</span>
+
+<span class="sd">        Format can also be the *CommonStyle* &#39;lines&#39; or &#39;points&#39;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div>
+<div class="viewcode-block" id="PlotBase.splotSurfaces"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.PlotBase.splotSurfaces">[docs]</a>    <span class="k">def</span> <span class="nf">splotSurfaces</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="p">[],</span> <span class="n">titles</span><span class="o">=</span><span class="p">[],</span> <span class="n">formats</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;&#39;</span><span class="p">]):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plot data[z1, z2, ] vs data[y] vs data[x] where:</span>
+
+<span class="sd">        - *data* the data array</span>
+<span class="sd">        - *x* x column index</span>
+<span class="sd">        - *y* y column index</span>
+<span class="sd">        - *z* list of z column indexes, if empty all of z not including x, y are plotted</span>
+<span class="sd">        - *titles* is a list of surface keys, if empty Surf1, Surf2, Surf3 is used</span>
+<span class="sd">        - *formats* is a list (per line) of XXX format strings (default=&#39;&#39;).</span>
+
+<span class="sd">        If *formats* only contains a single item, this format is used for all surfaces</span>
+<span class="sd">        and can also be the *CommonStyle* &#39;lines&#39; or &#39;points&#39;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div>
+<div class="viewcode-block" id="PlotBase.setLogScale"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.PlotBase.setLogScale">[docs]</a>    <span class="k">def</span> <span class="nf">setLogScale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set axis to logscale where:</span>
+
+<span class="sd">        - *axis* = x, y, z, xy, xz, yz, zyx</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div>
+<div class="viewcode-block" id="PlotBase.setNoLogScale"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.PlotBase.setNoLogScale">[docs]</a>    <span class="k">def</span> <span class="nf">setNoLogScale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set axis to a linear scale where:</span>
+
+<span class="sd">        - *axis* = x, y, z, xy, xz, yz, zyx</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div>
+<div class="viewcode-block" id="PlotBase.setRange"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.PlotBase.setRange">[docs]</a>    <span class="k">def</span> <span class="nf">setRange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set axis range where</span>
+
+<span class="sd">        - *axis* = x, y, z, xy, xz, yz, zyx</span>
+<span class="sd">        - *min* = range(s) lower bound (default=None) autoscale</span>
+<span class="sd">        - *max* = range(s) upper bound (default=None) autoscale</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div>
+<div class="viewcode-block" id="PlotBase.setGrid"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.PlotBase.setGrid">[docs]</a>    <span class="k">def</span> <span class="nf">setGrid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Display or remove graph grid.</span>
+
+<span class="sd">        - *value* (boolean) True (on) or False (off)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div>
+<div class="viewcode-block" id="PlotBase.setGraphTitle"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.PlotBase.setGraphTitle">[docs]</a>    <span class="k">def</span> <span class="nf">setGraphTitle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s">&#39;PySCeS Plot&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the graph title, unset if title=None</span>
+
+<span class="sd">        - *title* (string, default=&#39;PySCeS Plot&#39;) the graph title</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div>
+<div class="viewcode-block" id="PlotBase.setKey"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.PlotBase.setKey">[docs]</a>    <span class="k">def</span> <span class="nf">setKey</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Enable or disable the current plot key, no arguments removes key.</span>
+
+<span class="sd">        - *value* boolean (default = False)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div>
+<div class="viewcode-block" id="PlotBase.setAxisLabel"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.PlotBase.setAxisLabel">[docs]</a>    <span class="k">def</span> <span class="nf">setAxisLabel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the axis label:</span>
+
+<span class="sd">        - *axis* = x, y, z, xy, xz, yz, zyx</span>
+<span class="sd">        - *label* = string (default=&#39;&#39;)</span>
+
+<span class="sd">        Called with only the axis argument clears the axis label.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div>
+<div class="viewcode-block" id="PlotBase.save"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.PlotBase.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">directory</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">dfmt</span><span class="o">=</span><span class="s">&#39;</span><span class="si">%.8e</span><span class="s">&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Save the plot data and (optionally) XXX format file</span>
+
+<span class="sd">        - *filename* the filename</span>
+<span class="sd">        - *directory* optional (default = current working directory)</span>
+<span class="sd">        - *dfmt* the data format string (default=&#39;%.8e&#39;)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div>
+<div class="viewcode-block" id="PlotBase.export"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.PlotBase.export">[docs]</a>    <span class="k">def</span> <span class="nf">export</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">directory</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s">&#39;png&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Export the current plot as a &lt;format&gt; file.</span>
+
+<span class="sd">        - *filename* the filename</span>
+<span class="sd">        - *directory* optional (default = current working directory)</span>
+<span class="sd">        - *type* the file format (default=&#39;png&#39;).</span>
+
+<span class="sd">        Currently only PNG is guaranteed to be available in all interfaces.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</div>
+<div class="viewcode-block" id="PlotBase.axisInputStringToList"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.PlotBase.axisInputStringToList">[docs]</a>    <span class="k">def</span> <span class="nf">axisInputStringToList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">input</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Extracts axis information from a string input, returns a boolean triple</span>
+<span class="sd">        representing (x=True/False, y=True/False, z=True/False).</span>
+
+<span class="sd">        - *input* the input string</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">]</span>
+        <span class="nb">input</span> <span class="o">=</span> <span class="nb">input</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="k">if</span> <span class="s">&#39;x&#39;</span> <span class="ow">in</span> <span class="nb">input</span><span class="p">:</span>
+            <span class="n">out</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;x&#39;</span>
+        <span class="k">if</span> <span class="s">&#39;y&#39;</span> <span class="ow">in</span> <span class="nb">input</span><span class="p">:</span>
+            <span class="n">out</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;y&#39;</span>
+        <span class="k">if</span> <span class="s">&#39;z&#39;</span> <span class="ow">in</span> <span class="nb">input</span><span class="p">:</span>
+            <span class="n">out</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;z&#39;</span>
+        <span class="k">return</span> <span class="n">out</span>
+</div>
+<div class="viewcode-block" id="PlotBase.wait"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.PlotBase.wait">[docs]</a>    <span class="k">def</span> <span class="nf">wait</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seconds</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Wait *seconds* (default = 3) or until enter is pressed (seconds = -1)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">seconds</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="nb">raw_input</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">Press &lt;enter&gt; to continue ...</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">seconds</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="GnuPlotUPI"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.GnuPlotUPI">[docs]</a><span class="k">class</span> <span class="nc">GnuPlotUPI</span><span class="p">(</span><span class="n">PlotBase</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    PySCeS/GnuPlot is reborn, leaner and meaner than ever before. This class enables</span>
+<span class="sd">    plotting with GnuPlot via a subprocess link:</span>
+
+<span class="sd">    - *work_dir* optional argument setting directory for dat file(s)</span>
+<span class="sd">    - *gnuplot_dir* optional argument specifying the location of pgnuplot.exe (win32) or gnuplot</span>
+
+<span class="sd">    GnuPlot backend to the Unified Plotting Interface.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">__G_SUBPROC__</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">__ECHO__</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">__DATA_FILE_NAME__</span> <span class="o">=</span> <span class="s">&#39;_gnuplot.dat&#39;</span>
+    <span class="n">__WORK_DIR__</span>  <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">__DATA_FILE_PATH__</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">DATF_FORMAT</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%.8e</span><span class="s">&#39;</span>
+    <span class="n">__LAST_COMMAND__</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+    <span class="n">__MULTIPLOT__</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">PAUSE_TIME</span> <span class="o">=</span> <span class="mf">0.1</span>
+    <span class="n">__GNUPLOT_EXE_PATH__</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">__DISP_TERMINAL__</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="c">##  MULTIPLOT_CNTR = 0</span>
+    <span class="c">##  MULTIPLOT_MAX = 3</span>
+    <span class="c">##  datFbuffsize = 5</span>
+    <span class="c">##  datFcache = None</span>
+
+    <span class="n">CommonStyleDefs</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;points&#39;</span> <span class="p">:</span> <span class="s">&#39;w p&#39;</span><span class="p">,</span>
+                       <span class="s">&#39;lines&#39;</span> <span class="p">:</span>  <span class="s">&#39;w l&#39;</span>
+                      <span class="p">}</span>
+
+    <span class="n">Terminals</span> <span class="o">=</span>    <span class="p">{</span><span class="s">&#39;x11&#39;</span> <span class="p">:</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="s">&#39;windows&#39;</span> <span class="p">:</span> <span class="s">&#39;&#39;</span><span class="p">,</span>
+                    <span class="s">&#39;png&#39;</span> <span class="p">:</span> <span class="s">&#39;medium size 800,600&#39;</span>
+                    <span class="c"># &#39;xffffff x000000 x404040 xff0000 xffa500 x66cdaa xcdb5cd xadd8e6 x0000ff xdda0dd x9500d3&#39;</span>
+                    <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">work_dir</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">gnuplot_dir</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">gnuplot_dir</span> <span class="o">!=</span> <span class="bp">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">gnuplot_dir</span><span class="p">):</span>
+            <span class="n">GNUPLOT_PATH</span> <span class="o">=</span> <span class="n">gnuplot_dir</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">GNUPLOT_PATH</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">sys</span><span class="o">.</span><span class="n">platform</span> <span class="o">==</span> <span class="s">&#39;win32&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__GNUPLOT_EXE_PATH__</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">GNUPLOT_PATH</span><span class="p">,</span> <span class="s">&#39;pgnuplot.exe&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__DISP_TERMINAL__</span> <span class="o">=</span> <span class="s">&#39;windows&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__GNUPLOT_EXE_PATH__</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">GNUPLOT_PATH</span><span class="p">,</span> <span class="s">&#39;gnuplot&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__DISP_TERMINAL__</span> <span class="o">=</span> <span class="s">&#39;x11&#39;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__G_SUBPROC__</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__GNUPLOT_EXE_PATH__</span><span class="p">,</span> <span class="n">stdin</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">ex</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">GnuPlot load failure</span><span class="se">\n</span><span class="s">&#39;</span>
+            <span class="k">print</span> <span class="n">ex</span>
+        <span class="k">if</span> <span class="n">work_dir</span> <span class="o">==</span> <span class="bp">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">work_dir</span><span class="p">):</span>
+            <span class="n">work_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__DATA_FILE_PATH__</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">work_dir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__DATA_FILE_NAME__</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__WORK_DIR__</span> <span class="o">=</span> <span class="n">work_dir</span>
+
+<div class="viewcode-block" id="GnuPlotUPI.set"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.GnuPlotUPI.set">[docs]</a>    <span class="k">def</span> <span class="nf">set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Send *set &lt;key&gt;* or optionally *set &lt;key&gt; &lt;value&gt;* to GnuPlot.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">g_write</span><span class="p">(</span><span class="s">&quot;set </span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="GnuPlotUPI.unset"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.GnuPlotUPI.unset">[docs]</a>    <span class="k">def</span> <span class="nf">unset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Send *unset &lt;key&gt;* or optionally *unset &lt;key&gt; &lt;value&gt;* to GnuPlot.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">g_write</span><span class="p">(</span><span class="s">&quot;unset </span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="GnuPlotUPI.g_write"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.GnuPlotUPI.g_write">[docs]</a>    <span class="k">def</span> <span class="nf">g_write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cmd</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Write a command to the GnuPlot interpreter</span>
+
+<span class="sd">        - *cmd* the GnuPlot command</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cmd</span> <span class="o">=</span> <span class="n">cmd</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\\</span><span class="s">&#39;</span><span class="p">,</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_command</span> <span class="o">=</span> <span class="n">cmd</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__ECHO__</span><span class="p">:</span> <span class="k">print</span> <span class="s">&#39;SENT: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">cmd</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__G_SUBPROC__</span><span class="o">.</span><span class="n">stdin</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;&quot;&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="s">&quot;&quot;&quot;</span> <span class="o">%</span> <span class="n">cmd</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="GnuPlotUPI.g_file_write_array"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.GnuPlotUPI.g_file_write_array">[docs]</a>    <span class="k">def</span> <span class="nf">g_file_write_array</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arr</span><span class="p">,</span> <span class="n">dfmt</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Write a normal (2D) dataset to temp file. Dumps the array to file</span>
+<span class="sd">        using the format:</span>
+
+<span class="sd">        - *arr* the array (r&gt;0, c&gt;1)</span>
+<span class="sd">        - *fmt* default &#39;%.8e&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">dfmt</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">dfmt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">DATF_FORMAT</span>
+        <span class="n">numpy</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__DATA_FILE_PATH__</span><span class="p">,</span> <span class="n">arr</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="n">dfmt</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s">&#39; &#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__ECHO__</span><span class="p">:</span> <span class="k">print</span> <span class="s">&#39;WROTE: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">__DATA_FILE_PATH__</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">g_pause</span><span class="p">()</span> <span class="c"># multiplot protection</span>
+</div>
+<div class="viewcode-block" id="GnuPlotUPI.g_file_write_array3D"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.GnuPlotUPI.g_file_write_array3D">[docs]</a>    <span class="k">def</span> <span class="nf">g_file_write_array3D</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arr</span><span class="p">,</span> <span class="n">yaxis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">dfmt</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Write a GnuPlot format 3D dataset. The *yaxis* argument</span>
+<span class="sd">        specifies the column that should be used to split the dataset</span>
+<span class="sd">        into GnuPlot slices.</span>
+
+<span class="sd">        - *arr* the array (r&gt;1, c&gt;2)</span>
+<span class="sd">        - *fmt* default &#39;%.8e&#39;</span>
+<span class="sd">        - *yaxis* default 1</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">outlist</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">set_idx</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">curr_y</span> <span class="o">=</span> <span class="n">arr</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="n">yaxis</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="k">if</span> <span class="n">arr</span><span class="p">[</span><span class="n">r</span><span class="p">,</span> <span class="n">yaxis</span><span class="p">]</span> <span class="o">!=</span> <span class="n">curr_y</span><span class="p">:</span>
+                <span class="n">outlist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">arr</span><span class="p">[</span><span class="n">set_idx</span><span class="p">:</span><span class="n">r</span><span class="p">,</span> <span class="p">:])</span>
+                <span class="n">curr_y</span> <span class="o">=</span> <span class="n">arr</span><span class="p">[</span><span class="n">r</span><span class="p">,</span> <span class="n">yaxis</span><span class="p">]</span>
+                <span class="n">set_idx</span> <span class="o">=</span> <span class="n">r</span>
+        <span class="k">if</span> <span class="n">set_idx</span> <span class="o">&lt;</span> <span class="n">arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="n">outlist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">arr</span><span class="p">[</span><span class="n">set_idx</span><span class="p">:,</span> <span class="p">:])</span>
+
+        <span class="k">if</span> <span class="n">dfmt</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">dfmt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">DATF_FORMAT</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">outlist</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">g_file_write_array</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">dfmt</span><span class="o">=</span><span class="n">dfmt</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">F</span> <span class="o">=</span> <span class="nb">file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__DATA_FILE_PATH__</span><span class="p">,</span> <span class="s">&#39;w+&#39;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">outlist</span><span class="p">)):</span>
+                <span class="n">numpy</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">F</span><span class="p">,</span> <span class="n">outlist</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">fmt</span><span class="o">=</span><span class="n">dfmt</span><span class="p">)</span>
+                <span class="n">F</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39; </span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+            <span class="n">F</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+            <span class="n">F</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__ECHO__</span><span class="p">:</span> <span class="k">print</span> <span class="s">&#39;WROTE: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">__DATA_FILE_PATH__</span>
+        <span class="k">del</span> <span class="n">outlist</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">g_pause</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="GnuPlotUPI.g_pause"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.GnuPlotUPI.g_pause">[docs]</a>    <span class="k">def</span> <span class="nf">g_pause</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A small pause defined by *self.PAUSE_TIME* (multiplied by 2 when in multiplot).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__MULTIPLOT__</span><span class="p">:</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">PAUSE_TIME</span><span class="o">*</span><span class="mf">2.0</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">PAUSE_TIME</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="GnuPlotUPI.plot"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.GnuPlotUPI.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">format</span><span class="o">=</span><span class="s">&#39;w l&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plot a single line data[y] vs data[x] where:</span>
+
+<span class="sd">        - *data* the data array</span>
+<span class="sd">        - *x* x column index</span>
+<span class="sd">        - *y* y column index</span>
+<span class="sd">        - *title* is the line key</span>
+<span class="sd">        - *format* is the GnuPlot format string (default=&#39;w l&#39;)</span>
+
+<span class="sd">        Format can also be the *CommonStyle* &#39;lines&#39; or &#39;points&#39;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">format</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">CommonStyleDefs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">format</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">CommonStyleDefs</span><span class="p">[</span><span class="n">format</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">title</span> <span class="o">==</span> <span class="s">&#39;&#39;</span><span class="p">:</span>
+            <span class="n">title</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">title</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;X&#39;</span><span class="p">,</span> <span class="n">title</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">format</span> <span class="o">==</span> <span class="s">&#39;&#39;</span><span class="p">:</span>
+            <span class="n">format</span> <span class="o">=</span> <span class="s">&#39;w l&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotLines</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="p">[</span><span class="n">y</span><span class="p">],</span> <span class="n">title</span><span class="p">,</span> <span class="p">[</span><span class="n">format</span><span class="p">]</span><span class="o">*</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+</div>
+<div class="viewcode-block" id="GnuPlotUPI.plotLines"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.GnuPlotUPI.plotLines">[docs]</a>    <span class="k">def</span> <span class="nf">plotLines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="p">[],</span> <span class="n">titles</span><span class="o">=</span><span class="p">[],</span> <span class="n">formats</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;w l&#39;</span><span class="p">]):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plot a multiple lines data[y1, y2, ] vs data[x] where:</span>
+
+<span class="sd">        - *data* the data array</span>
+<span class="sd">        - *x* x column index</span>
+<span class="sd">        - *y* is a list of line indexes, if empty all of y not including x is plotted</span>
+<span class="sd">        - *titles* is a list of line keys if empty Line1, Line2, Line3 is used</span>
+<span class="sd">        - *formats* is a list (per line) of GnuPlot format strings (default=&#39;w l&#39;).</span>
+
+<span class="sd">        If *formats* only contains a single item, this format is used for all lines</span>
+<span class="sd">        and can also be the *CommonStyle* &#39;lines&#39; or &#39;points&#39;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">g_file_write_array</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">dfmt</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">DATF_FORMAT</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">y</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">formats</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">formats</span><span class="p">)</span> <span class="o">!=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="k">print</span> <span class="s">&quot;len(titles) must be one or equal the number data columns (</span><span class="si">%s</span><span class="s">) using: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">formats</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">formats</span> <span class="o">=</span> <span class="p">[</span><span class="n">formats</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span>
+        <span class="k">elif</span> <span class="n">formats</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;&#39;</span> <span class="ow">or</span> <span class="n">formats</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">formats</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;w l&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">formats</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">formats</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">formats</span>
+        <span class="n">cFormats</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">CommonStyleDefs</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">formats</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">formats</span><span class="p">[</span><span class="n">f</span><span class="p">]</span> <span class="ow">in</span> <span class="n">cFormats</span><span class="p">:</span>
+                <span class="n">formats</span><span class="p">[</span><span class="n">f</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">CommonStyleDefs</span><span class="p">[</span><span class="n">formats</span><span class="p">[</span><span class="n">f</span><span class="p">]]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">titles</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">titles</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;col</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">l</span><span class="p">)</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>
+
+        <span class="n">cmd</span> <span class="o">=</span> <span class="s">&#39;&#39;&#39;plot &#39;&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">yi</span> <span class="ow">in</span> <span class="n">y</span><span class="p">:</span>
+            <span class="n">cmd</span> <span class="o">+=</span> <span class="s">&#39;&#39;&#39;&quot;</span><span class="si">%s</span><span class="s">&quot; u </span><span class="si">%s</span><span class="s">:</span><span class="si">%s</span><span class="s"> t &quot;</span><span class="si">%s</span><span class="s">&quot; </span><span class="si">%s</span><span class="s">, &#39;&#39;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__DATA_FILE_PATH__</span><span class="p">,</span>  <span class="n">x</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">yi</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">titles</span><span class="p">[</span><span class="n">yi</span><span class="p">],</span> <span class="n">formats</span><span class="p">[</span><span class="n">yi</span><span class="p">])</span>
+        <span class="n">cmd</span> <span class="o">=</span> <span class="n">cmd</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">g_write</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setKey</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="GnuPlotUPI.splot"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.GnuPlotUPI.splot">[docs]</a>    <span class="k">def</span> <span class="nf">splot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">titles</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">format</span><span class="o">=</span><span class="s">&#39;w l&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plot a surface data[z] vs data[y] vs data[x] where:</span>
+
+<span class="sd">        - *data* the data array</span>
+<span class="sd">        - *x* x column index</span>
+<span class="sd">        - *y* y column index</span>
+<span class="sd">        - *z* z column index</span>
+<span class="sd">        - *titles* is the surface key</span>
+<span class="sd">        - *format* is the GnuPlot format string (default=&#39;w l&#39;)</span>
+
+<span class="sd">        Format can also be the *CommonStyle* &#39;lines&#39; or &#39;points&#39;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">format</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">CommonStyleDefs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">format</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">CommonStyleDefs</span><span class="p">[</span><span class="n">format</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">titles</span> <span class="o">==</span> <span class="s">&#39;&#39;</span><span class="p">:</span>
+            <span class="n">titles</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">titles</span><span class="p">)</span> <span class="o">==</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">Title list must match number of columns&#39;</span>
+        <span class="k">if</span> <span class="n">format</span> <span class="o">==</span> <span class="s">&#39;&#39;</span><span class="p">:</span>
+            <span class="n">format</span> <span class="o">=</span> <span class="s">&#39;w l&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">splotSurfaces</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="p">[</span><span class="n">z</span><span class="p">],</span> <span class="n">titles</span><span class="p">,</span> <span class="p">[</span><span class="n">format</span><span class="p">]</span><span class="o">*</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+</div>
+<div class="viewcode-block" id="GnuPlotUPI.splotSurfaces"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.GnuPlotUPI.splotSurfaces">[docs]</a>    <span class="k">def</span> <span class="nf">splotSurfaces</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="p">[],</span> <span class="n">titles</span><span class="o">=</span><span class="p">[],</span> <span class="n">formats</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;w l&#39;</span><span class="p">]):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plot data[z1, z2, ] vs data[y] vs data[x] where:</span>
+
+<span class="sd">        - *data* the data array</span>
+<span class="sd">        - *x* x column index</span>
+<span class="sd">        - *y* y column index</span>
+<span class="sd">        - *z* list of z column indexes, if empty all of z not including x, y are plotted</span>
+<span class="sd">        - *titles* is a list of surface keys, if empty Surf1, Surf2, Surf3 is used</span>
+<span class="sd">        - *formats* is a list (per line) of GnuPlot format strings (default=&#39;w l&#39;).</span>
+
+<span class="sd">        If *formats* only contains a single item, this format is used for all surface and</span>
+<span class="sd">        can also be the *CommonStyle* &#39;lines&#39; or &#39;points&#39;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">g_file_write_array3D</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">yaxis</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">dfmt</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">DATF_FORMAT</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">z</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">z</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">formats</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">formats</span><span class="p">)</span> <span class="o">!=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="k">print</span> <span class="s">&quot;len(titles) must be one or equal the number data columns (</span><span class="si">%s</span><span class="s">) using: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">formats</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">formats</span> <span class="o">=</span> <span class="p">[</span><span class="n">formats</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span>
+        <span class="k">elif</span> <span class="n">formats</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;&#39;</span> <span class="ow">or</span> <span class="n">formats</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">formats</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;w l&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">formats</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">formats</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">formats</span>
+        <span class="n">cFormats</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">CommonStyleDefs</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">formats</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">formats</span><span class="p">[</span><span class="n">f</span><span class="p">]</span> <span class="ow">in</span> <span class="n">cFormats</span><span class="p">:</span>
+                <span class="n">formats</span><span class="p">[</span><span class="n">f</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">CommonStyleDefs</span><span class="p">[</span><span class="n">formats</span><span class="p">[</span><span class="n">f</span><span class="p">]]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">titles</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">titles</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;col</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">s</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>
+
+        <span class="n">cmd</span> <span class="o">=</span> <span class="s">&#39;&#39;&#39;splot &#39;&#39;&#39;</span>
+
+        <span class="k">for</span> <span class="n">zi</span> <span class="ow">in</span> <span class="n">z</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">zi</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">):</span>
+                <span class="n">cmd</span> <span class="o">+=</span> <span class="s">&#39;&#39;&#39;&quot;</span><span class="si">%s</span><span class="s">&quot; u </span><span class="si">%s</span><span class="s">:</span><span class="si">%s</span><span class="s">:</span><span class="si">%s</span><span class="s"> t &quot;</span><span class="si">%s</span><span class="s">&quot; </span><span class="si">%s</span><span class="s">, &#39;&#39;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__DATA_FILE_PATH__</span><span class="p">,</span>  <span class="n">x</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">y</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">zi</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">titles</span><span class="p">[</span><span class="n">zi</span><span class="p">],</span> <span class="n">formats</span><span class="p">[</span><span class="n">zi</span><span class="p">])</span>
+        <span class="n">cmd</span> <span class="o">=</span> <span class="n">cmd</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+        <span class="k">print</span> <span class="n">cmd</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">g_write</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setKey</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="GnuPlotUPI.save"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.GnuPlotUPI.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">directory</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">dfmt</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Save the last plot as a GnuPlot file *name*.plt which references</span>
+<span class="sd">        *name*.dat.</span>
+
+<span class="sd">        - *name* the name of the GnuPlot plt and and datafile</span>
+<span class="sd">        - *directory* (optional) the directory to use (defaults to working directory)</span>
+<span class="sd">        - *dfmt* is ignored and uses the value of self.DATF_FORMAT</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">directory</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">out_n</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">out_n</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__WORK_DIR__</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">g_write</span><span class="p">(</span><span class="s">&#39;save &quot;</span><span class="si">%s</span><span class="s">.plt&quot;&#39;</span> <span class="o">%</span> <span class="n">out_n</span><span class="p">)</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__WORK_DIR__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__DATA_FILE_NAME__</span><span class="p">),</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">.dat&quot;</span> <span class="o">%</span> <span class="n">out_n</span><span class="p">)</span>
+        <span class="n">F</span> <span class="o">=</span> <span class="nb">file</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">.plt&#39;</span><span class="o">%</span> <span class="n">out_n</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span>
+        <span class="n">fnew</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;_gnuplot.dat&#39;</span><span class="p">,</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">.dat&#39;</span> <span class="o">%</span> <span class="n">name</span><span class="p">)</span>
+        <span class="n">fnew</span> <span class="o">=</span> <span class="n">fnew</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;noequal_axes&#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">)</span> <span class="c"># fixes the &quot;noequal_axes&quot; bug in gnuplot save</span>
+        <span class="n">fnew</span> <span class="o">=</span> <span class="n">fnew</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;#!/gnuplot&#39;</span><span class="p">,</span><span class="s">&#39;#!/gnuplot</span><span class="se">\n</span><span class="s">#</span><span class="se">\n</span><span class="s"># Plot created using PySCeS </span><span class="si">%s</span><span class="s"> (http://pysces.sourceforge.net)&#39;</span> <span class="o">%</span> <span class="n">__version__</span><span class="p">)</span> <span class="c"># fixes the &quot;noequal_axes&quot; bug in gnuplot save</span>
+        <span class="n">F</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="n">F</span> <span class="o">=</span> <span class="nb">file</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">.plt&#39;</span><span class="o">%</span> <span class="n">out_n</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+        <span class="n">F</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">fnew</span><span class="p">)</span>
+        <span class="n">F</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+        <span class="n">F</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="GnuPlotUPI.replot"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.GnuPlotUPI.replot">[docs]</a>    <span class="k">def</span> <span class="nf">replot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Replot the current GnuPlot plot</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">g_write</span><span class="p">(</span><span class="s">&#39;replot&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">g_pause</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="GnuPlotUPI.replotAndWait"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.GnuPlotUPI.replotAndWait">[docs]</a>    <span class="k">def</span> <span class="nf">replotAndWait</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seconds</span><span class="o">=</span><span class="mf">0.5</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Replot the current GnuPlot plot and wait default (*seconds* = 0.5)</span>
+<span class="sd">        or until enter is pressed (*seconds* = -1)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">replot</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="n">seconds</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="GnuPlotUPI.setLogScale"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.GnuPlotUPI.setLogScale">[docs]</a>    <span class="k">def</span> <span class="nf">setLogScale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set axis to logscale where:</span>
+
+<span class="sd">        - *axis* = x, y, z, xy, xz, yz, zyx</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">axout</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">axisInputStringToList</span><span class="p">(</span><span class="n">axis</span><span class="p">)</span>
+        <span class="n">axstr</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">axout</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">s</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">axstr</span> <span class="o">+=</span> <span class="n">s</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;logscale&#39;</span><span class="p">,</span> <span class="n">axstr</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="GnuPlotUPI.setNoLogScale"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.GnuPlotUPI.setNoLogScale">[docs]</a>    <span class="k">def</span> <span class="nf">setNoLogScale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set axis to a linear scale where:</span>
+
+<span class="sd">        - *axis* = x, y, z, xy, xz, yz, zyx</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">axout</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">axisInputStringToList</span><span class="p">(</span><span class="n">axis</span><span class="p">)</span>
+        <span class="n">axstr</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">axout</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">s</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">axstr</span> <span class="o">+=</span> <span class="n">s</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unset</span><span class="p">(</span><span class="s">&#39;logscale&#39;</span><span class="p">,</span> <span class="n">axstr</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="GnuPlotUPI.setRange"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.GnuPlotUPI.setRange">[docs]</a>    <span class="k">def</span> <span class="nf">setRange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set axis range where:</span>
+
+<span class="sd">        - *axis* = x, y, z, xy, xz, yz, zyx</span>
+<span class="sd">        - *min* = range(s) lower bound (default=None) autoscale</span>
+<span class="sd">        - *max* = range(s) upper bound (default=None) autoscale</span>
+
+<span class="sd">        If only the *axis* argument is provided, GnuPlot will autoscale the</span>
+<span class="sd">        ranges to the data.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">axout</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">axisInputStringToList</span><span class="p">(</span><span class="n">axis</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">min</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="nb">min</span> <span class="o">=</span> <span class="s">&#39;*&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">min</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="nb">min</span>
+        <span class="k">if</span> <span class="nb">max</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="nb">max</span> <span class="o">=</span> <span class="s">&#39;*&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">max</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="nb">max</span>
+        <span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="n">axout</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ax</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">range&#39;</span> <span class="o">%</span> <span class="n">ax</span><span class="p">,</span> <span class="s">&#39;[ </span><span class="si">%s</span><span class="s"> : </span><span class="si">%s</span><span class="s"> ]&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">min</span><span class="p">,</span><span class="nb">max</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="GnuPlotUPI.setGrid"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.GnuPlotUPI.setGrid">[docs]</a>    <span class="k">def</span> <span class="nf">setGrid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Display or remove graph grid.</span>
+
+<span class="sd">        - *value* (boolean) True (on) or False (off)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">value</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;grid&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">unset</span><span class="p">(</span><span class="s">&#39;grid&#39;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="GnuPlotUPI.setGraphTitle"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.GnuPlotUPI.setGraphTitle">[docs]</a>    <span class="k">def</span> <span class="nf">setGraphTitle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s">&#39;PySCeS Plot&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the graph title, unset if title argument is None</span>
+
+<span class="sd">        - *title* (string, default=&#39;PySCeS Plot&#39;) the graph title</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">title</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">unset</span><span class="p">(</span><span class="s">&#39;title&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;title&#39;</span><span class="p">,</span> <span class="s">&#39;</span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">title</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="GnuPlotUPI.setKey"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.GnuPlotUPI.setKey">[docs]</a>    <span class="k">def</span> <span class="nf">setKey</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Enable or disable the current plot key, no arguments removes key.</span>
+
+<span class="sd">        - *value* boolean (default = False)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">value</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;key&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">unset</span><span class="p">(</span><span class="s">&#39;key&#39;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="GnuPlotUPI.setAxisLabel"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.GnuPlotUPI.setAxisLabel">[docs]</a>    <span class="k">def</span> <span class="nf">setAxisLabel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the axis label:</span>
+
+<span class="sd">        - *axis* = x, y, z, xy, xz, yz, zyx</span>
+<span class="sd">        - *label* = string (default=&#39;&#39;)</span>
+
+<span class="sd">        Called with only the axis argument clears the axis label.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">axout</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">axisInputStringToList</span><span class="p">(</span><span class="n">axis</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="n">axout</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ax</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">label </span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">label</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="GnuPlotUPI.export"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.GnuPlotUPI.export">[docs]</a>    <span class="k">def</span> <span class="nf">export</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">directory</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s">&#39;png&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Export the current plot as a &lt;format&gt; file.</span>
+
+<span class="sd">        - *filename* the filename</span>
+<span class="sd">        - *directory* optional (default = current working directory)</span>
+<span class="sd">        - *type* the file format (default=&#39;png&#39;).</span>
+
+<span class="sd">        Currently only PNG is guaranteed to be available in all interfaces.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">imgPath</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s">&#39;png&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">name</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">:]</span> <span class="o">!=</span> <span class="s">&#39;.</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="nb">type</span><span class="p">:</span>
+                <span class="n">name</span> <span class="o">+=</span> <span class="s">&#39;.</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="nb">type</span>
+            <span class="k">if</span> <span class="n">directory</span><span class="o">!=</span><span class="bp">None</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
+                <span class="n">imgPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">imgPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span> <span class="n">name</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">imgPath</span> <span class="o">!=</span> <span class="bp">None</span> <span class="ow">and</span> <span class="nb">type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">Terminals</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;output&#39;</span><span class="p">,</span> <span class="s">&#39;</span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">imgPath</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setTerminal</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Terminals</span><span class="p">[</span><span class="nb">type</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">replot</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;output&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setTerminal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__DISP_TERMINAL__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Terminals</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__DISP_TERMINAL__</span><span class="p">])</span>
+            <span class="k">print</span> <span class="s">&#39;Image exported as </span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">imgPath</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&#39;Image not exported as type </span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s">&#39;</span> <span class="o">%</span> <span class="nb">type</span>
+</div>
+<div class="viewcode-block" id="GnuPlotUPI.setDataFileNumberFormat"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.GnuPlotUPI.setDataFileNumberFormat">[docs]</a>    <span class="k">def</span> <span class="nf">setDataFileNumberFormat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">format</span><span class="o">=</span><span class="s">&#39;</span><span class="si">%.8e</span><span class="s">&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the format string for data written to file</span>
+
+<span class="sd">        - *format* format string (default=&#39;%.8e&#39;)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">print</span> <span class="s">&#39;GnuPlot array data will be written as </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">format</span> <span class="o">%</span> <span class="mf">0.123456789</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">DATF_FORMAT</span> <span class="o">=</span> <span class="n">format</span>
+</div>
+<div class="viewcode-block" id="GnuPlotUPI.setTerminal"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.GnuPlotUPI.setTerminal">[docs]</a>    <span class="k">def</span> <span class="nf">setTerminal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the terminal, gnuplot: set terminal *name* *options*</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;terminal&#39;</span><span class="p">,</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">options</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="GnuPlotUPI.setMultiplot"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.GnuPlotUPI.setMultiplot">[docs]</a>    <span class="k">def</span> <span class="nf">setMultiplot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Begin a multiplot session</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__MULTIPLOT__</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&quot;multiplot&quot;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="GnuPlotUPI.unsetMultiplot"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.GnuPlotUPI.unsetMultiplot">[docs]</a>    <span class="k">def</span> <span class="nf">unsetMultiplot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        End a multiplot session.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__MULTIPLOT__</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unset</span><span class="p">(</span><span class="s">&quot;multiplot&quot;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="GnuPlotUPI.setSize"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.GnuPlotUPI.setSize">[docs]</a>    <span class="k">def</span> <span class="nf">setSize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the size of the next plot relative to the GnuPlot canvas (e.g. screen)</span>
+<span class="sd">        size which is defined to be 1. For example if ``width = height = 0.5`` the</span>
+<span class="sd">        plot is 1/4 the size of the viewable canvas. If no arguments are supplied</span>
+<span class="sd">        reset size to 1,1.</span>
+
+<span class="sd">        - *width* of next plot (default = 1.0)</span>
+<span class="sd">        - *height* of next plot (default = 1.0)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&quot;size&quot;</span><span class="p">,</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">,</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="GnuPlotUPI.setOrigin"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.GnuPlotUPI.setOrigin">[docs]</a>    <span class="k">def</span> <span class="nf">setOrigin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xpos</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ypos</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the origin (lower left corner) of the next plot. Uses GnuPlot</span>
+<span class="sd">        screen coordinates. If no arguments are supplied reset origin to 0,0.</span>
+
+<span class="sd">        - *xpos* of next plot (default = 0)</span>
+<span class="sd">        - *ypos* of next plot (default = 0)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&quot;origin&quot;</span><span class="p">,</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">,</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">xpos</span><span class="p">,</span> <span class="n">ypos</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="GnuPlotUPI.setSizeAndOrigin"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.GnuPlotUPI.setSizeAndOrigin">[docs]</a>    <span class="k">def</span> <span class="nf">setSizeAndOrigin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">xpos</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ypos</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the size and origin of the next plot. If no arguments</span>
+<span class="sd">        are supplied, reset the size to 1,1 and origin to 0.0</span>
+
+<span class="sd">        - *width* of next plot (default = 1.0)</span>
+<span class="sd">        - *height* of next plot (default = 1.0)</span>
+<span class="sd">        - *xpos* of next plot (default = 0)</span>
+<span class="sd">        - *ypos* of next plot (default = 0)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setSize</span><span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setOrigin</span><span class="p">(</span><span class="n">xpos</span><span class="p">,</span> <span class="n">ypos</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="MatplotlibUPI"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.MatplotlibUPI">[docs]</a><span class="k">class</span> <span class="nc">MatplotlibUPI</span><span class="p">(</span><span class="n">PlotBase</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Refactored Matplotlib backend to the Unified Plotting Interface</span>
+
+<span class="sd">    - *work_dir* (optional) working directory</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">__MODE_INTERACTIVE__</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="n">__MODE_NEW_FIGURE__</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="n">__FIGURE_GENERATOR__</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">__CURRENT_FIGURE__</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">__MODE_HOLD__</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">MAX_OPEN_WINDOWS</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="n">__ARRAY_DATA__</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">__WORK_DIR__</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">pyplot</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="c">#__ENABLE_HTML5__ = False</span>
+
+    <span class="n">CommonStyleDefs</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;points&#39;</span> <span class="p">:</span> <span class="s">&#39;o&#39;</span><span class="p">,</span>
+                       <span class="s">&#39;lines&#39;</span> <span class="p">:</span>  <span class="s">&#39;-&#39;</span>
+                      <span class="p">}</span>
+    <span class="n">__BACKENDS__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;GTK&#39;</span><span class="p">,</span> <span class="s">&#39;GTKAgg&#39;</span><span class="p">,</span> <span class="s">&#39;GTKCairo&#39;</span><span class="p">,</span> <span class="s">&#39;FltkAgg&#39;</span><span class="p">,</span> <span class="s">&#39;MacOSX&#39;</span><span class="p">,</span> <span class="s">&#39;QtAgg&#39;</span><span class="p">,</span> <span class="s">&#39;Qt4Agg&#39;</span><span class="p">,</span> <span class="s">&#39;TkAgg&#39;</span><span class="p">,</span> <span class="s">&#39;WX&#39;</span><span class="p">,</span> <span class="s">&#39;WXAgg&#39;</span><span class="p">,</span> <span class="s">&#39;CocoaAgg&#39;</span><span class="p">,</span>\
+                     <span class="s">&#39;agg&#39;</span><span class="p">,</span> <span class="s">&#39;nbagg&#39;</span><span class="p">,</span> <span class="s">&#39;cairo&#39;</span><span class="p">,</span> <span class="s">&#39;emf&#39;</span><span class="p">,</span> <span class="s">&#39;gdk&#39;</span><span class="p">,</span> <span class="s">&#39;pdf&#39;</span><span class="p">,</span> <span class="s">&#39;ps&#39;</span><span class="p">,</span> <span class="s">&#39;svg&#39;</span><span class="p">,</span> <span class="s">&#39;template&#39;</span><span class="p">)</span>
+
+    <span class="n">__INTERACTIVE_BACKENDS__</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;GTK&#39;</span><span class="p">,</span> <span class="s">&#39;GTKAgg&#39;</span><span class="p">,</span> <span class="s">&#39;GTKCairo&#39;</span><span class="p">,</span> <span class="s">&#39;FltkAgg&#39;</span><span class="p">,</span> <span class="s">&#39;MacOSX&#39;</span><span class="p">,</span> <span class="s">&#39;QtAgg&#39;</span><span class="p">,</span> <span class="s">&#39;Qt4Agg&#39;</span><span class="p">,</span> <span class="s">&#39;TkAgg&#39;</span><span class="p">,</span> <span class="s">&#39;WX&#39;</span><span class="p">,</span> <span class="s">&#39;WXAgg&#39;</span><span class="p">,</span>\
+                                <span class="s">&#39;CocoaAgg&#39;</span><span class="p">,</span> <span class="s">&#39;nbagg&#39;</span><span class="p">]</span>
+
+    <span class="n">__BACKEND__</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">work_dir</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="s">&#39;TkAgg&#39;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">work_dir</span> <span class="o">!=</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">work_dir</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__WORK_DIR__</span> <span class="o">=</span> <span class="n">work_dir</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__WORK_DIR__</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">import</span> <span class="nn">matplotlib</span>
+            <span class="k">if</span> <span class="n">backend</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__INTERACTIVE_BACKENDS__</span><span class="p">:</span>
+                <span class="n">matplotlib</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="n">backend</span><span class="p">,</span> <span class="n">warn</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__BACKEND__</span> <span class="o">=</span> <span class="n">backend</span>
+                <span class="k">print</span><span class="p">(</span><span class="s">&#39;Matplotlib backend set to: </span><span class="se">\&quot;</span><span class="s">{}</span><span class="se">\&quot;</span><span class="s">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">backend</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">backend</span> <span class="ow">in</span> <span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="s">&#39;None&#39;</span><span class="p">,</span> <span class="s">&#39;none&#39;</span><span class="p">]:</span>
+                    <span class="k">print</span><span class="p">(</span><span class="s">&#39;Matplotlib backend not set, using: </span><span class="se">\&quot;</span><span class="s">{}</span><span class="se">\&quot;</span><span class="s">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">get_backend</span><span class="p">()))</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">__BACKEND__</span> <span class="o">=</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">get_backend</span><span class="p">()</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">matplotlib</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s">&#39;TkAgg&#39;</span><span class="p">,</span> <span class="n">warn</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">__BACKEND__</span> <span class="o">=</span> <span class="s">&#39;TkAgg&#39;</span>
+                    <span class="k">print</span><span class="p">(</span><span class="s">&#39;Matplotlib </span><span class="se">\&quot;</span><span class="s">{}</span><span class="se">\&quot;</span><span class="s"> backend not set, defaulting to: </span><span class="se">\&quot;</span><span class="s">{}</span><span class="se">\&quot;</span><span class="s">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">backend</span><span class="p">,</span> <span class="s">&#39;TkAgg&#39;</span><span class="p">))</span>
+
+            <span class="c">#if self.__ENABLE_HTML5__:</span>
+                <span class="c">#matplotlib.use(&#39;module://mplh5canvas.backend_h5canvas&#39;) # HTML5</span>
+            <span class="c">#else:</span>
+                <span class="c">#matplotlib.use(&#39;TKagg&#39;, warn=False)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">ex</span><span class="p">:</span>
+            <span class="k">print</span> <span class="n">ex</span>
+            <span class="k">print</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">PySCeS defaults to matplotlib&#39;s TKagg backend if not specified in the user conficuration file, set </span><span class="se">\&quot;</span><span class="s">matplotlib_backend = &lt;backend&gt;</span><span class="se">\&quot;</span><span class="s"> &quot;</span>
+
+        <span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span>
+        <span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pylab</span>
+        <span class="c">##  self.pyplot = pyplot</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pyplot</span> <span class="o">=</span> <span class="n">pylab</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__MODE_INTERACTIVE__</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">pyplot</span><span class="o">.</span><span class="n">ion</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setNewFigureGenerator</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">MAX_OPEN_WINDOWS</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_setNewFigureGenerator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a figure_generator with range [1,num+1]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__FIGURE_GENERATOR__</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">cycle</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">num</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">MAX_OPEN_WINDOWS</span> <span class="o">=</span> <span class="n">num</span>
+
+    <span class="k">def</span> <span class="nf">_setActiveFigure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fignum</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__CURRENT_FIGURE__</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pyplot</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">fignum</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_setNewFigure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setActiveFigure</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__FIGURE_GENERATOR__</span><span class="o">.</span><span class="n">next</span><span class="p">())</span>
+
+<div class="viewcode-block" id="MatplotlibUPI.closeAll"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.MatplotlibUPI.closeAll">[docs]</a>    <span class="k">def</span> <span class="nf">closeAll</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Close all open matplotlib figures.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">MAX_OPEN_WINDOWS</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pyplot</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="MatplotlibUPI.hold"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.MatplotlibUPI.hold">[docs]</a>    <span class="k">def</span> <span class="nf">hold</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hold</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Enable plot holding where each new graph is plotted on top of</span>
+<span class="sd">        the previous one.</span>
+
+<span class="sd">        - *hold* boolean (default = False)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">hold</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__MODE_NEW_FIGURE__</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__MODE_HOLD__</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__MODE_NEW_FIGURE__</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__MODE_HOLD__</span> <span class="o">=</span> <span class="bp">False</span>
+</div>
+<div class="viewcode-block" id="MatplotlibUPI.plot"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.MatplotlibUPI.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">format</span><span class="o">=</span><span class="s">&#39;-&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plot a single line data[y] vs data[x] where:</span>
+
+<span class="sd">        - *data* the data array</span>
+<span class="sd">        - *x* x column index</span>
+<span class="sd">        - *y* y column index</span>
+<span class="sd">        - *title* is the line key</span>
+<span class="sd">        - *format* is the Matplotlib format string (default=&#39;-&#39;)</span>
+
+<span class="sd">        Format can also be the *CommonStyle* &#39;lines&#39; or &#39;points&#39;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">format</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">CommonStyleDefs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">format</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">CommonStyleDefs</span><span class="p">[</span><span class="n">format</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">title</span> <span class="o">==</span> <span class="s">&#39;&#39;</span><span class="p">:</span>
+            <span class="n">title</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">title</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;X&#39;</span><span class="p">,</span> <span class="n">title</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotLines</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="p">[</span><span class="n">y</span><span class="p">],</span> <span class="n">title</span><span class="p">,</span> <span class="p">[</span><span class="n">format</span><span class="p">]</span><span class="o">*</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+</div>
+<div class="viewcode-block" id="MatplotlibUPI.plotLines"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.MatplotlibUPI.plotLines">[docs]</a>    <span class="k">def</span> <span class="nf">plotLines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="p">[],</span> <span class="n">titles</span><span class="o">=</span><span class="p">[],</span> <span class="n">formats</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;-&#39;</span><span class="p">]):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plot a multiple lines data[y1, y2, ] vs data[x] where:</span>
+
+<span class="sd">        - *data* the data array</span>
+<span class="sd">        - *x* x column index</span>
+<span class="sd">        - *y* is a list of line indexes</span>
+<span class="sd">        - *titles* is a list of line keys</span>
+<span class="sd">        - *formats* is a list (per line) of Matplotlib format strings.</span>
+
+<span class="sd">        If *formats* only contains a single item, this format is used for all lines</span>
+<span class="sd">        and can also be the *CommonStyle* &#39;lines&#39; or &#39;points&#39;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__ARRAY_DATA__</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__MODE_NEW_FIGURE__</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_setNewFigure</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">__MODE_HOLD__</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">pyplot</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__ARRAY_DATA__</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">y</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">formats</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">formats</span><span class="p">)</span> <span class="o">!=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="k">print</span> <span class="s">&quot;len(titles) must be one or equal the number data columns (</span><span class="si">%s</span><span class="s">) using: </span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">formats</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">formats</span> <span class="o">=</span> <span class="p">[</span><span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">formats</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])]</span>
+        <span class="k">elif</span> <span class="n">formats</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;&#39;</span> <span class="ow">or</span> <span class="n">formats</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">formats</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;-&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">formats</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">formats</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">formats</span>
+        <span class="n">cFormats</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">CommonStyleDefs</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">formats</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">formats</span><span class="p">[</span><span class="n">f</span><span class="p">]</span> <span class="ow">in</span> <span class="n">cFormats</span><span class="p">:</span>
+                <span class="n">formats</span><span class="p">[</span><span class="n">f</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">CommonStyleDefs</span><span class="p">[</span><span class="n">formats</span><span class="p">[</span><span class="n">f</span><span class="p">]]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">titles</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">titles</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;col</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">l</span><span class="p">)</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">pyplot</span><span class="o">.</span><span class="n">ioff</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">yi</span> <span class="ow">in</span> <span class="n">y</span><span class="p">:</span>
+            <span class="c">#print(self.__ARRAY_DATA__.take([x],axis=1))</span>
+            <span class="c">#print(self.__ARRAY_DATA__.take([yi],axis=1))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pyplot</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__ARRAY_DATA__</span><span class="o">.</span><span class="n">take</span><span class="p">([</span><span class="n">x</span><span class="p">],</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">__ARRAY_DATA__</span><span class="o">.</span><span class="n">take</span><span class="p">([</span><span class="n">yi</span><span class="p">],</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">formats</span><span class="p">[</span><span class="n">yi</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="n">titles</span><span class="p">[</span><span class="n">yi</span><span class="p">])</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__MODE_INTERACTIVE__</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">pyplot</span><span class="o">.</span><span class="n">ion</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pyplot</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+        <span class="c">#if self.__ENABLE_HTML5__:</span>
+            <span class="c">#self.pyplot.show()</span>
+</div>
+<div class="viewcode-block" id="MatplotlibUPI.setLogScale"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.MatplotlibUPI.setLogScale">[docs]</a>    <span class="k">def</span> <span class="nf">setLogScale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set axis to logscale where:</span>
+
+<span class="sd">        - *axis* = x, y, z, xy, xz, yz, zyx</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">axout</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">axisInputStringToList</span><span class="p">(</span><span class="n">axis</span><span class="p">)</span>
+        <span class="n">A</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pyplot</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="n">axout</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ax</span> <span class="o">!=</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">ax</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;x&#39;</span><span class="p">,</span><span class="s">&#39;y&#39;</span><span class="p">]:</span>
+                <span class="nb">getattr</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="s">&#39;set_</span><span class="si">%s</span><span class="s">scale&#39;</span> <span class="o">%</span> <span class="n">ax</span><span class="p">)(</span><span class="s">&#39;log&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__MODE_INTERACTIVE__</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">pyplot</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="MatplotlibUPI.setNoLogScale"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.MatplotlibUPI.setNoLogScale">[docs]</a>    <span class="k">def</span> <span class="nf">setNoLogScale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set axis to a linear scale where:</span>
+
+<span class="sd">        - *axis* = x, y, z, xy, xz, yz, zyx</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">axout</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">axisInputStringToList</span><span class="p">(</span><span class="n">axis</span><span class="p">)</span>
+        <span class="n">A</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pyplot</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="n">axout</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ax</span> <span class="o">!=</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">ax</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;x&#39;</span><span class="p">,</span><span class="s">&#39;y&#39;</span><span class="p">]:</span>
+                <span class="nb">getattr</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="s">&#39;set_</span><span class="si">%s</span><span class="s">scale&#39;</span> <span class="o">%</span> <span class="n">ax</span><span class="p">)(</span><span class="s">&#39;linear&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__MODE_INTERACTIVE__</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">pyplot</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="MatplotlibUPI.setRange"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.MatplotlibUPI.setRange">[docs]</a>    <span class="k">def</span> <span class="nf">setRange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set axis range where</span>
+
+<span class="sd">        - *axis* = x, y, z, xy, xz, yz, zyx</span>
+<span class="sd">        - *min* = range(s) lower bound (default=None) autoscale</span>
+<span class="sd">        - *max* = range(s) upper bound (default=None) autoscale</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">axout</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">axisInputStringToList</span><span class="p">(</span><span class="n">axis</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="n">axout</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ax</span> <span class="o">!=</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">ax</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;x&#39;</span><span class="p">,</span><span class="s">&#39;y&#39;</span><span class="p">]:</span>
+                <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pyplot</span><span class="p">,</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">lim&#39;</span> <span class="o">%</span> <span class="n">ax</span><span class="p">)(</span><span class="nb">min</span><span class="p">,</span> <span class="nb">max</span><span class="p">)</span>
+        <span class="c">##  if self.__MODE_INTERACTIVE__: self.pyplot.draw()</span>
+</div>
+<div class="viewcode-block" id="MatplotlibUPI.setGrid"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.MatplotlibUPI.setGrid">[docs]</a>    <span class="k">def</span> <span class="nf">setGrid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Display or remove graph grid.</span>
+
+<span class="sd">        - *value* (boolean) True (on) or False (off)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pyplot</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="MatplotlibUPI.setGraphTitle"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.MatplotlibUPI.setGraphTitle">[docs]</a>    <span class="k">def</span> <span class="nf">setGraphTitle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s">&#39;PySCeS Plot&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the graph title, unset if title=None</span>
+
+<span class="sd">        - *title* (string, default=&#39;PySCeS Plot&#39;) the graph title</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pyplot</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="MatplotlibUPI.setKey"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.MatplotlibUPI.setKey">[docs]</a>    <span class="k">def</span> <span class="nf">setKey</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Enable or disable the current plot key, no arguments removes key.</span>
+
+<span class="sd">        - *value* boolean (default = False)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">L</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pyplot</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">get_legend</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">value</span><span class="p">:</span>
+            <span class="n">L</span><span class="o">.</span><span class="n">_visible</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">L</span><span class="o">.</span><span class="n">_visible</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__MODE_INTERACTIVE__</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">pyplot</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="MatplotlibUPI.setAxisLabel"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.MatplotlibUPI.setAxisLabel">[docs]</a>    <span class="k">def</span> <span class="nf">setAxisLabel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the axis label:</span>
+
+<span class="sd">        - *axis* = x, y, z, xy, xz, yz, zyx</span>
+<span class="sd">        - *label* = string (default=&#39;&#39;)</span>
+
+<span class="sd">        Called with only the axis argument clears the axis label.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">axout</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">axisInputStringToList</span><span class="p">(</span><span class="n">axis</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="n">axout</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ax</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;x&#39;</span><span class="p">,</span><span class="s">&#39;y&#39;</span><span class="p">]:</span>
+                <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pyplot</span><span class="p">,</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">label&#39;</span> <span class="o">%</span> <span class="n">ax</span><span class="p">)(</span><span class="n">label</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="MatplotlibUPI.save"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.MatplotlibUPI.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">directory</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">dfmt</span><span class="o">=</span><span class="s">&#39;</span><span class="si">%.8e</span><span class="s">&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Save the plot data to</span>
+
+<span class="sd">        - *filename* the filename</span>
+<span class="sd">        - *directory* optional (default = current working directory)</span>
+<span class="sd">        - *dfmt* the data format string (default=&#39;%.8e&#39;)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">directory</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">out_n</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">out_n</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__WORK_DIR__</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="n">numpy</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">out_n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__ARRAY_DATA__</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="n">dfmt</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s">&#39; &#39;</span><span class="p">)</span>
+        <span class="k">print</span> <span class="s">&#39;Data saved as </span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">out_n</span>
+</div>
+<div class="viewcode-block" id="MatplotlibUPI.export"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.MatplotlibUPI.export">[docs]</a>    <span class="k">def</span> <span class="nf">export</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">directory</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s">&#39;png&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Export the current plot as a &lt;format&gt; file.</span>
+
+<span class="sd">        - *filename* the filename</span>
+<span class="sd">        - *directory* optional (default = current working directory)</span>
+<span class="sd">        - *type* the file format (default=&#39;png&#39;).</span>
+
+<span class="sd">        Currently only PNG is guaranteed to be available in all interfaces.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">imgPath</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">terminals</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;png&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="n">terminals</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">name</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">:]</span> <span class="o">!=</span> <span class="s">&#39;.</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="nb">type</span><span class="p">:</span>
+                <span class="n">name</span> <span class="o">+=</span> <span class="s">&#39;.</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="nb">type</span>
+            <span class="k">if</span> <span class="n">directory</span><span class="o">!=</span><span class="bp">None</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
+                <span class="n">imgPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">imgPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span> <span class="n">name</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pyplot</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">imgPath</span><span class="p">)</span>
+            <span class="k">print</span> <span class="s">&#39;Image exported as </span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">imgPath</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&#39;Image not exported as type </span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s">&#39;</span> <span class="o">%</span> <span class="nb">type</span>
+
+</div>
+<div class="viewcode-block" id="MatplotlibUPI.setLineWidth"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.MatplotlibUPI.setLineWidth">[docs]</a>    <span class="k">def</span> <span class="nf">setLineWidth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sets the line width for current axis</span>
+
+<span class="sd">        - *width* the line width</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="p">[</span><span class="n">l</span><span class="o">.</span><span class="n">set_linewidth</span><span class="p">(</span><span class="n">width</span><span class="p">)</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pyplot</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">get_lines</span><span class="p">()]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__MODE_INTERACTIVE__</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">pyplot</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
+
+
+</div></div>
+<div class="viewcode-block" id="PyscesUPI"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.PyscesUPI">[docs]</a><span class="k">class</span> <span class="nc">PyscesUPI</span><span class="p">(</span><span class="n">PlotBase</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This is the frontend to the PySCeS Unified Plotting Interface (pysces.plt.*) that</span>
+<span class="sd">    allows one to specify which backend should be used to plot when a</span>
+<span class="sd">    UPI method is called. More than one interface can be active at the same time and</span>
+<span class="sd">    so far the Matplotlib and GnuPlot backends are available for use.</span>
+
+<span class="sd">    This is an experiment which must be refactored into a more general</span>
+<span class="sd">    way of doing things. Basically, I want an instance of the abstract plotting</span>
+<span class="sd">    class which will plot to one, any or all currently available backends.</span>
+<span class="sd">    If anybody has an idea how I can generate this class automatically please let</span>
+<span class="sd">    me know ;-)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">g</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">__USE_GNUPLOT__</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">__USE_MATPLOTLIB__</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">__GINTERFACES__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;matplotlib&#39;</span><span class="p">,</span> <span class="s">&#39;gnuplot&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="PyscesUPI.p_setInterface"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.PyscesUPI.p_setInterface">[docs]</a>    <span class="k">def</span> <span class="nf">p_setInterface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">instance</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add an interface to the backend selector</span>
+
+<span class="sd">        - *name* the interface name currently one of [&#39;matplotlib&#39;,&#39;gnuplot&#39;]</span>
+<span class="sd">        - *instance* an instance of a PlotBase derived (UPI) interface</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__GINTERFACES__</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__setattr__</span><span class="p">(</span><span class="s">&#39;__USE_</span><span class="si">%s</span><span class="s">__&#39;</span> <span class="o">%</span> <span class="n">name</span><span class="o">.</span><span class="n">upper</span><span class="p">(),</span> <span class="bp">True</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__setattr__</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">instance</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="PyscesUPI.p_deactivateInterface"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.PyscesUPI.p_deactivateInterface">[docs]</a>    <span class="k">def</span> <span class="nf">p_deactivateInterface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interface</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Deactivate the interface. This does not delete the interface and</span>
+<span class="sd">        it is possible to reactivate the deactivated interface with **p_activateInterface**.</span>
+
+<span class="sd">        - *interface* one of [&#39;matplotlib&#39;,&#39;gnuplot&#39;]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">interface</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__GINTERFACES__</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__setattr__</span><span class="p">(</span><span class="s">&#39;__USE_</span><span class="si">%s</span><span class="s">__&#39;</span> <span class="o">%</span> <span class="n">interface</span><span class="o">.</span><span class="n">upper</span><span class="p">(),</span> <span class="bp">False</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="PyscesUPI.p_activateInterface"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.PyscesUPI.p_activateInterface">[docs]</a>    <span class="k">def</span> <span class="nf">p_activateInterface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interface</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Activate an interface that has been set with **p_setInterface()** but deactivated with</span>
+<span class="sd">        **p_deactivateInterface**</span>
+
+<span class="sd">        - *interface* one of [&#39;matplotlib&#39;,&#39;gnuplot&#39;]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">interface</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__GINTERFACES__</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">__getattribute__</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">interface</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__setattr__</span><span class="p">(</span><span class="s">&#39;__USE_</span><span class="si">%s</span><span class="s">__&#39;</span> <span class="o">%</span> <span class="n">interface</span><span class="o">.</span><span class="n">upper</span><span class="p">(),</span> <span class="bp">True</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&#39;Cannot activate </span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s">interface&#39;</span> <span class="o">%</span> <span class="n">interface</span>
+</div>
+    <span class="k">def</span> <span class="nf">__gselect__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This methods uses plots a UPI method to *any* activated plotting</span>
+<span class="sd">        interface</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># avoids fishy nested args bug (not really relevant anymore but here just in case)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__USE_GNUPLOT__</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">__USE_MATPLOTLIB__</span><span class="p">:</span>
+            <span class="c"># args2 = tuple([copy.deepcopy(a) for a in args])</span>
+            <span class="c">##  args2 = copy.deepcopy(args)</span>
+            <span class="c">##  kwargs2 = copy.deepcopy(kwargs)</span>
+            <span class="n">args2</span> <span class="o">=</span> <span class="n">args</span>
+            <span class="n">kwargs2</span> <span class="o">=</span> <span class="n">kwargs</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">args2</span> <span class="o">=</span> <span class="n">args</span>
+            <span class="n">kwargs2</span> <span class="o">=</span> <span class="n">kwargs</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__USE_MATPLOTLIB__</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">m</span><span class="o">.</span><span class="n">__getattribute__</span><span class="p">(</span><span class="n">func</span><span class="p">)(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">NotImplementedError</span><span class="p">:</span>
+                <span class="k">print</span> <span class="s">&#39;</span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s"> method not available using Matplotlib&#39;</span> <span class="o">%</span> <span class="n">func</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__USE_GNUPLOT__</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">g</span><span class="o">.</span><span class="n">__getattribute__</span><span class="p">(</span><span class="n">func</span><span class="p">)(</span><span class="o">*</span><span class="n">args2</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs2</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">NotImplementedError</span><span class="p">:</span>
+                <span class="k">print</span> <span class="s">&#39;</span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s"> method not available using GnuPlot &#39;</span> <span class="o">%</span> <span class="n">func</span>
+        <span class="k">del</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">,</span> <span class="n">args2</span><span class="p">,</span> <span class="n">kwargs2</span>
+
+<div class="viewcode-block" id="PyscesUPI.plot"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.PyscesUPI.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">format</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plot a single line data[y] vs data[x] where:</span>
+
+<span class="sd">        - *data* the data array</span>
+<span class="sd">        - *x* x column index</span>
+<span class="sd">        - *y* y column index</span>
+<span class="sd">        - *title* is the line key</span>
+<span class="sd">        - *format* is the backend format string (default=&#39;&#39;)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__gselect__</span><span class="p">(</span><span class="s">&#39;plot&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">format</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="PyscesUPI.plotLines"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.PyscesUPI.plotLines">[docs]</a>    <span class="k">def</span> <span class="nf">plotLines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="p">[],</span> <span class="n">titles</span><span class="o">=</span><span class="p">[],</span> <span class="n">formats</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;&#39;</span><span class="p">]):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plot a multiple lines data[y1, y2, ] vs data[x] where:</span>
+
+<span class="sd">        - *data* the data array</span>
+<span class="sd">        - *x* x column index</span>
+<span class="sd">        - *y* is a list of line indexes, if empty all of y not including x is plotted</span>
+<span class="sd">        - *titles* is a list of line keys, if empty Line1,Line2,Line3 is used</span>
+<span class="sd">        - *formats* is a list (per line) of XXX format strings.</span>
+
+<span class="sd">        If *formats* only contains a single item, this format is used for all lines.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__gselect__</span><span class="p">(</span><span class="s">&#39;plotLines&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">titles</span><span class="p">,</span> <span class="n">formats</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="PyscesUPI.splot"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.PyscesUPI.splot">[docs]</a>    <span class="k">def</span> <span class="nf">splot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">titles</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">format</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plot a surface data[z] vs data[y] vs data[x] where:</span>
+
+<span class="sd">        - *data* the data array</span>
+<span class="sd">        - *x* x column index</span>
+<span class="sd">        - *y* y column index</span>
+<span class="sd">        - *z* z column index</span>
+<span class="sd">        - *titles* is a list of surface keys whose len matches data columns</span>
+<span class="sd">        - *format* is the XXX format string (default=&#39;&#39;)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__gselect__</span><span class="p">(</span><span class="s">&#39;splot&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">titles</span><span class="p">,</span> <span class="n">format</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="PyscesUPI.splotSurfaces"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.PyscesUPI.splotSurfaces">[docs]</a>    <span class="k">def</span> <span class="nf">splotSurfaces</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="p">[],</span> <span class="n">titles</span><span class="o">=</span><span class="p">[],</span> <span class="n">formats</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;&#39;</span><span class="p">]):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plot data[z1, z2, ] vs data[y] vs data[x] where:</span>
+
+<span class="sd">        - *data* the data array</span>
+<span class="sd">        - *x* x column index</span>
+<span class="sd">        - *y* y column index</span>
+<span class="sd">        - *z* list of z column indexes, if empty all of z not including x, y are plotted</span>
+<span class="sd">        - *titles* is a list of surface keys, if empty Surf1, Surf2, Surf3 is used</span>
+<span class="sd">        - *formats* is a list (per line) of XXX format strings (default=&#39;&#39;).</span>
+
+<span class="sd">        If *formats* only contains a single item, this format is used for all surfaces.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__gselect__</span><span class="p">(</span><span class="s">&#39;splotSurfaces&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">titles</span><span class="p">,</span> <span class="n">formats</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="PyscesUPI.setLogScale"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.PyscesUPI.setLogScale">[docs]</a>    <span class="k">def</span> <span class="nf">setLogScale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set axis to logscale where:</span>
+
+<span class="sd">        - *axis* = x, y, z, xy, xz, yz, zyx</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__gselect__</span><span class="p">(</span><span class="s">&#39;setLogScale&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="PyscesUPI.setNoLogScale"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.PyscesUPI.setNoLogScale">[docs]</a>    <span class="k">def</span> <span class="nf">setNoLogScale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set axis to a linear scale where:</span>
+
+<span class="sd">        - *axis* = x, y, z, xy, xz, yz, zyx</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__gselect__</span><span class="p">(</span><span class="s">&#39;setNoLogScale&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="PyscesUPI.setRange"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.PyscesUPI.setRange">[docs]</a>    <span class="k">def</span> <span class="nf">setRange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set axis range where</span>
+
+<span class="sd">        - *axis* = x, y, z, xy, xz, yz, zyx</span>
+<span class="sd">        - *min* = range(s) lower bound (default=None) autoscale</span>
+<span class="sd">        - *max* = range(s) upper bound (default=None) autoscale</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__gselect__</span><span class="p">(</span><span class="s">&#39;setRange&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="nb">min</span><span class="p">,</span> <span class="nb">max</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="PyscesUPI.setGrid"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.PyscesUPI.setGrid">[docs]</a>    <span class="k">def</span> <span class="nf">setGrid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Display or remove graph grid.</span>
+
+<span class="sd">        - *value* (boolean) True (on) or False (off)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__gselect__</span><span class="p">(</span><span class="s">&#39;setGrid&#39;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="PyscesUPI.setGraphTitle"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.PyscesUPI.setGraphTitle">[docs]</a>    <span class="k">def</span> <span class="nf">setGraphTitle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s">&#39;PySCeS Plot&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the graph title, unset if title=None</span>
+
+<span class="sd">        - *title* (string, default=&#39;PySCeS Plot&#39;) the graph title</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__gselect__</span><span class="p">(</span><span class="s">&#39;setGraphTitle&#39;</span><span class="p">,</span> <span class="n">title</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="PyscesUPI.setKey"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.PyscesUPI.setKey">[docs]</a>    <span class="k">def</span> <span class="nf">setKey</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Enable or disable the current plot key, no arguments removes key.</span>
+
+<span class="sd">        - *value* boolean (default = False)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__gselect__</span><span class="p">(</span><span class="s">&#39;setKey&#39;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="PyscesUPI.setAxisLabel"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.PyscesUPI.setAxisLabel">[docs]</a>    <span class="k">def</span> <span class="nf">setAxisLabel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the axis label:</span>
+
+<span class="sd">        - *axis* = x, y, z, xy, xz, yz, zyx</span>
+<span class="sd">        - *label* = string (default=None)</span>
+
+<span class="sd">        Called with only the axis argument clears the axis label.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__gselect__</span><span class="p">(</span><span class="s">&#39;setAxisLabel&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="n">label</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="PyscesUPI.save"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.PyscesUPI.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">directory</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">dfmt</span><span class="o">=</span><span class="s">&#39;</span><span class="si">%.8e</span><span class="s">&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Save the plot data and (optionally) XXX format file</span>
+
+<span class="sd">        - *filename* the filename</span>
+<span class="sd">        - *directory* optional (default = current working directory)</span>
+<span class="sd">        - *dfmt* the data format string (default=&#39;%.8e&#39;)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__gselect__</span><span class="p">(</span><span class="s">&#39;save&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">directory</span><span class="p">,</span> <span class="n">dfmt</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="PyscesUPI.export"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.PyscesUPI.export">[docs]</a>    <span class="k">def</span> <span class="nf">export</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">directory</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s">&#39;png&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Export the current plot as a &lt;format&gt; file.</span>
+
+<span class="sd">        - *filename* the filename</span>
+<span class="sd">        - *directory* optional (default = current working directory)</span>
+<span class="sd">        - *type* the file format (default=&#39;png&#39;).</span>
+
+<span class="sd">        Currently only PNG is guaranteed to be available in all interfaces.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__gselect__</span><span class="p">(</span><span class="s">&#39;export&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">directory</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="PyscesUPI.replot"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.PyscesUPI.replot">[docs]</a>    <span class="k">def</span> <span class="nf">replot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Replot the current figure for all active interfaces</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__USE_GNUPLOT__</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">g</span><span class="o">.</span><span class="n">replot</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__USE_MATPLOTLIB__</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">m</span><span class="o">.</span><span class="n">pyplot</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="PyscesUPI.closeAll"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.PyscesUPI.closeAll">[docs]</a>    <span class="k">def</span> <span class="nf">closeAll</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Close all active Matplolib figures&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__USE_MATPLOTLIB__</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">m</span><span class="o">.</span><span class="n">closeAll</span><span class="p">()</span>
+
+
+
+</div></div>
+<div class="viewcode-block" id="FIFOBuffer"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.FIFOBuffer">[docs]</a><span class="k">class</span> <span class="nc">FIFOBuffer</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Simple fixed size FIFO buffer.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="bp">None</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">size</span><span class="p">)]</span>
+
+<div class="viewcode-block" id="FIFOBuffer.add"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.FIFOBuffer.add">[docs]</a>    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="FIFOBuffer.get"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesPlot2.FIFOBuffer.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
+
+<span class="c"># The following code will be adapted used in future for higher level</span>
+<span class="c"># graphics operations.</span></div></div>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">class LineObj2(object):</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    Class describing a &quot;graph line&quot; or series of data.</span>
+
+<span class="sd">    - **data** a ndarray column of data shape = (r, 1)</span>
+<span class="sd">    - **label** a string label describing the column</span>
+<span class="sd">    - **\*\*kwargs** (optional) key=value pairs of property descriptors</span>
+
+<span class="sd">    Properties are stored as LineObj2 attributes</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    data = None</span>
+<span class="sd">    label = None</span>
+<span class="sd">    type = None</span>
+<span class="sd">    axis = None</span>
+<span class="sd">    IS_SELECTED = False</span>
+
+<span class="sd">    __properties__ = [&#39;index&#39;, &#39;linewidth&#39;, &#39;pointsize&#39;, &#39;colour&#39;, &#39;style&#39;,\</span>
+<span class="sd">                    &#39;logscale&#39;, &#39;visible&#39;]</span>
+
+<span class="sd">    def __init__(self, data, label, **kwargs):</span>
+<span class="sd">        self.axis = AxisObj2()</span>
+<span class="sd">        self.setData(data)</span>
+<span class="sd">        self.label = label</span>
+<span class="sd">        self.type = data.dtype.char</span>
+<span class="sd">        self.setProperties(**kwargs)</span>
+
+<span class="sd">    def setProperties(self, **kwargs):</span>
+<span class="sd">        for k in kwargs.keys():</span>
+<span class="sd">            if k in self.__properties__:</span>
+<span class="sd">                setattr(self, k, kwargs[k])</span>
+
+<span class="sd">    def getData(self):</span>
+<span class="sd">        return self.data</span>
+
+<span class="sd">    def setData(self, data):</span>
+<span class="sd">        self.axis.setRange(min(data), max(data))</span>
+<span class="sd">        self.data = data</span>
+
+<span class="sd">    def getLabel(self):</span>
+<span class="sd">        return self.label</span>
+
+<span class="sd">    def getType(self):</span>
+<span class="sd">        return self.type</span>
+
+<span class="sd">    def setSelected(self):</span>
+<span class="sd">        self.IS_SELECTED = True</span>
+
+<span class="sd">    def unsetSelected(self):</span>
+<span class="sd">        self.IS_SELECTED = False</span>
+
+<span class="sd">    def getProperties(self):</span>
+<span class="sd">        out = {}</span>
+<span class="sd">        for p in self.__properties__:</span>
+<span class="sd">            if hasattr(self, p):</span>
+<span class="sd">                out.update({p : getattr(self, p)})</span>
+<span class="sd">        return out</span>
+
+<span class="sd">    def unsetProperty(self, prop):</span>
+<span class="sd">        if hasattr(self, prop):</span>
+<span class="sd">            self.__delattr__(prop)</span>
+
+<span class="sd">    def unsetAllProperties(self):</span>
+<span class="sd">        for p in self.__properties__:</span>
+<span class="sd">             self.unsetProperty(p)</span>
+
+
+<span class="sd">class AxisObj2(object):</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    Class holding axis information (usually found as the *axis* attribute of</span>
+<span class="sd">    a LineObj2):</span>
+
+<span class="sd">    - **IS_AXIS** boolean</span>
+<span class="sd">    - **IS_LOG** boolean</span>
+<span class="sd">    - **axis** axis name &#39;x&#39; or &#39;y&#39;</span>
+<span class="sd">    - **label** axis label such as &#39;Vdem&#39;</span>
+<span class="sd">    - **range_min** axis viewport minimum</span>
+<span class="sd">    - **range_max** axis viewport maximum</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    IS_AXIS = False</span>
+<span class="sd">    IS_LOG = False</span>
+<span class="sd">    axis = None</span>
+<span class="sd">    label = None</span>
+<span class="sd">    units = None</span>
+<span class="sd">    range_min = None</span>
+<span class="sd">    range_max = None</span>
+
+
+<span class="sd">    def setLog(self):</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        Set *IS_LOG = True* and convert range_(min/max) to log10</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        if not self.IS_LOG and self.range_min != None and self.range_max != None:</span>
+<span class="sd">            self.setRange(numpy.log10(self.range_min), numpy.log10(self.range_max))</span>
+<span class="sd">        self.IS_LOG = True</span>
+
+<span class="sd">    def unsetLog(self):</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        Set *IS_LOG = False* and unlog range_(min/max)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        if self.IS_LOG and self.range_min != None and self.range_max != None:</span>
+<span class="sd">            self.setRange(10.0**self.range_min, 10.0**self.range_max)</span>
+<span class="sd">        self.IS_LOG = False</span>
+
+<span class="sd">    def setRange(self, min, max):</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        Set the axis range:</span>
+
+<span class="sd">        - **min** lower bound</span>
+<span class="sd">        - **max** upper bound</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        self.range_min = min</span>
+<span class="sd">        self.range_max = max</span>
+
+<span class="sd">    def setAxis(self, axis):</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        Enable this axis so that *IS_AXIS = True* where:</span>
+
+<span class="sd">        - **axis** is either &#39;x&#39; or &#39;y&#39;</span>
+
+<span class="sd">        If no *label* has been defined it is set to the axis name.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        if axis in [&#39;x&#39;,&#39;X&#39;]:</span>
+<span class="sd">            self.IS_AXIS = True</span>
+<span class="sd">            self.axis = &#39;x&#39;</span>
+<span class="sd">            if self.label == None or self.label in [&#39;y&#39;,&#39;Y&#39;]:</span>
+<span class="sd">                self.label = &#39;x&#39;</span>
+<span class="sd">        elif axis in [&#39;y&#39;,&#39;Y&#39;]:</span>
+<span class="sd">            self.IS_AXIS = True</span>
+<span class="sd">            self.axis = &#39;y&#39;</span>
+<span class="sd">            if self.label == None or self.label in [&#39;x&#39;,&#39;X&#39;]:</span>
+<span class="sd">                self.label = &#39;y&#39;</span>
+<span class="sd">        else:</span>
+<span class="sd">            print &#39;setAxis: %s is not a valid axis name&#39; % axis</span>
+
+<span class="sd">    def unsetAxis(self):</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        Disable this axis so that *IS_AXIS = False* and *axis = None*.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        self.IS_AXIS = False</span>
+<span class="sd">        self.axis = None</span>
+
+
+<span class="sd">class GraphicsObj2(object):</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    Class describing a &quot;graph&quot; or collection of series.</span>
+
+<span class="sd">    - **arr** an ndarray of data shape = (r, c&gt;=1)</span>
+<span class="sd">    - **labels** (optional) a list of column labels</span>
+
+<span class="sd">    If labels are not supplied they are created as line1, line2 etc.</span>
+<span class="sd">    Data series (LineObj2) objects are stored as GraphicsObj2</span>
+<span class="sd">    instance attributes.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<span class="sd">    series = None</span>
+<span class="sd">    scalar = None</span>
+<span class="sd">    name = None</span>
+
+<span class="sd">    def __init__(self, arr, labels=None):</span>
+<span class="sd">        self.addSeriesFromArray(arr, labels)</span>
+
+<span class="sd">    def setName(self, name):</span>
+<span class="sd">        self.name = name</span>
+
+<span class="sd">    def getName(self):</span>
+<span class="sd">        return self.name</span>
+
+<span class="sd">    def setAxis(self, axis, label):</span>
+<span class="sd">        if hasattr(self, label):</span>
+<span class="sd">            self.__getattribute__(label).axis.setAxis(axis)</span>
+<span class="sd">        else:</span>
+<span class="sd">            print &#39;setAxis: %s is not a valid label&#39; % label</span>
+
+<span class="sd">    def getAxis(self, axis, label=False):</span>
+<span class="sd">        out = None</span>
+<span class="sd">        for s in self.series:</span>
+<span class="sd">            if s.axis.IS_AXIS and s.axis.axis == axis:</span>
+<span class="sd">                if label:</span>
+<span class="sd">                    out =  (s.getData(), s.getLabel())</span>
+<span class="sd">                else:</span>
+<span class="sd">                    out = s.getData()</span>
+<span class="sd">                break</span>
+<span class="sd">        return out</span>
+
+<span class="sd">    def addOneSeries(self, series, label):</span>
+<span class="sd">        L = LineObj2(series, label)</span>
+<span class="sd">        self.series.append(L)</span>
+<span class="sd">        self.__setattr__(label, L)</span>
+
+<span class="sd">    def addSeriesFromArray(self, arr, labels=None):</span>
+<span class="sd">        assert type(arr) == numpy.ndarray, &#39;\nI need an ndarray&#39;</span>
+<span class="sd">        assert arr.shape[1] &gt;= 1, &#39;\nndarray must be 2D&#39;</span>
+<span class="sd">        self.series = []</span>
+
+<span class="sd">        if labels == None or len(labels) != arr.shape[1]:</span>
+<span class="sd">            labels = [&#39;line%s&#39; % c for c in range(arr.shape[1])]</span>
+
+<span class="sd">        for c in range(arr.shape[1]):</span>
+<span class="sd">            self.addOneSeries(arr.take([c], axis=1), labels[c])</span>
+
+<span class="sd">    def hasSeries(self):</span>
+<span class="sd">        return [l.getLabel() for l in self.series]</span>
+
+<span class="sd">    def updateOneSeries(self, series, label):</span>
+<span class="sd">        if hasattr(self, label):</span>
+<span class="sd">            self.__getattribute__(label).setData(series)</span>
+<span class="sd">        else:</span>
+<span class="sd">            print &#39;%s is an invalid series name.&#39; % label</span>
+
+<span class="sd">    def updateSeriesFromArray(self, arr):</span>
+<span class="sd">        labels = self.hasSeries()</span>
+<span class="sd">        if arr.shape[1] != len(labels):</span>
+<span class="sd">            print &#39;updateSeriesFromArray: incorrect array shape for series (%s)&#39; % self.hasSeries()</span>
+<span class="sd">        else:</span>
+<span class="sd">            for c in range(arr.shape[1]):</span>
+<span class="sd">                self.updateOneSeries(arr.take([c], axis=1), labels[c])</span>
+
+<span class="sd">    def delOneSeries(self, label):</span>
+<span class="sd">        currS = self.hasSeries()</span>
+<span class="sd">        if label in currS:</span>
+<span class="sd">            self.series.pop(currS.index(label))</span>
+<span class="sd">            self.__delattr__(label)</span>
+
+<span class="sd">    def getAllSeriesAsArray(self):</span>
+<span class="sd">        return numpy.hstack([s.getData() for s in self.series])</span>
+
+<span class="sd">    def getAllSeriesAsDict(self):</span>
+<span class="sd">        out = {}</span>
+<span class="sd">        for s in self.series:</span>
+<span class="sd">            out.update({s.getLabel() : s.getData()})</span>
+<span class="sd">        return out</span>
+
+<span class="sd">    def getAllSeriesAndProperties(self):</span>
+<span class="sd">        out = {}</span>
+<span class="sd">        for s in self.series:</span>
+<span class="sd">            out.update({s.getLabel() : {&#39;data&#39; : s.getData(),</span>
+<span class="sd">                                         &#39;properties&#39; : s.getProperties()}</span>
+<span class="sd">                        })</span>
+<span class="sd">        return out</span>
+
+<span class="sd">    def setSeriesProperties(self, label, **kwargs):</span>
+<span class="sd">        if hasattr(self, label):</span>
+<span class="sd">            self.__getattribute__(label).setProperties(**kwargs)</span>
+
+<span class="sd">    def setAllSeriesProperties(self, **kwargs):</span>
+<span class="sd">        for s in self.hasSeries():</span>
+<span class="sd">            self.setSeriesProperties(s, **kwargs)</span>
+
+<span class="sd">    def unsetAllSeriesProperties(self):</span>
+<span class="sd">        for s in self.hasSeries():</span>
+<span class="sd">            self.__getattribute__(s).unsetAllProperties()</span>
+<span class="sd">&#39;&#39;&#39;</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../userguide.html">
+              <img class="logo" src="../../_static/pysces_logo_2.gif" alt="Logo"/>
+            </a></p><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../userguide.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2004-2016, Brett Oliver, Johann Rohwer, Jannie Hofmeyr.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

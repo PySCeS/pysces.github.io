@@ -1,0 +1,121 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.71)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Writing formatted arrays</TITLE>
+<META NAME="description" CONTENT="Writing formatted arrays">
+<META NAME="keywords" CONTENT="PySCeS-QuickReference">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="PySCeS-QuickReference.css">
+
+<LINK REL="previous" HREF="node25.html">
+<LINK REL="up" HREF="node24.html">
+<LINK REL="next" HREF="node27.html">
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html422"
+  HREF="node27.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.gif"></A> 
+<A NAME="tex2html418"
+  HREF="node24.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.gif"></A> 
+<A NAME="tex2html414"
+  HREF="node25.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.gif"></A> 
+<A NAME="tex2html420"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html423"
+  HREF="node27.html">Write_array()</A>
+<B> Up:</B> <A NAME="tex2html419"
+  HREF="node24.html">Model attribute display functions</A>
+<B> Previous:</B> <A NAME="tex2html415"
+  HREF="node25.html">Displaying/saving model attributes</A>
+ &nbsp; <B>  <A NAME="tex2html421"
+  HREF="node1.html">Contents</A></B> 
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H2><A NAME="SECTION00062000000000000000">
+Writing formatted arrays</A>
+</H2>
+
+<P>
+The <TT>showX()</TT> methods described in the previous sections
+allow the user a convenient way to write the predefined matrices
+either to screen or file. However, for maximum flexibility,
+<I>PySCeS</I> includes a suite of array writers that enable one to
+easily write, in a variety of formats any array to a file. Unlike
+the <TT>showX()</TT> methods, the <code>Write_array</code> methods are
+specifically designed to write to data to a file.
+
+<P>
+In most modelling situations it is rare that an array needs to be
+stored or displayed that does not have specific labels for its
+rows or columns. Therefore, all the <code>Write_array</code> methods
+take list arguments that can contain either the row or column
+labels. Obviously, these lists should be equal in length to the
+matrix dimension they describe and in the correct order.
+
+<P>
+There are currently three custom array writing methods that work
+either with a 1D (vector) or 2D arrays (matrices). To allow an
+easy comparison of these methods' output, all the following
+sections use the same example array as input.
+
+<P>
+<BR><HR>
+<!--Table of Child-Links-->
+<A NAME="CHILD_LINKS"><STRONG>Subsections</STRONG></A>
+
+<UL>
+<LI><A NAME="tex2html424"
+  HREF="node27.html"><TT>Write_array()</TT></A>
+<LI><A NAME="tex2html425"
+  HREF="node28.html"><TT>Write_array_latex()</TT></A>
+</UL>
+<!--End of Table of Child-Links-->
+<HR>
+<!--Navigation Panel-->
+<A NAME="tex2html422"
+  HREF="node27.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.gif"></A> 
+<A NAME="tex2html418"
+  HREF="node24.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.gif"></A> 
+<A NAME="tex2html414"
+  HREF="node25.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.gif"></A> 
+<A NAME="tex2html420"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html423"
+  HREF="node27.html">Write_array()</A>
+<B> Up:</B> <A NAME="tex2html419"
+  HREF="node24.html">Model attribute display functions</A>
+<B> Previous:</B> <A NAME="tex2html415"
+  HREF="node25.html">Displaying/saving model attributes</A>
+ &nbsp; <B>  <A NAME="tex2html421"
+  HREF="node1.html">Contents</A></B> 
+<!--End of Navigation Panel-->
+<ADDRESS>
+Brett Olivier
+2007-09-21
+</ADDRESS>
+</BODY>
+</HTML>

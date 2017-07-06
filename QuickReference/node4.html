@@ -1,0 +1,111 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.71)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Starting a PySCeS session</TITLE>
+<META NAME="description" CONTENT="Starting a PySCeS session">
+<META NAME="keywords" CONTENT="PySCeS-QuickReference">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="PySCeS-QuickReference.css">
+
+<LINK REL="next" HREF="node5.html">
+<LINK REL="previous" HREF="node3.html">
+<LINK REL="up" HREF="node3.html">
+<LINK REL="next" HREF="node5.html">
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html147"
+  HREF="node5.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.gif"></A> 
+<A NAME="tex2html143"
+  HREF="node3.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.gif"></A> 
+<A NAME="tex2html137"
+  HREF="node3.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.gif"></A> 
+<A NAME="tex2html145"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html148"
+  HREF="node5.html">Instantiating a model object</A>
+<B> Up:</B> <A NAME="tex2html144"
+  HREF="node3.html">Running PySCeS</A>
+<B> Previous:</B> <A NAME="tex2html138"
+  HREF="node3.html">Running PySCeS</A>
+ &nbsp; <B>  <A NAME="tex2html146"
+  HREF="node1.html">Contents</A></B> 
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H2><A NAME="SECTION00031000000000000000">
+Starting a <I>PySCeS</I> session</A>
+</H2>
+To begin modelling we need to start up an interactive Python shell
+(we suggest iPython<A NAME="tex2html4"
+  HREF="footnode.html#foot439"><SUP><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]" SRC="footnote.gif"></SUP></A> and
+import <I>PySCeS</I>:
+<PRE>
+ Python 2.5.1 (r251:54863, Apr 18 2007, 08:51:08)
+ Type "copyright","credits" or "license" for more information.
+
+ &gt;&gt;&gt; import pysces
+
+ PySCeS environment
+ ******************
+ pysces.model_dir = C:\mypysces\pscmodels
+ pysces.output_dir = C:\mypysces
+
+ ***********************************************************************
+ * Welcome to PySCeS (0.4.0) - Python Simulator for Cellular Systems   *
+ *                http://pysces.sourceforge.net                        *
+ * Copyright(C) B.G. Olivier, J.M. Rohwer, J.-H.S. Hofmeyr, 2004-2007  *
+ * Triple-J Group for Molecular Cell Physiology                        *
+ * Stellenbosch University, South Africa                               *
+ * PySCeS is distributed under the GNU General Public Licence          *
+ * See README.txt for licence details                                  *
+ ***********************************************************************
+
+ &gt;&gt;&gt;
+</PRE>
+<I>PySCeS</I> is now ready to use. The first time you run <I>PySCeS</I> it
+will create the file <code>pys_usercfg.ini</code> which is used to store
+local user configuration data. On POSIX type systems this file
+will be created in <code>&lt;HOME&gt;/pysces</code>. Under Windows this is
+created in the <code>&lt;PYTHON&gt;\lib\site-packages\pysces</code> directory.
+Currently, this configuration file allows you to customize the two
+<I>PySCeS</I> working directories:
+
+<UL>
+<LI><code>model_dir</code> - where <I>PySCeS</I> looks for your input (.psc) files.
+</LI>
+<LI><code>output_dir</code> - where any temporary files or other output is
+ generated.
+</LI>
+</UL>
+If you would like to change the these defaults exit <I>PySCeS</I> and
+the interactive shell, edit the configuration files, restart an
+interactive shell and import <I>PySCeS</I>. Your new paths should be
+displayed on startup.
+
+<P>
+<BR><HR>
+<ADDRESS>
+Brett Olivier
+2007-09-21
+</ADDRESS>
+</BODY>
+</HTML>

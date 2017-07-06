@@ -1,0 +1,175 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.71)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Single dimension parameter scans</TITLE>
+<META NAME="description" CONTENT="Single dimension parameter scans">
+<META NAME="keywords" CONTENT="PySCeS-QuickReference">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="PySCeS-QuickReference.css">
+
+<LINK REL="next" HREF="node23.html">
+<LINK REL="previous" HREF="node21.html">
+<LINK REL="up" HREF="node21.html">
+<LINK REL="next" HREF="node23.html">
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html374"
+  HREF="node23.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.gif"></A> 
+<A NAME="tex2html370"
+  HREF="node21.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.gif"></A> 
+<A NAME="tex2html364"
+  HREF="node21.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.gif"></A> 
+<A NAME="tex2html372"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html375"
+  HREF="node23.html">Multi-dimension parameter scans</A>
+<B> Up:</B> <A NAME="tex2html371"
+  HREF="node21.html">PySCeS: analysis functions</A>
+<B> Previous:</B> <A NAME="tex2html365"
+  HREF="node21.html">PySCeS: analysis functions</A>
+ &nbsp; <B>  <A NAME="tex2html373"
+  HREF="node1.html">Contents</A></B> 
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H2><A NAME="SECTION00051000000000000000">
+Single dimension parameter scans</A>
+</H2>
+<I>PySCeS</I> has the ability to quickly generate and plot single
+dimension parameter scans. Scanning a parameter typically involves
+changing a parameter through a range of values and recalculating
+the steady state at each step. Two methods are provided which
+simplify this task, <TT>mod.Scan1()</TT> is provided to generate
+the scan data while <TT>mod.Scan1Plot()</TT> is used to visualise
+the results. The first step is to define the scan parameters:
+
+<UL>
+<LI><code>mod.scan_in</code> is a string defining the parameter to
+  be scanned e.g.&nbsp;<TT>'x0'</TT>
+</LI>
+<LI><code>mod.scan_out</code> is a list of strings representing the
+  attribute names you would like to track in the output eg.&nbsp;<code>['J_R1','J_R2','s1_ss','s2_ss']</code>
+</LI>
+<LI>You also need to define the range of points that you would like to scan over. For
+  a linear range SciPy<A NAME="tex2html14"
+  HREF="footnode.html#foot447"><SUP><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]" SRC="footnote.gif"></SUP></A> has a useful function <TT>scipy.linspace(start, end, points)</TT>.
+  If you need to generate a log range use <TT>scipy.logspace(start, end,
+  points)</TT>.
+</LI>
+</UL>
+Both <TT>scipy.linspace</TT> and <TT>scipy.logspace</TT> use the
+number of points (including the start and end points) in the
+interval as an input. Additionally, the start and end values of
+<TT>scipy.logspace</TT> must be entered as indices, e.g.&nbsp;to start
+the range at 0.1 and end it at 100 you would write
+<TT>scipy.logspace(-1, 2, steps)</TT>. Setting up a <I>PySCeS</I> scan
+session might look something like:
+<PRE>
+ import scipy
+ mod.scan_in = 'x0'
+ mod.scan_out = ['J_R1','J_R6','s2_ss','s7_ss']
+ scan_range = scipy.linspace(0,100,11)
+</PRE>
+Before starting the parameter scan, it is important to check that
+all the model attributes involved in the scan do actually exist.
+For example, <code>mod.J_R1</code> is created when
+<TT>mod.doState()</TT> is executed, likewise all the elasticities
+(<code>mod.ecR_S</code>) and control coefficients (<code>mod.ccJ_R</code>) are
+only created when the <TT>mod.doMca()</TT> method is called. If
+all the attributes exist you can perform a parameter scan using
+the <code>mod.Scan1(scan_range)</code> method which takes your
+predefined scan range as an argument:
+<PRE>
+ mod.Scan1(scan_range)
+
+ Scanning ...
+ 11 (hybrd) The solution converged.
+ (hybrd) The solution converged ...
+
+ done.
+</PRE>
+When the scan has been successfully completed<A NAME="tex2html15"
+  HREF="footnode.html#foot250"><SUP><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]" SRC="footnote.gif"></SUP></A>, the results are stored in the array
+(<code>mod.scan_res</code>) that has <code>mod.scan_in</code> as its first
+column followed by columns that represent the data defined in
+<code>mod.scan_out</code>. If one or more of your input or output
+parameters is not a valid model attribute, it will be ignored.
+Once the parameter scan data has been generated, the next step is
+to visualise it using the <TT>mod.Scan1Plot()</TT> method:
+<PRE>
+ mod.Scan1Plot()(plot=[], filename='', title='title', logx='' , logy='')
+</PRE>
+<TT>mod.Scan1Plot()</TT> behaves in a similar manner to
+<TT>mod.SimPlot()</TT> and when called with no arguments simply
+plots all the elements of <code>mod.scan_out</code> against
+<code>mod.scan_in</code>. You can, however, use the following arguments
+to modify the default behaviour:
+
+<UL>
+<LI><TT>plot=[]</TT>, a list argument that if empty (default) is assumed
+  to be <code>mod.scan_out</code>. However, any combination of <code>mod.scan_out</code>
+  elements can be entered as a list and individually plotted.
+</LI>
+<LI>If a filename is set, <TT>Scan1Plot()</TT> will in addition
+  to displaying the results on the screen, try to write
+  a PNG image of the plot to a file: <I>filename.png</I>
+</LI>
+<LI>By default <TT>Scan1Plot()</TT> generates a title for the
+  plot using the model file name plus the time the plot
+  is generated. If required, custom graph titles can be set with <TT>title='custom title'</TT>
+</LI>
+<LI>If <TT>logx</TT> and <TT>logx</TT> are given a string value (<TT>logx = 'on'</TT>) the
+  corresponding graph axis will be displayed using a logarithmic scale.
+</LI>
+</UL>
+
+<P>
+<HR>
+<!--Navigation Panel-->
+<A NAME="tex2html374"
+  HREF="node23.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.gif"></A> 
+<A NAME="tex2html370"
+  HREF="node21.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.gif"></A> 
+<A NAME="tex2html364"
+  HREF="node21.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.gif"></A> 
+<A NAME="tex2html372"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html375"
+  HREF="node23.html">Multi-dimension parameter scans</A>
+<B> Up:</B> <A NAME="tex2html371"
+  HREF="node21.html">PySCeS: analysis functions</A>
+<B> Previous:</B> <A NAME="tex2html365"
+  HREF="node21.html">PySCeS: analysis functions</A>
+ &nbsp; <B>  <A NAME="tex2html373"
+  HREF="node1.html">Contents</A></B> 
+<!--End of Navigation Panel-->
+<ADDRESS>
+Brett Olivier
+2007-09-21
+</ADDRESS>
+</BODY>
+</HTML>

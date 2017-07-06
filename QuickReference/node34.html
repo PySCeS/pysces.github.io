@@ -1,0 +1,187 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.71)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Installing PySCeS 0.4.x</TITLE>
+<META NAME="description" CONTENT="Installing PySCeS 0.4.x">
+<META NAME="keywords" CONTENT="PySCeS-QuickReference">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="PySCeS-QuickReference.css">
+
+<LINK REL="next" HREF="node35.html">
+<LINK REL="previous" HREF="node29.html">
+<LINK REL="up" HREF="PySCeS-QuickReference.html">
+<LINK REL="next" HREF="node35.html">
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html521"
+  HREF="node35.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.gif"></A> 
+<A NAME="tex2html517"
+  HREF="PySCeS-QuickReference.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.gif"></A> 
+<A NAME="tex2html511"
+  HREF="node33.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.gif"></A> 
+<A NAME="tex2html519"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html522"
+  HREF="node35.html">About this document ...</A>
+<B> Up:</B> <A NAME="tex2html518"
+  HREF="PySCeS-QuickReference.html">Introduction to PySCeS 0.4.x</A>
+<B> Previous:</B> <A NAME="tex2html512"
+  HREF="node33.html">Formatting graphs</A>
+ &nbsp; <B>  <A NAME="tex2html520"
+  HREF="node1.html">Contents</A></B> 
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H1><A NAME="SECTION00080000000000000000"></A>
+<A NAME="sec:install"></A>
+<BR>
+Installing <I>PySCeS</I> 0.4.x
+</H1>
+
+<P>
+<I>PySCeS</I> is distributed as a Python package and is installed using
+the Python distribution utilities<A NAME="tex2html21"
+  HREF="footnode.html#foot394"><SUP><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]" SRC="footnote.gif"></SUP></A>. Before installing <I>PySCeS</I> you need at
+least a complete, working, version of SciPy 0.5.x (or newer). The
+basic prerequisites for building and installing <I>PySCeS</I> from
+scratch are:
+
+<UL>
+<LI><I>Python 2.4</I> or newer (<TT><A NAME="tex2html22"
+  HREF="http://www.python.org/">http://www.python.org/</A></TT>)
+</LI>
+<LI><I>GCC compiler suite</I> (including Fortran and C++ compilers, (3.3 or newer))
+</LI>
+<LI><I>Numpy</I> - Numerical Python (<TT><A NAME="tex2html23"
+  HREF="http://numpy.sourceforge.net/">http://numpy.sourceforge.net/</A></TT>)
+</LI>
+<LI><I>SciPy</I> - Scientific libraries for Python (<TT><A NAME="tex2html24"
+  HREF="http://www.scipy.org/">http://www.scipy.org/</A></TT>)
+</LI>
+<LI><I>Matplotlib</I> - Plotting library for Python
+    (<TT><A NAME="tex2html25"
+  HREF="http://matplotlib.sourceforge.net/">http://matplotlib.sourceforge.net/</A></TT>), be sure to
+    install/enable the TKagg backend (especially on Linux).
+</LI>
+</UL>
+We strongly recommend (especially for user interactivity and
+graphing purposes<A NAME="tex2html26"
+  HREF="footnode.html#foot406"><SUP><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]" SRC="footnote.gif"></SUP></A>) that the following Python modules also be installed:
+
+<UL>
+<LI><I>iPython</I> - an extended Python editing shell (<TT><A NAME="tex2html27"
+  HREF="http://ipython.scipy.org/">http://ipython.scipy.org/</A></TT>)
+</LI>
+<LI><I>wxPython</I> - a cross-platform GUI toolkit (<TT><A NAME="tex2html28"
+  HREF="http://www.wxpython.org/download.php">http://www.wxpython.org/download.php</A></TT>)
+</LI>
+</UL>
+On systems using Microsoft Windows<SUP><SMALL>TM</SMALL></SUP> 2000 or XP
+<I>PySCeS</I> has been designed to be compatible with the <I>MinGW</I>
+(<TT><A NAME="tex2html29"
+  HREF="http://www.mingw.org/">http://www.mingw.org/</A></TT>) GCC compilers<A NAME="tex2html30"
+  HREF="footnode.html#foot415"><SUP><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]" SRC="footnote.gif"></SUP></A>. Using a Posix environment such as Cygwin should
+also be possible. As it can be daunting to compile and build
+applications on Windows, a binary release of <I>PySCeS</I> and its
+associated support applications are available from the main
+<I>PySCeS</I> 
+site<A NAME="tex2html31"
+  HREF="footnode.html#foot452"><SUP><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]" SRC="footnote.gif"></SUP></A>.
+
+<P>
+As part of the setup process, <I>PySCeS</I> installs a number of Python
+packages that are critical for its functioning. These bundled
+modules include David Beazley's <I>Python Lex-Yacc</I> or
+<I>PLY</I><A NAME="tex2html33"
+  HREF="footnode.html#foot453"><SUP><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]" SRC="footnote.gif"></SUP></A>.
+Assuming the required packages are properly install <I>PySCeS</I> can be
+built as follows:
+
+<UL>
+<LI>Linux/Cygwin: <TT>python setup.py install</TT>
+</LI>
+<LI>Windows (MinGW): <TT>python setup.py config -compiler=mingw32
+    build
+<BR>-compiler=mingw32 install</TT>
+    </LI>
+</UL>
+Additionally, two external applications are compiled and installed
+with <I>PySCeS</I>: Thomas Pfeiffer's
+<I>MetaTool</I><A NAME="tex2html35"
+  HREF="footnode.html#foot454"><SUP><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]" SRC="footnote.gif"></SUP></A>
+<PRE>
+ METATOOL is a C program developed from 1998 to 2000 by Thomas
+ Pfeiffer (Berlin) in cooperation with Stefan Schuster and
+ Ferdinand Moldenhauer (Berlin) and Juan Carlos Nuno (Madrid).
+</PRE>
+which consists of two executable binaries that are used by <I>PySCeS</I> 
+to calculate elementary modes and the non-linear solver library
+<I>NLEQ2</I>. The ZIB institute (<TT><A NAME="tex2html37"
+  HREF="http://www.zib.de/">http://www.zib.de/</A></TT>) has
+kindly given us permission to use and distribute the
+<I>NLEQ2</I> algorithm as part of <I>PySCeS</I>, providing such usage
+does not contravene their licence terms as described in
+<code>nleq2/nleq2_readme</code>.
+<PRE>
+* Licence
+  You may use or modify this code for your own non commercial
+  purposes for an unlimited time.
+  In any case you should not deliver this code without a special
+  permission of ZIB.
+  In case you intend to use the code commercially, we oblige you
+  to sign an according licence agreement with ZIB.
+</PRE>
+If you are not using <I>PySCeS</I> for research or personal use you
+<B>must</B> disable NLEQ2 installation by setting nleq2 = 0 in
+<TT>setup.py</TT> or obtain a licence from ZIB.
+
+<P>
+<HR>
+<!--Navigation Panel-->
+<A NAME="tex2html521"
+  HREF="node35.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.gif"></A> 
+<A NAME="tex2html517"
+  HREF="PySCeS-QuickReference.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.gif"></A> 
+<A NAME="tex2html511"
+  HREF="node33.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.gif"></A> 
+<A NAME="tex2html519"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html522"
+  HREF="node35.html">About this document ...</A>
+<B> Up:</B> <A NAME="tex2html518"
+  HREF="PySCeS-QuickReference.html">Introduction to PySCeS 0.4.x</A>
+<B> Previous:</B> <A NAME="tex2html512"
+  HREF="node33.html">Formatting graphs</A>
+ &nbsp; <B>  <A NAME="tex2html520"
+  HREF="node1.html">Contents</A></B> 
+<!--End of Navigation Panel-->
+<ADDRESS>
+Brett Olivier
+2007-09-21
+</ADDRESS>
+</BODY>
+</HTML>

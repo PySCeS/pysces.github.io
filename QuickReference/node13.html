@@ -1,0 +1,111 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.71)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Simulation results</TITLE>
+<META NAME="description" CONTENT="Simulation results">
+<META NAME="keywords" CONTENT="PySCeS-QuickReference">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="PySCeS-QuickReference.css">
+
+<LINK REL="next" HREF="node14.html">
+<LINK REL="previous" HREF="node12.html">
+<LINK REL="up" HREF="node12.html">
+<LINK REL="next" HREF="node14.html">
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html267"
+  HREF="node14.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.gif"></A> 
+<A NAME="tex2html263"
+  HREF="node12.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.gif"></A> 
+<A NAME="tex2html257"
+  HREF="node12.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.gif"></A> 
+<A NAME="tex2html265"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html268"
+  HREF="node14.html">Simulation results - legacy</A>
+<B> Up:</B> <A NAME="tex2html264"
+  HREF="node12.html">Time simulation</A>
+<B> Previous:</B> <A NAME="tex2html258"
+  HREF="node12.html">Time simulation</A>
+ &nbsp; <B>  <A NAME="tex2html266"
+  HREF="node1.html">Contents</A></B> 
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H3><A NAME="SECTION00044100000000000000"></A>
+ <A NAME="sec:datasimobj"></A>
+<BR>
+Simulation results
+</H3>
+In <I>PySCeS</I> 0.4.x the simulation results have been consolidated
+into a new <code>mod.data_sim</code> object. By default in any
+simulation only the species concentrations are calculated,
+however, the reaction rates can easily be generated as well by
+setting:
+<BR><code>mod.data_sim_add_rates = True</code> <I>before</I> a
+simulation is executed.
+
+<P>
+Once a simulation is executed the results are stored in the
+<code>mod.data_sim</code> object which has the following attributes and
+methods:
+
+<UL>
+<LI><code>data_sim.getTime()</code> return a vector of time
+    points
+</LI>
+<LI><code>data_sim.getSpecies()</code> return an array([[time], [species]])
+</LI>
+<LI><code>data_sim.getRates()</code> return an array([[time], [rates]])
+</LI>
+<LI><code>data_sim.getOutput(*args)</code> return an array consisting of time
+    plus any specified species or rate e.g.&nbsp;<TT>getOutput('s1', 'R1')</TT>
+</LI>
+<LI><code>data_sim.getDataAtTime(time)</code> return the results
+    of the simulation at time point <TT>time</TT>.
+</LI>
+<LI><code>data_sim.getDataInTimeInterval(time, bound)</code>
+    return the simulation data in the interval <!-- MATH
+ $[time-bounds,
+    time+bounds]$
+ -->
+<IMG
+ WIDTH="260" HEIGHT="37" ALIGN="MIDDLE" BORDER="0"
+ SRC="img4.gif"
+ ALT="$[time-bounds,
+time+bounds]$">, if bounds is not specified it is assumed to be
+    the step size.
+</LI>
+<LI><code>data_sim.l_species</code> the species array labels
+</LI>
+<LI><code>data_sim.l_rates</code> the rate array labels
+</LI>
+</UL>
+
+<P>
+<BR><HR>
+<ADDRESS>
+Brett Olivier
+2007-09-21
+</ADDRESS>
+</BODY>
+</HTML>

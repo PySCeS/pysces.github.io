@@ -1,0 +1,14 @@
+@ARTICLE{OliRohHof05,
+author = {Olivier, Brett G. and Rohwer, Johann M. and Hofmeyr, Jan-Hendrik S.},
+title = {{Modelling cellular systems with PySCeS}},
+journal = {Bioinformatics},
+volume = {21},
+number = {4},
+pages = {560-561},
+year = {2005},
+abstract = {Summary: The Python Simulator for Cellular Systems (PySCeS) is an extendable research tool for the numerical analysis and investigation of cellular systems.  Availability: PySCeS is distributed as Open Source Software under the GNU General Public Licence and is available for download from http://pysces.sourceforge.net  Contact: bgoli@sun.ac.za
+},
+URL = {http://bioinformatics.oxfordjournals.org/cgi/content/abstract/21/4/560},
+eprint = {http://bioinformatics.oxfordjournals.org/cgi/reprint/21/4/560.pdf}
+}
+

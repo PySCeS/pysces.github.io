@@ -1,0 +1,98 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.71)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Loading a model</TITLE>
+<META NAME="description" CONTENT="Loading a model">
+<META NAME="keywords" CONTENT="PySCeS-QuickReference">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="PySCeS-QuickReference.css">
+
+<LINK REL="next" HREF="node7.html">
+<LINK REL="previous" HREF="node5.html">
+<LINK REL="up" HREF="node3.html">
+<LINK REL="next" HREF="node7.html">
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html171"
+  HREF="node7.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.gif"></A> 
+<A NAME="tex2html167"
+  HREF="node3.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.gif"></A> 
+<A NAME="tex2html161"
+  HREF="node5.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.gif"></A> 
+<A NAME="tex2html169"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html172"
+  HREF="node7.html">Basic model attributes</A>
+<B> Up:</B> <A NAME="tex2html168"
+  HREF="node3.html">Running PySCeS</A>
+<B> Previous:</B> <A NAME="tex2html162"
+  HREF="node5.html">Instantiating a model object</A>
+ &nbsp; <B>  <A NAME="tex2html170"
+  HREF="node1.html">Contents</A></B> 
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H2><A NAME="SECTION00033000000000000000">
+Loading a model</A>
+</H2>
+Once a new model object has been initialised is needs to be
+loaded. During the load process the input file is parsed, the
+model desciption is translated into Python data structures and a
+structural analysis is performed. To get a usable model object use
+the <I>doLoad()</I> command:
+<PRE>
+ &gt;&gt;&gt; mod.doLoad()
+
+ Parsing file: C:\mypysces\pscmodels\pysces_test_linear1.psc
+ Calculating L matrix . . . . . . .  done.
+ Calculating K matrix . . . . . . .  done.
+</PRE>
+Once loaded, all the model elements contained in the input file
+are made available as a model attribute<A NAME="tex2html6"
+  HREF="footnode.html#foot53"><SUP><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]" SRC="footnote.gif"></SUP></A>. For
+example, in the input file you might find initialisations such as
+<TT>s1&nbsp;=&nbsp;1.0 and k1&nbsp;=&nbsp;10.0</TT>. For example <TT>s1</TT> can be
+accessed as the species variable, <code>mod.s1</code> as well as an
+attribute which holds its initial value, <code>mod.s1_init</code>.
+<PRE>
+ &gt;&gt;&gt; mod.s1
+ 1.0
+ &gt;&gt;&gt; mod.s1_init
+ 1.0
+ &gt;&gt;&gt; mod.k1
+ 10.0
+</PRE>
+Any errors generated during the loading process typically occur as
+a result of problems (e.g.&nbsp;syntax errors) in the input file. A
+typical example of this is the <I>`list out of range'</I>
+exception which usually indicates a missing multiplication
+operator (<code>3(</code> instead of <code>3*(</code>) or unbalanced
+parentheses in a rate equation expression.
+
+<P>
+<BR><HR>
+<ADDRESS>
+Brett Olivier
+2007-09-21
+</ADDRESS>
+</BODY>
+</HTML>

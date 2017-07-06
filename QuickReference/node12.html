@@ -1,0 +1,152 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.71)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Time simulation</TITLE>
+<META NAME="description" CONTENT="Time simulation">
+<META NAME="keywords" CONTENT="PySCeS-QuickReference">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="PySCeS-QuickReference.css">
+
+<LINK REL="next" HREF="node15.html">
+<LINK REL="previous" HREF="node11.html">
+<LINK REL="up" HREF="node8.html">
+<LINK REL="next" HREF="node13.html">
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html253"
+  HREF="node13.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.gif"></A> 
+<A NAME="tex2html249"
+  HREF="node8.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.gif"></A> 
+<A NAME="tex2html243"
+  HREF="node11.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.gif"></A> 
+<A NAME="tex2html251"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html254"
+  HREF="node13.html">Simulation results</A>
+<B> Up:</B> <A NAME="tex2html250"
+  HREF="node8.html">PySCeS: core analysis functions</A>
+<B> Previous:</B> <A NAME="tex2html244"
+  HREF="node11.html">Structural Analysis - new</A>
+ &nbsp; <B>  <A NAME="tex2html252"
+  HREF="node1.html">Contents</A></B> 
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H2><A NAME="SECTION00044000000000000000">
+Time simulation</A>
+</H2>
+<I>PySCeS</I> can perform time simulations by using the ODEPACK
+integration routine LSODA.
+
+<P>
+There are three ways of running a simulation. (i)&nbsp;by defining the
+simulation's end time and the number of required points and using the
+<TT>Simulate()</TT> method:
+<PRE>
+ &gt;&gt;&gt; mod.Simulate()
+ Integration successful.
+</PRE>
+(ii)&nbsp;the end time and number of points can be specified using the
+<code>doSim()</code> method. In this example a 20 step simulation is run
+from time point zero up to 10:
+<PRE>
+ &gt;&gt;&gt; mod.doSim(end=10.0, points=20.0)
+ Integration successful.
+</PRE>
+(iii)&nbsp;the <code>doSimPlot()</code> command runs the time simulation and
+displays the results. It takes the same arguments as <TT>doSim()</TT>
+as well as a <TT>plot</TT> string argument (this argument is
+described as part of the  <TT>SimPlot()</TT> command):
+<PRE>
+ &gt;&gt;&gt; mod.doSimPlot(end=10.0, points=20.0, plot='met')
+ Integration successful.
+</PRE>
+Although easy to use, a more flexible way to visualize the results
+of a time simulation is to use the <TT>mod.SimPlot()</TT> method:
+<PRE>
+ mod.SimPlot(plot='met',filename='',title='title',logx='',logy='')
+</PRE>
+Called without arguments, <TT>mod.SimPlot()</TT> plots all the
+species concentrations against time. However, it may be customized in
+a number of ways:
+
+<UL>
+<LI><TT>plot=</TT> can be: <TT>'met'</TT>, all species or
+  <TT>'rate'</TT>, all reaction rates or a user supplied list of model
+  species and rates, e.g.&nbsp;<TT>['s1','s2','R3','R5']</TT>.
+</LI>
+<LI>If a filename argument is provided, <TT>mod.SimPlot()</TT>
+  will, in addition to displaying the result on the screen, try to write
+  a PNG image of the plot to a PNG file named <I>filename.png</I>
+</LI>
+<LI>By default <TT>mod.SimPlot()</TT> generates a title for the
+  plot using the model file name plus the time that the plot
+  is generated. Custom titles can be set with <TT>title = 'mytitle'</TT>
+  argument.
+</LI>
+<LI>If <TT>logx</TT> and <TT>logx</TT> are given a string value (e.g.&nbsp;<TT>logx = 'on'</TT>) the
+  respective axis is displayed using a logarithmic scale.
+</LI>
+</UL>
+
+<P>
+<BR><HR>
+<!--Table of Child-Links-->
+<A NAME="CHILD_LINKS"><STRONG>Subsections</STRONG></A>
+
+<UL>
+<LI><A NAME="tex2html255"
+  HREF="node13.html">Simulation results</A>
+<LI><A NAME="tex2html256"
+  HREF="node14.html">Simulation results - legacy</A>
+</UL>
+<!--End of Table of Child-Links-->
+<HR>
+<!--Navigation Panel-->
+<A NAME="tex2html253"
+  HREF="node13.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.gif"></A> 
+<A NAME="tex2html249"
+  HREF="node8.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.gif"></A> 
+<A NAME="tex2html243"
+  HREF="node11.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.gif"></A> 
+<A NAME="tex2html251"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html254"
+  HREF="node13.html">Simulation results</A>
+<B> Up:</B> <A NAME="tex2html250"
+  HREF="node8.html">PySCeS: core analysis functions</A>
+<B> Previous:</B> <A NAME="tex2html244"
+  HREF="node11.html">Structural Analysis - new</A>
+ &nbsp; <B>  <A NAME="tex2html252"
+  HREF="node1.html">Contents</A></B> 
+<!--End of Navigation Panel-->
+<ADDRESS>
+Brett Olivier
+2007-09-21
+</ADDRESS>
+</BODY>
+</HTML>

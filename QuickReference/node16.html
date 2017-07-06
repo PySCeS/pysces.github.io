@@ -1,0 +1,80 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.71)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Reaction rates and fluxes</TITLE>
+<META NAME="description" CONTENT="Reaction rates and fluxes">
+<META NAME="keywords" CONTENT="PySCeS-QuickReference">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="PySCeS-QuickReference.css">
+
+<LINK REL="next" HREF="node17.html">
+<LINK REL="previous" HREF="node15.html">
+<LINK REL="up" HREF="node8.html">
+<LINK REL="next" HREF="node17.html">
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html301"
+  HREF="node17.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.gif"></A> 
+<A NAME="tex2html297"
+  HREF="node8.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.gif"></A> 
+<A NAME="tex2html291"
+  HREF="node15.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.gif"></A> 
+<A NAME="tex2html299"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html302"
+  HREF="node17.html">Metabolic Control Analysis</A>
+<B> Up:</B> <A NAME="tex2html298"
+  HREF="node8.html">PySCeS: core analysis functions</A>
+<B> Previous:</B> <A NAME="tex2html292"
+  HREF="node15.html">Steady-state analysis</A>
+ &nbsp; <B>  <A NAME="tex2html300"
+  HREF="node1.html">Contents</A></B> 
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H2><A NAME="SECTION00046000000000000000">
+Reaction rates and fluxes</A>
+</H2>
+Most algorithms and methods will return species concentrations as
+their output. If, however, the reaction rates evolution over time
+or steady-state fluxes are required the system of rate equations
+can be solved using the relevant set of concentrations. In the
+simulation section the <code>mod.Fix_Sim()</code> was introduced which
+when given the results of a simulation (concentrations), could
+return the array of rates (including a time column)<A NAME="tex2html12"
+  HREF="footnode.html#foot445"><SUP><IMG  ALIGN="BOTTOM" BORDER="1" ALT="[*]" SRC="footnote.gif"></SUP></A>. <I>PySCeS</I> also includes a more
+generic function, <TT>mod.FluxGen()</TT>, which when supplied with
+a concentration vector (or array) returns a vector (or array) of
+rates. Of course, given an array of steady-state concentrations
+<TT>mod.FluxGen()</TT> returns the steady-state fluxes.
+<PRE>
+ rates = mod.FluxGen(concentrations)
+</PRE>
+
+<P>
+<BR><HR>
+<ADDRESS>
+Brett Olivier
+2007-09-21
+</ADDRESS>
+</BODY>
+</HTML>

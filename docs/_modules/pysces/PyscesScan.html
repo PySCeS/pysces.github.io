@@ -1,0 +1,614 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pysces.PyscesScan &mdash; PySCeS User Guide v0.9</title>
+    
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.9.3',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="search" type="application/opensearchdescription+xml"
+          title="Search within PySCeS User Guide v0.9"
+          href="../../_static/opensearch.xml"/>
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+    <link rel="top" title="PySCeS User Guide v0.9" href="../../userguide.html" />
+    <link rel="up" title="Module code" href="../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for pysces.PyscesScan</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">PySCeS - Python Simulator for Cellular Systems (http://pysces.sourceforge.net)</span>
+
+<span class="sd">Copyright (C) 2004-2016 B.G. Olivier, J.M. Rohwer, J.-H.S Hofmeyr all rights reserved,</span>
+
+<span class="sd">Brett G. Olivier (bgoli@users.sourceforge.net)</span>
+<span class="sd">Triple-J Group for Molecular Cell Physiology</span>
+<span class="sd">Stellenbosch University, South Africa.</span>
+
+<span class="sd">Permission to use, modify, and distribute this software is given under the</span>
+<span class="sd">terms of the PySceS (BSD style) license. See LICENSE.txt that came with</span>
+<span class="sd">this distribution for specifics.</span>
+
+<span class="sd">NO WARRANTY IS EXPRESSED OR IMPLIED.  USE AT YOUR OWN RISK.</span>
+<span class="sd">Brett G. Olivier</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">pysces.version</span> <span class="kn">import</span> <span class="n">__version__</span>
+<span class="n">__doc__</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span>
+<span class="s">          PyscesScan</span>
+<span class="s">          ----------</span>
+
+<span class="s">          PySCeS classes for continuations and multi-dimensional parameter scans</span>
+<span class="s">          &quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">scipy</span>
+<span class="kn">from</span> <span class="nn">pysces.PyscesUtils</span> <span class="kn">import</span> <span class="n">TimerBox</span>
+
+<span class="n">__psyco_active__</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="c">##  try:</span>
+    <span class="c">##  import psyco</span>
+    <span class="c">##  psyco.profile()</span>
+    <span class="c">##  __psyco_active__ = 1</span>
+    <span class="c">##  print &#39;PySCeS Module is now PsycoActive!&#39;</span>
+<span class="c">##  except:</span>
+    <span class="c">##  __psyco_active__ = 0</span>
+<span class="c">##  __psyco_active__ = 0</span>
+
+<div class="viewcode-block" id="Scanner"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesScan.Scanner">[docs]</a><span class="k">class</span> <span class="nc">Scanner</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Arbitrary dimension generic scanner. This class is initiated with</span>
+<span class="sd">    a loaded PySCeS model and then allows the user to define scan parameters</span>
+<span class="sd">    see self.addScanParameter() and user output see self.addUserOutput().</span>
+<span class="sd">    Steady-state results are always stored in self.SteadyStateResults while</span>
+<span class="sd">    user output can be found in self.UserOutputResults - brett 2007.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">genOn</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="n">quietRun</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">_MODE_</span> <span class="o">=</span> <span class="s">&#39;state&#39;</span>
+    <span class="n">HAS_USER_OUTPUT</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">HAS_STATE_OUTPUT</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="n">nan_on_bad_state</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="n">MSG_PRINT_INTERVAL</span> <span class="o">=</span> <span class="mi">500</span>
+    <span class="n">__AnalysisModes__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;state&#39;</span><span class="p">,</span><span class="s">&#39;elasticity&#39;</span><span class="p">,</span><span class="s">&#39;mca&#39;</span><span class="p">,</span><span class="s">&#39;stability&#39;</span><span class="p">,</span><span class="s">&#39;null&#39;</span><span class="p">)</span>
+    <span class="n">invalid_state_list</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">invalid_state_list_idx</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mod</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">N</span> <span class="o">=</span> <span class="n">mod</span><span class="o">.</span><span class="n">nmatrix</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">ex</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">SCANNER: Please load a model &lt;i.e. mod. doLoad()&gt; before trying to use it.&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">GenDict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">GenOrder</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ScanSpace</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mod</span> <span class="o">=</span> <span class="n">mod</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">SteadyStateResults</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">UserOutputList</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">UserOutputResults</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scanT</span> <span class="o">=</span> <span class="n">TimerBox</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Scanner.testInputParameter"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesScan.Scanner.testInputParameter">[docs]</a>    <span class="k">def</span> <span class="nf">testInputParameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This tests whether a str(name) is an attribute of the model</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mod</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+</div>
+<div class="viewcode-block" id="Scanner.resetInputParameters"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesScan.Scanner.resetInputParameters">[docs]</a>    <span class="k">def</span> <span class="nf">resetInputParameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Just remembered what this does, I think it resets the input model</span>
+<span class="sd">        parameters after a scan run.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">GenDict</span><span class="p">:</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mod</span><span class="p">,</span><span class="n">key</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">GenDict</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="mi">6</span><span class="p">])</span>
+</div>
+<div class="viewcode-block" id="Scanner.addUserOutput"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesScan.Scanner.addUserOutput">[docs]</a>    <span class="k">def</span> <span class="nf">addUserOutput</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">kw</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add output parameters to the scanner as a collection of one or more</span>
+<span class="sd">        string arguments (&#39;O1&#39;,&#39;O2&#39;,&#39;O3&#39;, &#39;On&#39;). These are evaluated at</span>
+<span class="sd">        each iteration of the scanner and stored in the self.UserOutputResults</span>
+<span class="sd">        array. The list of output is stored in self.UserOutputList.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="p">[</span><span class="n">attr</span> <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">kw</span> <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">attr</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">]</span>
+        <span class="c">#print output</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">HAS_USER_OUTPUT</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">ModeList</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__AnalysisModes__</span><span class="p">)</span>
+        <span class="n">MaxMode</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">output</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">attr</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;ec&#39;</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_MODE_</span> <span class="o">!=</span> <span class="s">&#39;null&#39;</span><span class="p">:</span>
+                <span class="n">cM</span> <span class="o">=</span> <span class="n">ModeList</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s">&#39;elasticity&#39;</span><span class="p">)</span>
+                <span class="k">if</span>  <span class="n">cM</span> <span class="o">&gt;</span> <span class="n">MaxMode</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_MODE_</span> <span class="o">=</span> <span class="s">&#39;elasticity&#39;</span>
+                    <span class="n">MaxMode</span> <span class="o">=</span> <span class="n">cM</span>
+            <span class="k">elif</span> <span class="n">attr</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;cc&#39;</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_MODE_</span> <span class="o">!=</span> <span class="s">&#39;null&#39;</span><span class="p">:</span>
+                <span class="n">cM</span> <span class="o">=</span> <span class="n">ModeList</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s">&#39;mca&#39;</span><span class="p">)</span>
+                <span class="k">if</span>  <span class="n">cM</span> <span class="o">&gt;</span> <span class="n">MaxMode</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_MODE_</span> <span class="o">=</span> <span class="s">&#39;mca&#39;</span>
+                    <span class="n">MaxMode</span> <span class="o">=</span> <span class="n">cM</span>
+            <span class="k">elif</span> <span class="n">attr</span><span class="p">[:</span><span class="mi">6</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;lambda&#39;</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_MODE_</span> <span class="o">!=</span> <span class="s">&#39;null&#39;</span><span class="p">:</span>
+                <span class="n">cM</span> <span class="o">=</span> <span class="n">ModeList</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s">&#39;stability&#39;</span><span class="p">)</span>
+                <span class="k">if</span>  <span class="n">cM</span> <span class="o">&gt;</span> <span class="n">MaxMode</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_MODE_</span> <span class="o">=</span> <span class="s">&#39;stability&#39;</span>
+                    <span class="n">MaxMode</span> <span class="o">=</span> <span class="n">cM</span>
+        <span class="k">print</span> <span class="s">&#39;MaxMode&#39;</span><span class="p">,</span> <span class="n">MaxMode</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">UserOutputList</span> <span class="o">=</span> <span class="n">output</span>
+</div>
+<div class="viewcode-block" id="Scanner.addScanParameter"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesScan.Scanner.addScanParameter">[docs]</a>    <span class="k">def</span> <span class="nf">addScanParameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="p">,</span><span class="n">start</span><span class="p">,</span><span class="n">end</span><span class="p">,</span><span class="n">points</span><span class="p">,</span><span class="n">log</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span><span class="n">slave</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add a parameter to scan (an axis if you like) input is:</span>
+
+<span class="sd">        - str(name) = model parameter name</span>
+<span class="sd">        - float(start) = lower bound of scan</span>
+<span class="sd">        - float(end) = upper bound of scan</span>
+<span class="sd">        - int(points) = number of points in scan range</span>
+<span class="sd">        - bool(log) = Use a logarithmic (base10) range</span>
+<span class="sd">        - bool(slave) = Scan parameters can be masters i.e. an independent axis or a &quot;slave&quot; which moves synchronously with the previously defined parameter range.</span>
+
+<span class="sd">        The first ScanParameter cannot be a slave.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">offset</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">testInputParameter</span><span class="p">(</span><span class="n">name</span><span class="p">),</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">SCANNER: Model does not have an attribute </span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s"> </span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">name</span>
+        <span class="k">assert</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">GenOrder</span><span class="p">,</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">SCANNER: This operation is currently not allowed</span><span class="se">\n</span><span class="s">&#39;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">GenOrder</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">GenOrder</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">GenDict</span><span class="p">[</span><span class="n">el</span><span class="p">][</span><span class="mi">4</span><span class="p">]</span> <span class="o">==</span> <span class="bp">False</span><span class="p">:</span>           <span class="c"># test if not slave</span>
+                    <span class="n">offset</span> <span class="o">=</span> <span class="n">offset</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">GenDict</span><span class="p">[</span><span class="n">el</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span>  <span class="c"># increment offset</span>
+            <span class="k">if</span> <span class="n">slave</span> <span class="o">==</span> <span class="bp">True</span><span class="p">:</span>
+                <span class="n">prevpar</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">GenOrder</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>                <span class="c"># previous parameter, i.e. master</span>
+                <span class="n">offset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">GenDict</span><span class="p">[</span><span class="n">prevpar</span><span class="p">][</span><span class="mi">5</span><span class="p">]</span>          <span class="c"># don&#39;t increment for slave</span>
+                <span class="k">if</span> <span class="n">points</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">GenDict</span><span class="p">[</span><span class="n">prevpar</span><span class="p">][</span><span class="mi">2</span><span class="p">]:</span>
+                    <span class="k">print</span> <span class="s">&#39;SCANNER: Slave parameter needs to iterate over same number of</span><span class="se">\n</span><span class="s">points as master...resetting points.&#39;</span>
+                    <span class="n">points</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">GenDict</span><span class="p">[</span><span class="n">prevpar</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">slave</span> <span class="o">==</span> <span class="bp">True</span><span class="p">:</span>
+                <span class="n">slave</span> <span class="o">=</span> <span class="bp">False</span>
+                <span class="k">print</span> <span class="s">&#39;SCANNER: Inner range cannot be a slave ... resetting to master&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">GenDict</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">name</span><span class="p">,(</span><span class="n">start</span><span class="p">,</span><span class="n">end</span><span class="p">,</span><span class="n">points</span><span class="p">,</span><span class="n">log</span><span class="p">,</span><span class="n">slave</span><span class="p">,</span><span class="n">offset</span><span class="p">,</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mod</span><span class="p">,</span><span class="n">name</span><span class="p">)))</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="o">+</span><span class="s">&#39;_test&#39;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">stepGen</span><span class="p">(</span><span class="n">offset</span><span class="p">))</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">rangeGen</span><span class="p">(</span><span class="n">name</span><span class="p">,</span><span class="n">start</span><span class="p">,</span><span class="n">end</span><span class="p">,</span><span class="n">points</span><span class="p">,</span><span class="n">log</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">GenOrder</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">GenOrder</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Scanner.makeRange"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesScan.Scanner.makeRange">[docs]</a>    <span class="k">def</span> <span class="nf">makeRange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">start</span><span class="p">,</span><span class="n">end</span><span class="p">,</span><span class="n">points</span><span class="p">,</span><span class="n">log</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Should be pretty self evident it defines a range:</span>
+
+<span class="sd">        - float(start)</span>
+<span class="sd">        - float(end)</span>
+<span class="sd">        - int(points)</span>
+<span class="sd">        - bool(log)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">log</span><span class="p">:</span>
+            <span class="n">rng</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="n">scipy</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">start</span><span class="p">),</span><span class="n">scipy</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">end</span><span class="p">),</span><span class="n">points</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">rng</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">start</span><span class="p">,</span><span class="n">end</span><span class="p">,</span><span class="n">points</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">rng</span>
+</div>
+<div class="viewcode-block" id="Scanner.rangeGen"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesScan.Scanner.rangeGen">[docs]</a>    <span class="k">def</span> <span class="nf">rangeGen</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="p">,</span><span class="n">start</span><span class="p">,</span><span class="n">end</span><span class="p">,</span><span class="n">points</span><span class="p">,</span><span class="n">log</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This is where things get more interesting. This function creates</span>
+<span class="sd">        a cycling generator which loops over a parameter range.</span>
+
+<span class="sd">        - *parameter* name</span>
+<span class="sd">        - *start* value</span>
+<span class="sd">        - *end* value</span>
+<span class="sd">        - *points*</span>
+<span class="sd">        - *log* scale</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">range</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">makeRange</span><span class="p">(</span><span class="n">start</span><span class="p">,</span><span class="n">end</span><span class="p">,</span><span class="n">points</span><span class="p">,</span><span class="n">log</span><span class="p">)</span>
+        <span class="n">cnt</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">genOn</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="o">+</span><span class="s">&#39;_test&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">next</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">cnt</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">range</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                    <span class="n">cnt</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">cnt</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">yield</span> <span class="nb">range</span><span class="p">[</span><span class="n">cnt</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="Scanner.stepGen"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesScan.Scanner.stepGen">[docs]</a>    <span class="k">def</span> <span class="nf">stepGen</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">offset</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Another looping generator function. The idea here is to create</span>
+<span class="sd">        a set of generators for the scan parameters. These generators then</span>
+<span class="sd">        all fire together and determine whether the range generators should</span>
+<span class="sd">        advance or not. Believe it or not this dynamically creates the matrix</span>
+<span class="sd">        of parameter values to be evaluated.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">val</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">genOn</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">val</span> <span class="o">&gt;=</span> <span class="n">offset</span><span class="p">:</span>
+                <span class="n">val</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">yield</span> <span class="bp">True</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">yield</span> <span class="bp">False</span>
+            <span class="n">val</span> <span class="o">+=</span> <span class="mi">1</span>
+</div>
+    <span class="k">def</span> <span class="nf">__nextStep__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Fire all step generators</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">genN</span><span class="o">+</span><span class="s">&#39;_test&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">next</span><span class="p">()</span> <span class="k">for</span> <span class="n">genN</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">GenOrder</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">__nextValue__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Fire all range generators</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">genN</span><span class="p">)</span><span class="o">.</span><span class="n">next</span><span class="p">()</span> <span class="k">for</span> <span class="n">genN</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">GenOrder</span><span class="p">]</span>
+
+<div class="viewcode-block" id="Scanner.setModValue"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesScan.Scanner.setModValue">[docs]</a>    <span class="k">def</span> <span class="nf">setModValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="p">,</span><span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        An easy one, assign value to name of the instantiated PySCeS model attribute</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mod</span><span class="p">,</span> <span class="n">name</span><span class="p">),</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">Model does not have an attribute: </span><span class="si">%s</span><span class="s"> </span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">name</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mod</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="Scanner.RunAgain"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesScan.Scanner.RunAgain">[docs]</a>    <span class="k">def</span> <span class="nf">RunAgain</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        While it is impossible to change the generator/range structure of a scanner</span>
+<span class="sd">        (just build another one) you can &#39;in principle&#39; change the User Output and run</span>
+<span class="sd">        it again.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Run</span><span class="p">(</span><span class="n">ReRun</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Scanner.Run"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesScan.Scanner.Run">[docs]</a>    <span class="k">def</span> <span class="nf">Run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">ReRun</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Run the parameter scan</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scanT</span><span class="o">.</span><span class="n">normal_timer</span><span class="p">(</span><span class="s">&#39;RUN&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_MODE_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_MODE_</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">_MODE_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__AnalysisModes__</span><span class="p">,</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">SCANNER: </span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s"> is not a valid analysis mode!&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">_MODE_</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">quietRun</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mod</span><span class="o">.</span><span class="n">SetQuiet</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mod</span><span class="o">.</span><span class="n">SetLoud</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">ReRun</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ScanSpace</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">UserOutputResults</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">SteadyStateResults</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">invalid_state_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">invalid_state_list_idx</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nan_on_bad_state</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mod</span><span class="o">.</span><span class="n">__settings__</span><span class="p">[</span><span class="s">&quot;mode_state_nan_on_fail&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="c">#self.mod.mode_state_nan_on_fail = True</span>
+        <span class="n">Tsteps</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">gen</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">GenOrder</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">GenDict</span><span class="p">[</span><span class="n">gen</span><span class="p">][</span><span class="mi">4</span><span class="p">]</span> <span class="o">==</span> <span class="bp">False</span><span class="p">:</span>      <span class="c"># don&#39;t increase Tsteps for slaves</span>
+                <span class="n">Tsteps</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">GenDict</span><span class="p">[</span><span class="n">gen</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span>
+        <span class="k">print</span> <span class="bp">self</span><span class="o">.</span><span class="n">scanT</span><span class="o">.</span><span class="n">RUN</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
+        <span class="n">analysis_counter</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">print</span> <span class="s">&#39;SCANNER: Tsteps&#39;</span><span class="p">,</span> <span class="n">Tsteps</span>
+        <span class="n">pcntr</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">Tsteps</span><span class="p">):</span>
+            <span class="n">pars</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__nextValue__</span><span class="p">()</span>
+            <span class="c">#if pars not in self.ScanSpace:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ScanSpace</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pars</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">par</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">GenOrder</span><span class="p">)):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">setModValue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">GenOrder</span><span class="p">[</span><span class="n">par</span><span class="p">],</span><span class="n">pars</span><span class="p">[</span><span class="n">par</span><span class="p">])</span>
+            <span class="n">analysis_counter</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Analyze</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">mod</span><span class="o">.</span><span class="n">__StateOK__</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">invalid_state_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pars</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">invalid_state_list_idx</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">analysis_counter</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">StoreData</span><span class="p">()</span>
+            <span class="n">pcntr</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">pcntr</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">MSG_PRINT_INTERVAL</span><span class="p">:</span>
+                <span class="k">print</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">analysis_counter</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">scanT</span><span class="o">.</span><span class="n">RUN</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
+                <span class="n">pcntr</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ScanSpace</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ScanSpace</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">SteadyStateResults</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">SteadyStateResults</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">UserOutputResults</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">UserOutputResults</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">resetInputParameters</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nan_on_bad_state</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mod</span><span class="o">.</span><span class="n">mode_state_nan_on_fail</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">print</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">SCANNER: </span><span class="si">%s</span><span class="s"> states analysed</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">analysis_counter</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">invalid_state_list</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&#39;Bad steady states encountered at:</span><span class="se">\n</span><span class="s">&#39;</span>
+            <span class="k">print</span> <span class="bp">self</span><span class="o">.</span><span class="n">invalid_state_list</span>
+            <span class="k">print</span> <span class="bp">self</span><span class="o">.</span><span class="n">invalid_state_list_idx</span>
+</div>
+<div class="viewcode-block" id="Scanner.Analyze"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesScan.Scanner.Analyze">[docs]</a>    <span class="k">def</span> <span class="nf">Analyze</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The analysis method, the mode is automatically set by the self.addUserOutput()</span>
+<span class="sd">        method but can be reset by the user.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_MODE_</span> <span class="o">==</span> <span class="s">&#39;state&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mod</span><span class="o">.</span><span class="n">doState</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_MODE_</span> <span class="o">==</span> <span class="s">&#39;elasticity&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mod</span><span class="o">.</span><span class="n">doElas</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_MODE_</span> <span class="o">==</span> <span class="s">&#39;mca&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mod</span><span class="o">.</span><span class="n">doMca</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_MODE_</span> <span class="o">==</span> <span class="s">&#39;stability&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mod</span><span class="o">.</span><span class="n">doEigenMca</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_MODE_</span> <span class="o">==</span> <span class="s">&#39;null&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">HAS_STATE_OUTPUT</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mod</span><span class="o">.</span><span class="n">User_Function</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="Scanner.StoreData"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesScan.Scanner.StoreData">[docs]</a>    <span class="k">def</span> <span class="nf">StoreData</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Internal function which concatenates and stores the data generated by Analyze.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">HAS_STATE_OUTPUT</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_MODE_</span> <span class="o">!=</span> <span class="s">&#39;null&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">SteadyStateResults</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">scipy</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">mod</span><span class="o">.</span><span class="n">state_species</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">mod</span><span class="o">.</span><span class="n">state_flux</span><span class="p">)))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">HAS_USER_OUTPUT</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_MODE_</span> <span class="o">!=</span> <span class="s">&#39;null&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">UserOutputResults</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">scipy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mod</span><span class="p">,</span><span class="n">res</span><span class="p">)</span> <span class="k">for</span> <span class="n">res</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">UserOutputList</span><span class="p">]))</span>
+</div>
+<div class="viewcode-block" id="Scanner.getOutput"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesScan.Scanner.getOutput">[docs]</a>    <span class="k">def</span> <span class="nf">getOutput</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Will be the new output function.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+</div>
+<div class="viewcode-block" id="Scanner.getResultMatrix"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesScan.Scanner.getResultMatrix">[docs]</a>    <span class="k">def</span> <span class="nf">getResultMatrix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stst</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">lbls</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns an array of result data. I&#39;m keepin this for backwards compatibility but</span>
+<span class="sd">        it will be replaced by a getOutput() method when this scanner is updated to use</span>
+<span class="sd">        the new data_scan object.</span>
+
+<span class="sd">        - *stst* add steady-state data to output array</span>
+<span class="sd">        - *lbls* return a tuple of (array, column_header_list)</span>
+
+<span class="sd">        If *stst* is True output has dimensions [scan_parameters]+[state_species+state_flux]+[Useroutput]</span>
+<span class="sd">        otherwise [scan_parameters]+[Useroutput].</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">output_array</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">labels</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">stst</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">HAS_USER_OUTPUT</span><span class="p">:</span>
+                <span class="n">output_array</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">hstack</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">ScanSpace</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">SteadyStateResults</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">UserOutputResults</span><span class="p">])</span>
+                <span class="n">labels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">GenOrder</span><span class="o">+</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mod</span><span class="o">.</span><span class="n">species</span><span class="p">)</span><span class="o">+</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mod</span><span class="o">.</span><span class="n">reactions</span><span class="p">)</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">UserOutputList</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">output_array</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">hstack</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">ScanSpace</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">SteadyStateResults</span><span class="p">])</span>
+                <span class="n">labels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">GenOrder</span><span class="o">+</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mod</span><span class="o">.</span><span class="n">species</span><span class="p">)</span><span class="o">+</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mod</span><span class="o">.</span><span class="n">reactions</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">output_array</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">hstack</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">ScanSpace</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">UserOutputResults</span><span class="p">])</span>
+            <span class="n">labels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">GenOrder</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">UserOutputList</span>
+        <span class="k">if</span> <span class="n">lbls</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">output_array</span><span class="p">,</span> <span class="n">labels</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">output_array</span>
+
+</div></div>
+<div class="viewcode-block" id="PITCONScanUtils"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesScan.PITCONScanUtils">[docs]</a><span class="k">class</span> <span class="nc">PITCONScanUtils</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Static Bifurcation Scanning utilities using PITCON, call with loaded model object.</span>
+<span class="sd">    Hopefully nobody else was trying to use the older class as it was horrible. This new</span>
+<span class="sd">    one is is leaner, meaner and pretty cool ;-)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">model</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">timer</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">pitcon_range_low</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">pitcon_range_high</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">pitcon_scan_density</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">pitcon_scan_parameter</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">pitcon_scan_parameter_3d</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">pitcon_res</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="n">user_output</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">res_user</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="n">res_idx</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">res_metab</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">res_flux</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">res_eigen</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">model</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Instantiate PITCONScanUtils with a loaded PySCeS model instance.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timer</span> <span class="o">=</span> <span class="n">TimerBox</span><span class="p">()</span>
+
+<div class="viewcode-block" id="PITCONScanUtils.setUserOuput"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesScan.PITCONScanUtils.setUserOuput">[docs]</a>    <span class="k">def</span> <span class="nf">setUserOuput</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the user output required as n string arguments.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">user_output</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="PITCONScanUtils.runContinuation"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesScan.PITCONScanUtils.runContinuation">[docs]</a>    <span class="k">def</span> <span class="nf">runContinuation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">parameter</span><span class="p">,</span><span class="n">low</span><span class="p">,</span><span class="n">high</span><span class="p">,</span><span class="n">density</span><span class="p">,</span><span class="n">par3d</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">logrange</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span><span class="n">runQuiet</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Run the continuation using the following parameters:</span>
+
+<span class="sd">        Args:</span>
+
+<span class="sd">        - parameter = str(the parameter to be scanned)</span>
+<span class="sd">        - low = float(lower bound)</span>
+<span class="sd">        - high = float(upper bound)</span>
+<span class="sd">        - density = int(the number of initial points)</span>
+<span class="sd">        - par3d = float(extra 3d parameter to insert into the output array) this parameter is not set ONLY used in output</span>
+<span class="sd">        - logrange = boolean [default = True], if True generate the result using logspace(log10(low), log10(high), density) otherwise use a linear range</span>
+<span class="sd">        - runQuiet = boolean [default = True], if True do not display intermediate results to screen, disable for debugging</span>
+
+<span class="sd">        After running the continuation the results are stored in numpy arrays</span>
+
+<span class="sd">        - mod.res_idx  = scan parameter values (and optionally par3d)</span>
+<span class="sd">        - mod.res_metab = steady-state species concentrations</span>
+<span class="sd">        - mod.res_flux = steady-state flux values</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">pitcon_scan_density</span> <span class="o">=</span> <span class="n">density</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pitcon_scan_parameter</span> <span class="o">=</span> <span class="n">parameter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pitcon_scan_parameter_3d</span> <span class="o">=</span> <span class="n">par3d</span>
+        <span class="k">if</span> <span class="n">logrange</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pitcon_range_low</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">low</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pitcon_range_high</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">high</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">pitcon_par_space</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pitcon_range_low</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">pitcon_range_high</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">pitcon_scan_density</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pitcon_range_low</span> <span class="o">=</span> <span class="n">low</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pitcon_range_high</span> <span class="o">=</span> <span class="n">high</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">pitcon_par_space</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pitcon_range_low</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">pitcon_range_high</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">pitcon_scan_density</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">pitcon_flux_gen</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">runQuiet</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">SetQuiet</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">SetLoud</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pitcon_scan_parameter_3d</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pitcon_res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">PITCON</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pitcon_scan_parameter</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pitcon_scan_parameter_3d</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">res_idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pitcon_res</span><span class="p">[:,:</span><span class="mi">2</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">res_metab</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pitcon_res</span><span class="p">[:,</span><span class="mi">2</span><span class="p">:</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">species</span><span class="p">)</span><span class="o">+</span><span class="mi">2</span><span class="p">:]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">res_flux</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pitcon_res</span><span class="p">[:,</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">species</span><span class="p">)</span><span class="o">+</span><span class="mi">2</span><span class="p">:]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pitcon_res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">PITCON</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pitcon_scan_parameter</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">res_idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pitcon_res</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">res_idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">res_idx</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">res_idx</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="mi">1</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">res_metab</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pitcon_res</span><span class="p">[:,</span><span class="mi">1</span><span class="p">:</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">species</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">res_flux</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pitcon_res</span><span class="p">[:,</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">species</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">:]</span>
+
+        <span class="k">print</span> <span class="s">&#39;</span><span class="se">\n\t</span><span class="s">Continuation complete</span><span class="se">\n</span><span class="s">&#39;</span>
+
+</div>
+<div class="viewcode-block" id="PITCONScanUtils.analyseData"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesScan.PITCONScanUtils.analyseData">[docs]</a>    <span class="k">def</span> <span class="nf">analyseData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">analysis</span><span class="o">=</span><span class="s">&#39;elas&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Performs &quot;analysis&quot; on the PITCON generated set of steady-state results where analysis is:</span>
+
+<span class="sd">        - &#39;elasv&#39; = variable elasticities</span>
+<span class="sd">        - &#39;elasp&#39; = parameter elasticities</span>
+<span class="sd">        - &#39;elas&#39;  = all elasticities</span>
+<span class="sd">        - &#39;mca&#39;   = control coefficients</span>
+<span class="sd">        - &#39;resp&#39;  = response coefficients</span>
+<span class="sd">        - &#39;eigen&#39; = eigen values</span>
+<span class="sd">        - &#39;all&#39;   = all of the above</span>
+
+<span class="sd">        Higher level analysis types automatically enable the lower level analysis needed e.g.</span>
+<span class="sd">        selecting &#39;mca&#39; implies &#39;elasv&#39; etc. User output defined with mod.setUserOutput() is</span>
+<span class="sd">        stored in the mod.res_user array.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># reset result lists</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">res_eigen</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">res_user</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">step_cntr</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timer</span><span class="o">.</span><span class="n">step_timer</span><span class="p">(</span><span class="s">&#39;st1&#39;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">res_idx</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">res_idx</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">timer</span><span class="o">.</span><span class="n">st1_cstep</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">step_cntr</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">timer</span><span class="o">.</span><span class="n">st1_cstep</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">step_cntr</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
+                <span class="k">print</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">timer</span><span class="o">.</span><span class="n">st1</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
+                <span class="n">step_cntr</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="n">PitParVal</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">res_idx</span><span class="p">[</span><span class="n">row</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">pitcon_scan_parameter</span><span class="p">,</span><span class="n">PitParVal</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">state_species</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">res_metab</span><span class="p">[</span><span class="n">row</span><span class="p">,:]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">state_flux</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">res_flux</span><span class="p">[</span><span class="n">row</span><span class="p">,:]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">SetStateSymb</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">state_flux</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">state_species</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">Forcing_Function</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="n">analysis</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;elasv&#39;</span><span class="p">,</span> <span class="s">&#39;elas&#39;</span><span class="p">,</span> <span class="s">&#39;mca&#39;</span><span class="p">,</span> <span class="s">&#39;resp&#39;</span><span class="p">,</span> <span class="s">&#39;eigen&#39;</span><span class="p">,</span> <span class="s">&#39;all&#39;</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">EvalEvar</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">state_species</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">state_flux</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">analysis</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;elasp&#39;</span><span class="p">,</span> <span class="s">&#39;elas&#39;</span><span class="p">,</span> <span class="s">&#39;resp&#39;</span><span class="p">,</span> <span class="s">&#39;all&#39;</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">EvalEpar</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">state_species</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">state_flux</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">analysis</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;mca&#39;</span><span class="p">,</span> <span class="s">&#39;resp&#39;</span><span class="p">,</span> <span class="s">&#39;all&#39;</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">EvalCC</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">analysis</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;resp&#39;</span><span class="p">,</span> <span class="s">&#39;all&#39;</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">EvalRC</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">analysis</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;eigen&#39;</span><span class="p">,</span> <span class="s">&#39;all&#39;</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">EvalEigen</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">res_eigen</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">eigen_values</span><span class="p">)</span>
+            <span class="n">state_out</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">user_output</span> <span class="o">!=</span> <span class="bp">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">user_output</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">user_output</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">state_out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">attr</span><span class="p">))</span>
+                    <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">ex</span><span class="p">:</span>
+                        <span class="k">print</span> <span class="n">ex</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">res_user</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">state_out</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">res_user</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">res_user</span><span class="p">)</span>
+        <span class="k">print</span> <span class="s">&#39;</span><span class="se">\n\t</span><span class="si">%s</span><span class="s"> evaluation complete</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">analysis</span>
+
+</div>
+<div class="viewcode-block" id="PITCONScanUtils.getArrayListAsArray"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesScan.PITCONScanUtils.getArrayListAsArray">[docs]</a>    <span class="k">def</span> <span class="nf">getArrayListAsArray</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array_list</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Stack (concatenate) the list of arrays into a single array.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">array_list</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">output</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">array_list</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">array_list</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">output</span> <span class="o">=</span> <span class="n">array_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">output</span>
+</div></div>
+<span class="k">if</span> <span class="n">__psyco_active__</span><span class="p">:</span>
+    <span class="n">psyco</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">Scanner</span><span class="p">)</span>
+    <span class="n">psyco</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">PITCONScanUtils</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../userguide.html">
+              <img class="logo" src="../../_static/pysces_logo_2.gif" alt="Logo"/>
+            </a></p><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../userguide.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2004-2016, Brett Oliver, Johann Rohwer, Jannie Hofmeyr.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

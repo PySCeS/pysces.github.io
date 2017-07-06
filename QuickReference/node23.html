@@ -1,0 +1,146 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.71)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Multi-dimension parameter scans</TITLE>
+<META NAME="description" CONTENT="Multi-dimension parameter scans">
+<META NAME="keywords" CONTENT="PySCeS-QuickReference">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="PySCeS-QuickReference.css">
+
+<LINK REL="previous" HREF="node22.html">
+<LINK REL="up" HREF="node21.html">
+<LINK REL="next" HREF="node24.html">
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html384"
+  HREF="node24.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.gif"></A> 
+<A NAME="tex2html380"
+  HREF="node21.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.gif"></A> 
+<A NAME="tex2html376"
+  HREF="node22.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.gif"></A> 
+<A NAME="tex2html382"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html385"
+  HREF="node24.html">Model attribute display functions</A>
+<B> Up:</B> <A NAME="tex2html381"
+  HREF="node21.html">PySCeS: analysis functions</A>
+<B> Previous:</B> <A NAME="tex2html377"
+  HREF="node22.html">Single dimension parameter scans</A>
+ &nbsp; <B>  <A NAME="tex2html383"
+  HREF="node1.html">Contents</A></B> 
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H2><A NAME="SECTION00052000000000000000">
+Multi-dimension parameter scans</A>
+</H2>
+This new <I>PySCeS</I> feature allows multi-dimensional parameter
+scanning. Any combination of parameters is possible and can be
+added as `master' parameters that change independently or `slave'
+parameters whose change is coordinated with the previously defined
+parameter. Unlike <TT>mod.Scan1()</TT> this function is accessible
+as <TT>pysces.Scanner</TT> a custom class that can be instantiated
+with a loaded <I>PySCeS</I> model object:
+<PRE>
+ &gt;&gt;&gt; sc1 = pysces.Scanner(mod)
+ &gt;&gt;&gt; sc1.addScanParameter('x3', 1, 10, 11)
+ &gt;&gt;&gt; sc1.addScanParameter('k2', 0.1, 1000, 5, log=True)
+ &gt;&gt;&gt; sc1.addScanParameter('k4', 0.1, 1000, 5, log=True, slave=True)
+ &gt;&gt;&gt; sc1.addUserOutput('J_R1', 's1_ss')
+ &gt;&gt;&gt; sc1.Run()
+
+ ...
+ scan: 55 states analysed
+
+ &gt;&gt;&gt; sc1_res = sc1.getResultMatrix()
+ &gt;&gt;&gt; print sc1_res[0]
+ array([1., 0.1, 0.1, 97.94286647, 49.1380999])
+
+ &gt;&gt;&gt; print sc1_res[-1]
+ array([1.0e+01, 1.0e+03, 1.0e+03, -3.32564878e+00, 3.84227702e-03])
+</PRE>
+In this scan we define two independent (<TT>x3, k2</TT>) and one
+dependent (<TT>k3</TT>) scan parameters and track the changes in
+the steady state variables <code>J_R1</code> and <code>s1_ss</code>. Note that
+<TT>k2</TT> and <TT>k4</TT> use a logarithmic scale. Once run the
+input parameters cannot be altered, however, the output can be
+changed and the scan rerun.
+
+<UL>
+<LI><code>sc1.addScanParameter(name, start, end, points, log, slave)</code>
+  where <TT>name</TT> is the input parameter (as a string), <TT>start</TT> and <TT>end</TT>
+  define the range with the required number of <TT>points</TT>. While <TT>log</TT>
+  and <TT>slave</TT> are boolean arguments indicating the point distribution and
+  whether the axis is independent or not.
+</LI>
+<LI><code>sc1.addUserOutput(*args)</code> an arbitrary number of
+  model attributes to be output can be added (this method
+  automatically tries to determine the level of analysis needed)
+  e.g.&nbsp;<code>addUserOutput('J_R1', 'ecR1_k2')</code>
+</LI>
+<LI><code>sc1.Run()</code> run the scan, if subsequent runs are
+  required after changing output parameters use <TT>sc1.RunAgain()</TT>
+</LI>
+<LI><code>sc1.getResultMatrix()</code> return the scan results as an
+  array containing both input and output.
+</LI>
+<LI><code>sc1.UserOutputList</code> the list of output names
+</LI>
+<LI><code>sc1.UserOutputResults</code> an array containing only the
+  output
+</LI>
+<LI><code>sc1.ScanSpace</code> the generated list of input
+  parameters.
+</LI>
+</UL>
+
+<P>
+<HR>
+<!--Navigation Panel-->
+<A NAME="tex2html384"
+  HREF="node24.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.gif"></A> 
+<A NAME="tex2html380"
+  HREF="node21.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.gif"></A> 
+<A NAME="tex2html376"
+  HREF="node22.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.gif"></A> 
+<A NAME="tex2html382"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html385"
+  HREF="node24.html">Model attribute display functions</A>
+<B> Up:</B> <A NAME="tex2html381"
+  HREF="node21.html">PySCeS: analysis functions</A>
+<B> Previous:</B> <A NAME="tex2html377"
+  HREF="node22.html">Single dimension parameter scans</A>
+ &nbsp; <B>  <A NAME="tex2html383"
+  HREF="node1.html">Contents</A></B> 
+<!--End of Navigation Panel-->
+<ADDRESS>
+Brett Olivier
+2007-09-21
+</ADDRESS>
+</BODY>
+</HTML>

@@ -1,0 +1,7 @@
+@PHDTHESIS{oli05,
+  author = {Brett Gareth Olivier},
+  year = 2005,
+  title = {Simulation and Database Software for Computational Systems Biology:
+          \sf{PySCeS} and \sf{JWS Online}},
+  school = {Stellenbosch University}
+}

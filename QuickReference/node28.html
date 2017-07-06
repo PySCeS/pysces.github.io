@@ -1,0 +1,116 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.71)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Write_array_latex()</TITLE>
+<META NAME="description" CONTENT="Write_array_latex()">
+<META NAME="keywords" CONTENT="PySCeS-QuickReference">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="PySCeS-QuickReference.css">
+
+<LINK REL="previous" HREF="node27.html">
+<LINK REL="up" HREF="node26.html">
+<LINK REL="next" HREF="node29.html">
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html446"
+  HREF="node29.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.gif"></A> 
+<A NAME="tex2html442"
+  HREF="node26.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.gif"></A> 
+<A NAME="tex2html438"
+  HREF="node27.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.gif"></A> 
+<A NAME="tex2html444"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html447"
+  HREF="node29.html">PySCeS module functions</A>
+<B> Up:</B> <A NAME="tex2html443"
+  HREF="node26.html">Writing formatted arrays</A>
+<B> Previous:</B> <A NAME="tex2html439"
+  HREF="node27.html">Write_array()</A>
+ &nbsp; <B>  <A NAME="tex2html445"
+  HREF="node1.html">Contents</A></B> 
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H3><A NAME="SECTION00062200000000000000">
+<TT>Write_array_latex()</TT></A>
+</H3>
+
+<P>
+The <code>Write_array_latex()</code> method functions similarly to the
+generic <code>Write_array()</code> method except that it generates a
+formatted array that can be included directly in a L<SUP><SMALL>A</SMALL></SUP>T<SMALL>E</SMALL>X
+document. Additionally, there is no separator argument, column
+headings are not truncated and row labels appear to the left of
+the matrix.
+<PRE>
+ mod.Write_array_latex(input, File=None, Row=None, Col=None)
+</PRE>
+which generates
+<PRE>
+%% Write_array_latex_linear1_11:45:03
+\[
+\begin{array}{r|rrr}
+  &amp; $\small{s0}$ &amp; $\small{s1}$ &amp; $\small{s2}$ \\ \hline
+ $\small{R1}$ &amp;-0.3004 &amp; 0.0000 &amp; 0.0000 \\
+ $\small{R2}$ &amp; 1.5022 &amp;-0.5022 &amp; 0.0000 \\
+ $\small{R3}$ &amp; 0.0000 &amp; 1.5065 &amp;-0.5065 \\
+ $\small{R4}$ &amp; 0.0000 &amp; 0.0000 &amp; 1.0130 \\
+ \end{array}
+\]
+</PRE>
+and in a typeset document appears as
+<BR><P></P>
+<DIV ALIGN="CENTER">
+<!-- MATH
+ \begin{displaymath}
+\begin{array}{r|rrr}
+  & $\small {s0}$\  & $\small {s1}$\  & $\small {s2}$\  \\\hline
+ $\small {R1}$\  &-0.3004 & 0.0000 & 0.0000 \\
+ $\small {R2}$\  & 1.5022 &-0.5022 & 0.0000 \\
+ $\small {R3}$\  & 0.0000 & 1.5065 &-0.5065 \\
+ $\small {R4}$\  & 0.0000 & 0.0000 & 1.0130 \\
+ \end{array}
+\end{displaymath}
+ -->
+
+<IMG
+ WIDTH="293" HEIGHT="123" BORDER="0"
+ SRC="img7.gif"
+ ALT="\begin{displaymath}
+\begin{array}{r\vert rrr}
+&amp; $\small {s0}$\ &amp; $\small {s1}...
+...
+$\small {R4}$\ &amp; 0.0000 &amp; 0.0000 &amp; 1.0130 \\
+\end{array}
+\end{displaymath}">
+</DIV>
+<BR CLEAR="ALL">
+<P></P>
+
+<P>
+<BR><HR>
+<ADDRESS>
+Brett Olivier
+2007-09-21
+</ADDRESS>
+</BODY>
+</HTML>

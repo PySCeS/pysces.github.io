@@ -1,0 +1,122 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.71)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Basic model attributes</TITLE>
+<META NAME="description" CONTENT="Basic model attributes">
+<META NAME="keywords" CONTENT="PySCeS-QuickReference">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="PySCeS-QuickReference.css">
+
+<LINK REL="previous" HREF="node6.html">
+<LINK REL="up" HREF="node3.html">
+<LINK REL="next" HREF="node8.html">
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html181"
+  HREF="node8.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.gif"></A> 
+<A NAME="tex2html177"
+  HREF="node3.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.gif"></A> 
+<A NAME="tex2html173"
+  HREF="node6.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.gif"></A> 
+<A NAME="tex2html179"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html182"
+  HREF="node8.html">PySCeS: core analysis functions</A>
+<B> Up:</B> <A NAME="tex2html178"
+  HREF="node3.html">Running PySCeS</A>
+<B> Previous:</B> <A NAME="tex2html174"
+  HREF="node6.html">Loading a model</A>
+ &nbsp; <B>  <A NAME="tex2html180"
+  HREF="node1.html">Contents</A></B> 
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H2><A NAME="SECTION00034000000000000000">
+Basic model attributes</A>
+</H2>
+Some basic model properties are accessible once the model is
+loaded.
+
+<UL>
+<LI><TT>mod.ModelFile</TT>, the name of the loaded model input file.
+</LI>
+<LI><TT>mod.ModelDir</TT>, the input file directory .
+</LI>
+<LI><TT>mod.ModelOutput</TT>, <I>PySCeS</I> work/output directory
+</LI>
+<LI>The model parameters are made available using their original name as specified in the input file
+   e.g.&nbsp;the value of parameter <TT>k1</TT> is now accessible as <TT>mod.k1</TT>
+</LI>
+<LI>External (fixed) species are made available in the same way.
+</LI>
+<LI>Internal (variable) species are treated in a similar way except that an additional attribute (parameter)
+   is created to hold the species initial value (as specified in the input file) e.g.&nbsp;from <TT>s1</TT>, <TT>mod.s1</TT>
+  and <code>mod.s1_init</code> are instantiated as model object attributes.
+</LI>
+<LI>Rate equations are translated into class methods that can be evaluated to give their current value.
+   For example, calling <TT>mod.R1()</TT> returns the <TT>R1</TT>'s current rate.
+</LI>
+<LI><TT>mod.species</TT> contains the model's variable species names (and order relative to the stoichiometric matrix).
+</LI>
+<LI><code>mod.fixed_species</code> contains the fixed species names.
+</LI>
+<LI>Reaction names and order can be displayed using <TT>mod.reactions</TT>
+</LI>
+<LI>Parameter names (including fixed species) can be displayed using <TT>mod.parameters</TT>
+</LI>
+</UL>
+All basic model attributes that are described in the input file
+can be changed interactively. However if the model rate equations
+need to be changed, this can only be done in the input file after
+which the model should be re-instantiated and reloaded.
+
+<P>
+<HR>
+<!--Navigation Panel-->
+<A NAME="tex2html181"
+  HREF="node8.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.gif"></A> 
+<A NAME="tex2html177"
+  HREF="node3.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.gif"></A> 
+<A NAME="tex2html173"
+  HREF="node6.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.gif"></A> 
+<A NAME="tex2html179"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.gif"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html182"
+  HREF="node8.html">PySCeS: core analysis functions</A>
+<B> Up:</B> <A NAME="tex2html178"
+  HREF="node3.html">Running PySCeS</A>
+<B> Previous:</B> <A NAME="tex2html174"
+  HREF="node6.html">Loading a model</A>
+ &nbsp; <B>  <A NAME="tex2html180"
+  HREF="node1.html">Contents</A></B> 
+<!--End of Navigation Panel-->
+<ADDRESS>
+Brett Olivier
+2007-09-21
+</ADDRESS>
+</BODY>
+</HTML>
