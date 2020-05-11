@@ -1,0 +1,478 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>pysces.PyscesUtils &#8212; PySCeS User Guide v0.9</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.9.7',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="search" type="application/opensearchdescription+xml"
+          title="Search within PySCeS User Guide v0.9"
+          href="../../_static/opensearch.xml"/>
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for pysces.PyscesUtils</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">PySCeS - Python Simulator for Cellular Systems (http://pysces.sourceforge.net)</span>
+
+<span class="sd">Copyright (C) 2004-2019 B.G. Olivier, J.M. Rohwer, J.-H.S Hofmeyr all rights reserved,</span>
+
+<span class="sd">Brett G. Olivier (bgoli@users.sourceforge.net)</span>
+<span class="sd">Triple-J Group for Molecular Cell Physiology</span>
+<span class="sd">Stellenbosch University, South Africa.</span>
+
+<span class="sd">Permission to use, modify, and distribute this software is given under the</span>
+<span class="sd">terms of the PySceS (BSD style) license. See LICENSE.txt that came with</span>
+<span class="sd">this distribution for specifics.</span>
+
+<span class="sd">NO WARRANTY IS EXPRESSED OR IMPLIED.  USE AT YOUR OWN RISK.</span>
+<span class="sd">Brett G. Olivier</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">unicode_literals</span>
+
+<span class="kn">from</span> <span class="nn">pysces.version</span> <span class="k">import</span> <span class="n">__version__</span>
+<span class="vm">__doc__</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;</span>
+<span class="s1">            PyscesUtils</span>
+<span class="s1">            -----------</span>
+
+<span class="s1">            The PyscesUtils module holds a collection of methods of general use such as timers and</span>
+<span class="s1">            array export fucntionality that can be accessed as **pysces.write.**</span>
+
+<span class="s1">            &#39;&#39;&#39;</span>
+
+<span class="kn">import</span> <span class="nn">fileinput</span>
+<span class="kn">import</span> <span class="nn">os</span><span class="o">,</span><span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+
+
+
+<div class="viewcode-block" id="VersionCheck"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesUtils.VersionCheck">[docs]</a><span class="k">def</span> <span class="nf">VersionCheck</span><span class="p">(</span><span class="n">ver</span><span class="o">=</span><span class="s1">&#39;0.1.5&#39;</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;dead&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="str2bool"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesUtils.str2bool">[docs]</a><span class="k">def</span> <span class="nf">str2bool</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Tries to convert a string to a Python boolean</span>
+
+<span class="sd">    - *s* True if &#39;True&#39;, &#39;true&#39; or&#39;1&#39; else False</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">s</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;True&#39;</span><span class="p">,</span><span class="s1">&#39;true&#39;</span><span class="p">,</span> <span class="s1">&#39;1&#39;</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="TimerBox"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesUtils.TimerBox">[docs]</a><span class="k">class</span> <span class="nc">TimerBox</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A timer &quot;container&quot; class that can be used to hold user defined timers</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">__go__</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">2</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Your version of Python (&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">[:</span><span class="mi">3</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39;) might be too old</span><span class="se">\</span>
+<span class="s1">            to use this class. Python 2.2 or newer is required&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="TimerBox.normal_timer"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesUtils.TimerBox.normal_timer">[docs]</a>    <span class="k">def</span> <span class="nf">normal_timer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        normal_timer(name)</span>
+
+<span class="sd">        Creates a normal timer method with &lt;name&gt; in the TimerBox instance. Normal timers</span>
+<span class="sd">        print the elapsed time since creation when called.</span>
+
+<span class="sd">         - *name* the timer name</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span> <span class="ow">or</span> <span class="nb">type</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="o">==</span> <span class="n">unicode</span>
+        <span class="k">def</span> <span class="nf">timer</span><span class="p">(</span><span class="n">startTime</span><span class="o">=</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()):</span>
+            <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">__go__</span><span class="p">:</span>
+                <span class="n">ms</span> <span class="o">=</span> <span class="nb">divmod</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">startTime</span><span class="p">,</span><span class="mi">60</span><span class="p">)</span>
+                <span class="n">nowTime</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">ms</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> <span class="o">+</span> <span class="s1">&#39; min &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">ms</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span> <span class="o">+</span> <span class="s1">&#39; sec&#39;</span>
+                <span class="k">yield</span> <span class="n">nowTime</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="p">,</span><span class="n">timer</span><span class="p">())</span></div>
+
+<div class="viewcode-block" id="TimerBox.step_timer"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesUtils.TimerBox.step_timer">[docs]</a>    <span class="k">def</span> <span class="nf">step_timer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="p">,</span><span class="n">maxsteps</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        step_timer(name,maxsteps)</span>
+
+<span class="sd">        Creates a step timer method with &lt;name&gt; in the TimerBox instance. Step timers</span>
+<span class="sd">        print the elapsed time as well as the next step out of maxsteps when called.</span>
+
+<span class="sd">        - *name* the timer name</span>
+<span class="sd">        - *maxsteps* the maximum number of steps associated with this timer</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">,</span> <span class="s1">&#39;Name is a string representing the timer name&#39;</span>
+        <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">maxsteps</span><span class="p">)</span> <span class="o">==</span> <span class="nb">int</span> <span class="ow">or</span> <span class="nb">type</span><span class="p">(</span><span class="n">maxsteps</span><span class="p">)</span> <span class="o">==</span> <span class="nb">float</span><span class="p">,</span> <span class="s1">&#39;int or float needed&#39;</span>
+
+        <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="o">+</span><span class="s1">&#39;_cstep&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">timer</span><span class="p">(</span><span class="n">startTime</span><span class="o">=</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">(),</span><span class="n">maxS</span><span class="o">=</span><span class="n">maxsteps</span><span class="p">):</span>
+            <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">__go__</span><span class="p">:</span>
+                <span class="n">ms</span> <span class="o">=</span> <span class="nb">divmod</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">startTime</span><span class="p">,</span><span class="mi">60</span><span class="p">)</span>
+                <span class="n">nowStep</span> <span class="o">=</span> <span class="s1">&#39;step &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="o">+</span><span class="s1">&#39;_cstep&#39;</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39; of &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">maxS</span><span class="p">)</span><span class="o">+</span> <span class="s1">&#39; (&#39;</span><span class="o">+</span>\
+                    <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">ms</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> <span class="o">+</span> <span class="s1">&#39; min &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">ms</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span> <span class="o">+</span> <span class="s1">&#39; sec)&#39;</span>
+                <span class="k">yield</span> <span class="n">nowStep</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="p">,</span><span class="n">timer</span><span class="p">())</span></div>
+
+<div class="viewcode-block" id="TimerBox.stop"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesUtils.TimerBox.stop">[docs]</a>    <span class="k">def</span> <span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Delete the timer &lt;name&gt; from the TimerBox instance</span>
+
+<span class="sd">        - *name* the timer name to delete</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">delattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="o">+</span><span class="s1">&#39;_cstep&#39;</span><span class="p">)</span>
+            <span class="nb">delattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="o">+</span><span class="s1">&#39;_cstep&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="TimerBox.reset_step"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesUtils.TimerBox.reset_step">[docs]</a>    <span class="k">def</span> <span class="nf">reset_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reset the number of steps of timer &lt;name&gt; in the TimerBox to zero</span>
+
+<span class="sd">        - *name* the step timer whose steps should be reset</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="o">+</span><span class="s1">&#39;_cstep&#39;</span><span class="p">)</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="o">+</span><span class="s1">&#39;_cstep&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span></div></div>
+
+<div class="viewcode-block" id="CopyTestModels"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesUtils.CopyTestModels">[docs]</a><span class="k">def</span> <span class="nf">CopyTestModels</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;moved to PyscesTest&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CopyModels"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesUtils.CopyModels">[docs]</a><span class="k">def</span> <span class="nf">CopyModels</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;dead&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ConvertFileD2U"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesUtils.ConvertFileD2U">[docs]</a><span class="k">def</span> <span class="nf">ConvertFileD2U</span><span class="p">(</span><span class="n">Filelist</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts a [Filename] from rn to n inplace no effect if the line termination is correct</span>
+
+<span class="sd">    - *Filelist* a file or list of files to convert</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">fileinput</span><span class="o">.</span><span class="n">input</span><span class="p">(</span><span class="n">Filelist</span><span class="p">,</span><span class="n">inplace</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">line</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;</span><span class="se">\r</span><span class="s1">&#39;</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">line</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ConvertFileU2D"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesUtils.ConvertFileU2D">[docs]</a><span class="k">def</span> <span class="nf">ConvertFileU2D</span><span class="p">(</span><span class="n">Filelist</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts a [Filename] from n to rn inplace no effect if the line termination is correct:</span>
+
+<span class="sd">    - *Filelist* a file or list of files to convert</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">fileinput</span><span class="o">.</span><span class="n">input</span><span class="p">(</span><span class="n">Filelist</span><span class="p">,</span><span class="n">inplace</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">line</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;</span><span class="se">\r</span><span class="s1">&#39;</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">line</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="WriteOutput"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesUtils.WriteOutput">[docs]</a><span class="k">class</span> <span class="nc">WriteOutput</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This code is adapted from:</span>
+
+<span class="sd">    CBMPy: CBTools module</span>
+
+<span class="sd">    Constraint Based Modelling in Python (http://cbmpy.sourceforge.net)</span>
+<span class="sd">    Copyright (C) 2009-2017 Brett G. Olivier, VU University Amsterdam, Amsterdam, The Netherlands</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="WriteOutput.exportLabelledArray"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesUtils.WriteOutput.exportLabelledArray">[docs]</a>    <span class="k">def</span> <span class="nf">exportLabelledArray</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arr</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">fname</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%f</span><span class="s1">&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Write a 2D array type object to file</span>
+
+<span class="sd">         - *arr* the an array like object</span>
+<span class="sd">         - *names* the list of row names</span>
+<span class="sd">         - *fname* the output filename</span>
+<span class="sd">         - *sep* [default=&#39;,&#39;] the column separator</span>
+<span class="sd">         - *format* [default=&#39;%s&#39;] the output number format</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">names</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">),</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1"> ...  rows must equal number of names!&#39;</span>
+        <span class="n">F</span> <span class="o">=</span> <span class="n">file</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+        <span class="n">cntr</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="k">if</span> <span class="n">names</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">F</span><span class="o">.</span><span class="n">write</span><span class="p">((</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">+</span><span class="n">sep</span><span class="p">)</span> <span class="o">%</span> <span class="n">names</span><span class="p">[</span><span class="n">r</span><span class="p">])</span>
+            <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+                <span class="k">if</span> <span class="n">c</span> <span class="o">&lt;</span> <span class="n">arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                    <span class="n">F</span><span class="o">.</span><span class="n">write</span><span class="p">((</span><span class="nb">format</span><span class="o">+</span><span class="n">sep</span><span class="p">)</span> <span class="o">%</span> <span class="n">arr</span><span class="p">[</span><span class="n">r</span><span class="p">,</span><span class="n">c</span><span class="p">])</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">F</span><span class="o">.</span><span class="n">write</span><span class="p">((</span><span class="nb">format</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span> <span class="o">%</span> <span class="n">arr</span><span class="p">[</span><span class="n">r</span><span class="p">,</span><span class="n">c</span><span class="p">])</span>
+            <span class="n">cntr</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">cntr</span> <span class="o">&gt;=</span> <span class="mi">250</span><span class="p">:</span>
+                <span class="n">F</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+                <span class="n">cntr</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">F</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">F</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+        <span class="n">F</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;exported to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fname</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="WriteOutput.exportLabelledArrayWithHeader"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesUtils.WriteOutput.exportLabelledArrayWithHeader">[docs]</a>    <span class="k">def</span> <span class="nf">exportLabelledArrayWithHeader</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arr</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">header</span><span class="p">,</span> <span class="n">fname</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%f</span><span class="s1">&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Export an array with row names and header</span>
+
+<span class="sd">         - *arr* the an array like object</span>
+<span class="sd">         - *names* the list of row names</span>
+<span class="sd">         - *header* the list of column names</span>
+<span class="sd">         - *fname* the output filename</span>
+<span class="sd">         - *sep* [default=&#39;,&#39;] the column separator</span>
+<span class="sd">         - *format* [default=&#39;%s&#39;] the output number format</span>
+<span class="sd">         - *appendlist* [default=False] if True append the array to *fname* otherwise create a new file</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">names</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">),</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1"> ...  rows must equal number of names!&#39;</span>
+        <span class="k">if</span> <span class="n">header</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">header</span><span class="p">),</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1"> ...  cols must equal number of header names!&#39;</span>
+        <span class="n">F</span> <span class="o">=</span> <span class="n">file</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+        <span class="n">cntr</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">header</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">names</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">hstr</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span><span class="o">+</span><span class="n">sep</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">hstr</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+            <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">header</span><span class="p">:</span>
+                <span class="n">hstr</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="n">h</span><span class="p">)</span><span class="o">+</span><span class="n">sep</span>
+            <span class="n">hstr</span> <span class="o">=</span> <span class="n">hstr</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="n">F</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">hstr</span><span class="p">)</span>
+            <span class="k">del</span> <span class="n">hstr</span>
+        <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="k">if</span> <span class="n">names</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">F</span><span class="o">.</span><span class="n">write</span><span class="p">((</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">+</span><span class="n">sep</span><span class="p">)</span> <span class="o">%</span> <span class="n">names</span><span class="p">[</span><span class="n">r</span><span class="p">])</span>
+            <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+                <span class="k">if</span> <span class="n">c</span> <span class="o">&lt;</span> <span class="n">arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                    <span class="n">F</span><span class="o">.</span><span class="n">write</span><span class="p">((</span><span class="nb">format</span><span class="o">+</span><span class="n">sep</span><span class="p">)</span> <span class="o">%</span> <span class="n">arr</span><span class="p">[</span><span class="n">r</span><span class="p">,</span><span class="n">c</span><span class="p">])</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">F</span><span class="o">.</span><span class="n">write</span><span class="p">((</span><span class="nb">format</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span> <span class="o">%</span> <span class="n">arr</span><span class="p">[</span><span class="n">r</span><span class="p">,</span><span class="n">c</span><span class="p">])</span>
+            <span class="n">cntr</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">cntr</span> <span class="o">&gt;=</span> <span class="mi">250</span><span class="p">:</span>
+                <span class="n">F</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+                <span class="n">cntr</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">F</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">F</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+        <span class="n">F</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;exported to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fname</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="WriteOutput.exportLabelledLinkedList"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesUtils.WriteOutput.exportLabelledLinkedList">[docs]</a>    <span class="k">def</span> <span class="nf">exportLabelledLinkedList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arr</span><span class="p">,</span> <span class="n">fname</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">appendlist</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Write a 2D linked list [[...],[...],[...],[...]] and optionally a list of row labels to file:</span>
+
+<span class="sd">         - *arr* the linked list</span>
+<span class="sd">         - *fname* the output filename</span>
+<span class="sd">         - *names* the list of row names</span>
+<span class="sd">         - *sep* [default=&#39;,&#39;] the column separator</span>
+<span class="sd">         - *format* [default=&#39;%s&#39;] the output number format</span>
+<span class="sd">         - *appendlist* [default=False] if True append the array to *fname* otherwise create a new file</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">names</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">),</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1"> ...  rows must equal number of names!&#39;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">appendlist</span><span class="p">:</span>
+            <span class="n">F</span> <span class="o">=</span> <span class="n">file</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">F</span> <span class="o">=</span> <span class="n">file</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">)</span>
+        <span class="n">cntr</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">arr</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">names</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">F</span><span class="o">.</span><span class="n">write</span><span class="p">((</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">+</span><span class="n">sep</span><span class="p">)</span> <span class="o">%</span> <span class="n">names</span><span class="p">[</span><span class="n">r</span><span class="p">])</span>
+            <span class="n">col_l</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">arr</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">col_l</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">c</span> <span class="o">&lt;</span> <span class="n">col_l</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">arr</span><span class="p">[</span><span class="n">r</span><span class="p">][</span><span class="n">c</span><span class="p">]</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">:</span>
+                        <span class="n">F</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;0.0&#39;</span><span class="o">+</span><span class="n">sep</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">F</span><span class="o">.</span><span class="n">write</span><span class="p">((</span><span class="nb">format</span><span class="o">+</span><span class="n">sep</span><span class="p">)</span> <span class="o">%</span> <span class="n">arr</span><span class="p">[</span><span class="n">r</span><span class="p">][</span><span class="n">c</span><span class="p">])</span>
+                        <span class="k">except</span> <span class="ne">UnicodeEncodeError</span><span class="p">:</span>
+                            <span class="n">F</span><span class="o">.</span><span class="n">write</span><span class="p">((</span><span class="nb">format</span><span class="o">+</span><span class="n">sep</span><span class="p">)</span> <span class="o">%</span> <span class="s1">&#39;uError&#39;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">arr</span><span class="p">[</span><span class="n">r</span><span class="p">][</span><span class="n">c</span><span class="p">]</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">:</span>
+                        <span class="n">F</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;0.0</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">F</span><span class="o">.</span><span class="n">write</span><span class="p">((</span><span class="nb">format</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span> <span class="o">%</span> <span class="n">arr</span><span class="p">[</span><span class="n">r</span><span class="p">][</span><span class="n">c</span><span class="p">])</span>
+                        <span class="k">except</span> <span class="ne">UnicodeEncodeError</span><span class="p">:</span>
+                            <span class="n">F</span><span class="o">.</span><span class="n">write</span><span class="p">((</span><span class="nb">format</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span> <span class="o">%</span> <span class="s1">&#39;uError&#39;</span><span class="p">)</span>
+            <span class="n">cntr</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">cntr</span> <span class="o">&gt;=</span> <span class="mi">250</span><span class="p">:</span>
+                <span class="n">F</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+                <span class="n">cntr</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="c1">##  F.write(&#39;\n&#39;)</span>
+        <span class="n">F</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+        <span class="n">F</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">del</span> <span class="n">arr</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">appendlist</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;exported to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fname</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="WriteOutput.exportLabelledArrayWithHeader2CSV"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesUtils.WriteOutput.exportLabelledArrayWithHeader2CSV">[docs]</a>    <span class="k">def</span> <span class="nf">exportLabelledArrayWithHeader2CSV</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arr</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">header</span><span class="p">,</span> <span class="n">fname</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Export an array with row names and header to fname.csv</span>
+
+<span class="sd">         - *arr* the an array like object</span>
+<span class="sd">         - *names* the list of row names</span>
+<span class="sd">         - *header* the list of column names</span>
+<span class="sd">         - *fname* the output filename</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">fname</span> <span class="o">+=</span> <span class="s1">&#39;.csv&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exportLabelledArrayWithHeader</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">header</span><span class="p">,</span> <span class="n">fname</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%f</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="WriteOutput.exportLabelledArray2CSV"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesUtils.WriteOutput.exportLabelledArray2CSV">[docs]</a>    <span class="k">def</span> <span class="nf">exportLabelledArray2CSV</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arr</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">fname</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Export an array with row names to fname.csv</span>
+
+<span class="sd">         - *arr* the an array like object</span>
+<span class="sd">         - *names* the list of row names</span>
+<span class="sd">         - *fname* the output filename</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">fname</span> <span class="o">+=</span> <span class="s1">&#39;.csv&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exportLabelledArray</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">fname</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%f</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="WriteOutput.exportArray2CSV"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesUtils.WriteOutput.exportArray2CSV">[docs]</a>    <span class="k">def</span> <span class="nf">exportArray2CSV</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arr</span><span class="p">,</span> <span class="n">fname</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Export an array to fname.csv</span>
+
+<span class="sd">         - *arr* the an array like object</span>
+<span class="sd">         - *fname* the output filename</span>
+<span class="sd">         - *sep* [default=&#39;,&#39;] the column separator</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">fname</span> <span class="o">+=</span> <span class="s1">&#39;.csv&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exportLabelledArray</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">fname</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%f</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="WriteOutput.exportLabelledArrayWithHeader2TXT"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesUtils.WriteOutput.exportLabelledArrayWithHeader2TXT">[docs]</a>    <span class="k">def</span> <span class="nf">exportLabelledArrayWithHeader2TXT</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arr</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">header</span><span class="p">,</span> <span class="n">fname</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Export an array with row names and header to fname.txt</span>
+
+<span class="sd">         - *arr* the an array like object</span>
+<span class="sd">         - *names* the list of row names</span>
+<span class="sd">         - *header* the list of column names</span>
+<span class="sd">         - *fname* the output filename</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">fname</span> <span class="o">+=</span> <span class="s1">&#39;.txt&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exportLabelledArrayWithHeader</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">header</span><span class="p">,</span> <span class="n">fname</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%f</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="WriteOutput.exportLabelledArray2TXT"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesUtils.WriteOutput.exportLabelledArray2TXT">[docs]</a>    <span class="k">def</span> <span class="nf">exportLabelledArray2TXT</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arr</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">fname</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Export an array with row names to fname.txt</span>
+
+<span class="sd">         - *arr* the an array like object</span>
+<span class="sd">         - *names* the list of row names</span>
+<span class="sd">         - *fname* the output filename</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">fname</span> <span class="o">+=</span> <span class="s1">&#39;.txt&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exportLabelledArray</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">fname</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%f</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="WriteOutput.exportArray2TXT"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesUtils.WriteOutput.exportArray2TXT">[docs]</a>    <span class="k">def</span> <span class="nf">exportArray2TXT</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arr</span><span class="p">,</span> <span class="n">fname</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Export an array to fname.txt</span>
+
+<span class="sd">         - *arr* the an array like object</span>
+<span class="sd">         - *fname* the output filename</span>
+<span class="sd">         - *sep* [default=&#39;,&#39;] the column separator</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">fname</span> <span class="o">+=</span> <span class="s1">&#39;.txt&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exportLabelledArray</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">fname</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%f</span><span class="s1">&#39;</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../userguide.html">
+              <img class="logo" src="../../_static/pysces_logo_2.gif" alt="Logo"/>
+            </a></p><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../userguide.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2004-2019, Brett Oliver, Johann Rohwer, Jannie Hofmeyr.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

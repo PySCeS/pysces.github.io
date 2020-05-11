@@ -1,0 +1,1479 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>pysces.PyscesLink &#8212; PySCeS User Guide v0.9</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.9.7',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="search" type="application/opensearchdescription+xml"
+          title="Search within PySCeS User Guide v0.9"
+          href="../../_static/opensearch.xml"/>
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for pysces.PyscesLink</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">PySCeS - Python Simulator for Cellular Systems (http://pysces.sourceforge.net)</span>
+
+<span class="sd">Copyright (C) 2004-2019 B.G. Olivier, J.M. Rohwer, J.-H.S Hofmeyr all rights reserved,</span>
+
+<span class="sd">Brett G. Olivier (bgoli@users.sourceforge.net)</span>
+<span class="sd">Triple-J Group for Molecular Cell Physiology</span>
+<span class="sd">Stellenbosch University, South Africa.</span>
+
+<span class="sd">Permission to use, modify, and distribute this software is given under the</span>
+<span class="sd">terms of the PySceS (BSD style) license. See LICENSE.txt that came with</span>
+<span class="sd">this distribution for specifics.</span>
+
+<span class="sd">NO WARRANTY IS EXPRESSED OR IMPLIED.  USE AT YOUR OWN RISK.</span>
+<span class="sd">Brett G. Olivier</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">unicode_literals</span>
+
+<span class="kn">from</span> <span class="nn">pysces.version</span> <span class="k">import</span> <span class="n">__version__</span>
+<span class="vm">__doc__</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;</span>
+<span class="s1">          PyscesLink</span>
+<span class="s1">          ----------</span>
+
+<span class="s1">          Interfaces to external software and API&#39;s, has replaced the PySCeS contrib classes.</span>
+<span class="s1">          &#39;&#39;&#39;</span>
+
+<span class="c1"># for METATOOLlink</span>
+<span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">re</span><span class="o">,</span> <span class="nn">io</span>
+<span class="c1"># for SBWWebLink</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">urllib.request</span> <span class="k">import</span> <span class="n">ProxyHandler</span><span class="p">,</span> <span class="n">build_opener</span><span class="p">,</span> <span class="n">HTTPHandler</span><span class="p">,</span> <span class="n">install_opener</span><span class="p">,</span> <span class="n">urlopen</span>   <span class="c1">#Py 3</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">urllib2</span> <span class="k">import</span> <span class="n">ProxyHandler</span><span class="p">,</span> <span class="n">build_opener</span><span class="p">,</span> <span class="n">HTTPHandler</span><span class="p">,</span> <span class="n">install_opener</span><span class="p">,</span> <span class="n">urlopen</span>    <span class="c1">#Py 2</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">urllib.parse</span> <span class="k">import</span> <span class="n">urlencode</span>  <span class="c1">#Py 3</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">urllib</span> <span class="k">import</span> <span class="n">urlencode</span> <span class="c1">#Py 2</span>
+
+<div class="viewcode-block" id="SBWlink"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesLink.SBWlink">[docs]</a><span class="k">class</span> <span class="nc">SBWlink</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Generic access for local SBW services using SBWPython &quot;&quot;&quot;</span>
+    <span class="n">sbw</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">psbw</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">sbwModuleProxy</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">moduleDict</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">modules</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">import</span> <span class="nn">SBW</span> <span class="k">as</span> <span class="nn">SBW</span>
+            <span class="kn">import</span> <span class="nn">SBW.psbw</span> <span class="k">as</span> <span class="nn">psbw</span>
+            <span class="c1">##  reload(SBW)</span>
+            <span class="c1">##  reload(psbw)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sbw</span> <span class="o">=</span> <span class="n">SBW</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">psbw</span> <span class="o">=</span> <span class="n">SBW</span><span class="o">.</span><span class="n">psbw</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sbwModuleProxy</span> <span class="o">=</span> <span class="n">SBW</span><span class="o">.</span><span class="n">sbwModuleProxy</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">moduleDict</span> <span class="o">=</span> <span class="n">SBW</span><span class="o">.</span><span class="n">sbwModuleProxy</span><span class="o">.</span><span class="n">moduleDict</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">modules</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">moduleDict</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">moduleDict</span><span class="p">[</span><span class="n">m</span><span class="p">]</span><span class="o">.</span><span class="n">pythonName</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;python&#39;</span><span class="p">]:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">SBW_exposeAll</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">moduleDict</span><span class="p">[</span><span class="n">m</span><span class="p">])</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">modules</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">moduleDict</span><span class="p">[</span><span class="n">m</span><span class="p">]</span><span class="o">.</span><span class="n">pythonName</span><span class="p">)</span>
+                    <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">moduleDict</span><span class="p">[</span><span class="n">m</span><span class="p">]</span><span class="o">.</span><span class="n">pythonName</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">moduleDict</span><span class="p">[</span><span class="n">m</span><span class="p">])</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">SBWlink established.&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">ex</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">SBWlink not established.&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="SBWlink.SBW_exposeAll"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesLink.SBWlink.SBW_exposeAll">[docs]</a>    <span class="k">def</span> <span class="nf">SBW_exposeAll</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">module</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">module</span><span class="o">.</span><span class="n">services</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">s</span><span class="o">.</span><span class="n">methods</span><span class="p">:</span>
+                <span class="nb">getattr</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">m</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="SBWlink.SBW_getActiveModules"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesLink.SBWlink.SBW_getActiveModules">[docs]</a>    <span class="k">def</span> <span class="nf">SBW_getActiveModules</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">idlist</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">namelst</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="nb">id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">psbw</span><span class="o">.</span><span class="n">getModuleIdList</span><span class="p">():</span>
+            <span class="n">idlist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
+            <span class="n">namelst</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">psbw</span><span class="o">.</span><span class="n">getModuleName</span><span class="p">(</span><span class="nb">id</span><span class="p">))</span>
+        <span class="k">for</span> <span class="nb">id</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">moduleDict</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+            <span class="k">if</span> <span class="nb">id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">idlist</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">moduleDict</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">modules</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">namelst</span><span class="p">:</span>
+                <span class="nb">delattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="n">name</span><span class="p">])</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">modules</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">namelst</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">modules</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">SBW_loadModule</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">namelst</span></div>
+
+<div class="viewcode-block" id="SBWlink.SBW_loadModule"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesLink.SBWlink.SBW_loadModule">[docs]</a>    <span class="k">def</span> <span class="nf">SBW_loadModule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">module_name</span><span class="p">):</span>
+        <span class="n">ans</span> <span class="o">=</span> <span class="s1">&#39;Y&#39;</span>
+        <span class="k">if</span> <span class="n">module_name</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">:]</span> <span class="o">==</span> <span class="s1">&#39;GUI&#39;</span><span class="p">:</span>
+            <span class="n">ans</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s1">&#39;Warning! This may hang the console</span><span class="se">\n</span><span class="s1">\yPress </span><span class="se">\&#39;</span><span class="s1">Y</span><span class="se">\&#39;</span><span class="s1"> to continue: &#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ans</span> <span class="o">==</span> <span class="s1">&#39;Y&#39;</span><span class="p">:</span>
+            <span class="n">module_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">psbw</span><span class="o">.</span><span class="n">SBWGetModuleInstance</span><span class="p">(</span><span class="n">module_name</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="n">module_id</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Unknow module, </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">module_name</span>
+            <span class="n">module</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sbwModuleProxy</span><span class="o">.</span><span class="n">ModuleProxy</span><span class="p">(</span><span class="n">module_id</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">SBW_exposeAll</span><span class="p">(</span><span class="n">module</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">module_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">moduleDict</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&lt;PySCeS_SBW&gt; Adding &#39;</span> <span class="o">+</span> <span class="n">module</span><span class="o">.</span><span class="n">pythonName</span> <span class="o">+</span> <span class="s1">&#39; to ModuleProxy (id=&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">module_id</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;)&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">moduleDict</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">module_id</span> <span class="p">:</span> <span class="n">module</span><span class="p">})</span>
+            <span class="k">if</span> <span class="n">module</span><span class="o">.</span><span class="n">pythonName</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">modules</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&lt;PySCeS_SBW&gt; Adding &#39;</span> <span class="o">+</span> <span class="n">module</span><span class="o">.</span><span class="n">pythonName</span> <span class="o">+</span> <span class="s1">&#39; to SBWlink&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">modules</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">module</span><span class="o">.</span><span class="n">pythonName</span><span class="p">)</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">module</span><span class="o">.</span><span class="n">pythonName</span><span class="p">,</span> <span class="n">module</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Module </span><span class="si">%s</span><span class="s1"> not loaded&#39;</span> <span class="o">%</span> <span class="n">module_name</span><span class="p">)</span></div></div>
+
+<div class="viewcode-block" id="SBWLayoutWebLink"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesLink.SBWLayoutWebLink">[docs]</a><span class="k">class</span> <span class="nc">SBWLayoutWebLink</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Enables access to DrawNetwork and SBMLLayout web services at www.sys-bio.org&quot;&quot;&quot;</span>
+    <span class="n">sbwhost</span> <span class="o">=</span> <span class="s1">&#39;128.208.17.26&#39;</span>
+    <span class="n">sbml</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">sbmllayout</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">svg</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">DEBUGMODE</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">DEBUGLEVEL</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">DRAWNETWORKLOADED</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">LAYOUTMODULELOADED</span> <span class="o">=</span> <span class="kc">False</span>
+
+<div class="viewcode-block" id="SBWLayoutWebLink.setProxy"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesLink.SBWLayoutWebLink.setProxy">[docs]</a>    <span class="k">def</span> <span class="nf">setProxy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set as many proxy settings as you need. You may supply a user name without</span>
+<span class="sd">        a password in which case you will be prompted to enter one (once) when required</span>
+<span class="sd">        (NO guarantees, implied or otherwise, on password security AT ALL). Arguments can be:</span>
+
+<span class="sd">        user = &#39;daUser&#39;,</span>
+<span class="sd">        pwd = &#39;daPassword&#39;,</span>
+<span class="sd">        host = &#39;proxy.paranoid.net&#39;,</span>
+<span class="sd">        port = 3128</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">proxy_info</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+            <span class="n">proxy_info</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">k</span> <span class="p">:</span> <span class="n">kwargs</span><span class="p">[</span><span class="n">k</span><span class="p">]})</span>
+
+        <span class="k">if</span> <span class="s1">&#39;user&#39;</span> <span class="ow">in</span> <span class="n">proxy_info</span> <span class="ow">and</span> <span class="s1">&#39;pwd&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">proxy_info</span><span class="p">:</span>
+            <span class="n">proxy_info</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;pwd&#39;</span> <span class="p">:</span> <span class="n">getpass</span><span class="o">.</span><span class="n">getpass</span><span class="p">()})</span>
+        <span class="n">proxy_support</span> <span class="o">=</span> <span class="n">ProxyHandler</span><span class="p">({</span><span class="s2">&quot;http&quot;</span> <span class="p">:</span>
+                    <span class="s2">&quot;http://</span><span class="si">%(user)s</span><span class="s2">:</span><span class="si">%(pwd)s</span><span class="s2">@</span><span class="si">%(host)s</span><span class="s2">:</span><span class="si">%(port)d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">proxy_info</span><span class="p">})</span>
+        <span class="n">opener</span> <span class="o">=</span> <span class="n">build_opener</span><span class="p">(</span><span class="n">proxy_support</span><span class="p">,</span> <span class="n">HTTPHandler</span><span class="p">)</span>
+        <span class="n">install_opener</span><span class="p">(</span><span class="n">opener</span><span class="p">)</span>
+        <span class="k">del</span> <span class="n">proxy_info</span><span class="p">,</span> <span class="n">proxy_support</span></div>
+
+<div class="viewcode-block" id="SBWLayoutWebLink.loadSBMLFileFromDisk"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesLink.SBWLayoutWebLink.loadSBMLFileFromDisk">[docs]</a>    <span class="k">def</span> <span class="nf">loadSBMLFileFromDisk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">File</span><span class="p">,</span> <span class="n">Dir</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">Dir</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">Dir</span><span class="p">,</span> <span class="n">File</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="n">File</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sbmllayout</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">svg</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">DRAWNETWORKLOADED</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">LAYOUTMODULELOADED</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">sbmlF</span> <span class="o">=</span> <span class="n">file</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sbml</span> <span class="o">=</span> <span class="n">sbmlF</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+            <span class="n">sbmlF</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> is an invalid path&quot;</span> <span class="o">%</span> <span class="n">path</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="SBWLayoutWebLink.loadSBMLFromString"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesLink.SBWLayoutWebLink.loadSBMLFromString">[docs]</a>    <span class="k">def</span> <span class="nf">loadSBMLFromString</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sbmllayout</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">svg</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">DRAWNETWORKLOADED</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">LAYOUTMODULELOADED</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sbml</span> <span class="o">=</span> <span class="nb">str</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="SBWLayoutWebLink.urlGET"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesLink.SBWLayoutWebLink.urlGET">[docs]</a>    <span class="k">def</span> <span class="nf">urlGET</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">host</span><span class="p">,</span> <span class="n">urlpath</span><span class="p">):</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="s1">&#39;http://</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="p">,</span><span class="n">urlpath</span><span class="p">)</span>
+        <span class="n">con</span> <span class="o">=</span> <span class="n">urlopen</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+        <span class="n">resp</span> <span class="o">=</span> <span class="n">con</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">DEBUGMODE</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">con</span><span class="o">.</span><span class="n">headers</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">DEBUGMODE</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">DEBUGLEVEL</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">resp</span><span class="p">)</span>
+        <span class="n">con</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">resp</span></div>
+
+<div class="viewcode-block" id="SBWLayoutWebLink.urlPOST"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesLink.SBWLayoutWebLink.urlPOST">[docs]</a>    <span class="k">def</span> <span class="nf">urlPOST</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">host</span><span class="p">,</span> <span class="n">urlpath</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">==</span> <span class="nb">dict</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Data must be a dictionary&#39;</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="s1">&#39;http://</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">urlpath</span><span class="p">)</span>
+        <span class="n">con</span> <span class="o">=</span> <span class="n">urlopen</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">urlencode</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+        <span class="n">resp</span> <span class="o">=</span> <span class="n">con</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">DEBUGMODE</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">con</span><span class="o">.</span><span class="n">headers</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">DEBUGMODE</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">DEBUGLEVEL</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">resp</span><span class="p">)</span>
+        <span class="n">con</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">resp</span></div>
+
+<div class="viewcode-block" id="SBWLayoutWebLink.getVersion"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesLink.SBWLayoutWebLink.getVersion">[docs]</a>    <span class="k">def</span> <span class="nf">getVersion</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Inspector.getVersion()&#39;</span><span class="p">)</span>
+        <span class="n">ver</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">urlGET</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sbwhost</span><span class="p">,</span> <span class="s1">&#39;/generate/Inspector.asmx/getVersion&#39;</span><span class="p">)</span>
+        <span class="n">ver</span> <span class="o">=</span> <span class="n">ver</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="n">ver</span> <span class="o">=</span> <span class="n">ver</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;&lt;string xmlns=&quot;http://www.sys-bio.org/&quot;&gt;&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="n">ver</span> <span class="o">=</span> <span class="n">ver</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;&lt;/string&gt;&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ver</span></div>
+
+<div class="viewcode-block" id="SBWLayoutWebLink.drawNetworkLoadSBML"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesLink.SBWLayoutWebLink.drawNetworkLoadSBML">[docs]</a>    <span class="k">def</span> <span class="nf">drawNetworkLoadSBML</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;DrawNetwork.loadSBML()&#39;</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">sbml</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">No SBML file loaded&#39;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;var0&#39;</span> <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">sbml</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">DRAWNETWORKLOADED</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">urlPOST</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sbwhost</span><span class="p">,</span> <span class="s1">&#39;/generate/DrawNetwork.asmx/loadSBML&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="SBWLayoutWebLink.drawNetworkGetSBMLwithLayout"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesLink.SBWLayoutWebLink.drawNetworkGetSBMLwithLayout">[docs]</a>    <span class="k">def</span> <span class="nf">drawNetworkGetSBMLwithLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;DrawNetwork.getSBML()&#39;</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">DRAWNETWORKLOADED</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">SBML not loaded into DrawNetwork module&#39;</span>
+        <span class="n">sbml</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">urlGET</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sbwhost</span><span class="p">,</span> <span class="s1">&#39;/generate/DrawNetwork.asmx/getSBML&#39;</span><span class="p">)</span>
+        <span class="n">sbml</span> <span class="o">=</span> <span class="n">sbml</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;&amp;gt;&#39;</span><span class="p">,</span><span class="s1">&#39;&gt;&#39;</span><span class="p">)</span>
+        <span class="n">sbml</span> <span class="o">=</span> <span class="n">sbml</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;&amp;lt;&#39;</span><span class="p">,</span><span class="s1">&#39;&lt;&#39;</span><span class="p">)</span>
+        <span class="n">sbml</span> <span class="o">=</span> <span class="n">sbml</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;&lt;string xmlns=&quot;http://www.sys-bio.org/&quot;&gt;&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&#39;&#39;&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="n">sbml</span> <span class="o">=</span> <span class="n">sbml</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;&lt;/string&gt;&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sbmllayout</span> <span class="o">=</span> <span class="n">sbml</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="SBWLayoutWebLink.layoutModuleLoadSBML"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesLink.SBWLayoutWebLink.layoutModuleLoadSBML">[docs]</a>    <span class="k">def</span> <span class="nf">layoutModuleLoadSBML</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;SBMLLayoutModule.loadSBML()&#39;</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">sbmllayout</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">No SBML Layout loaded&#39;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;var0&#39;</span> <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">sbmllayout</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">LAYOUTMODULELOADED</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">urlPOST</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sbwhost</span><span class="p">,</span> <span class="s1">&#39;/generate/SBMLLayoutModule.asmx/loadSBML&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="SBWLayoutWebLink.layoutModuleGetSVG"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesLink.SBWLayoutWebLink.layoutModuleGetSVG">[docs]</a>    <span class="k">def</span> <span class="nf">layoutModuleGetSVG</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">LAYOUTMODULELOADED</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">SBML not loaded into SBMLLayout module&#39;</span>
+        <span class="n">svg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">urlGET</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sbwhost</span><span class="p">,</span> <span class="s1">&#39;/generate/SBMLLayoutModule.asmx/getSVG&#39;</span><span class="p">)</span>
+        <span class="n">svg</span> <span class="o">=</span> <span class="n">svg</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;&amp;gt;&#39;</span><span class="p">,</span><span class="s1">&#39;&gt;&#39;</span><span class="p">)</span>
+        <span class="n">svg</span> <span class="o">=</span> <span class="n">svg</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;&amp;lt;&#39;</span><span class="p">,</span><span class="s1">&#39;&lt;&#39;</span><span class="p">)</span>
+        <span class="n">svg</span> <span class="o">=</span> <span class="n">svg</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;&lt;string xmlns=&quot;http://www.sys-bio.org/&quot;&gt;&#39;&#39;&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="n">svg</span> <span class="o">=</span> <span class="n">svg</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&#39;&#39;&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="n">svg</span> <span class="o">=</span> <span class="n">svg</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;&lt;/string&gt;&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">svg</span> <span class="o">=</span> <span class="n">svg</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="SBWLayoutWebLink.getSBML"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesLink.SBWLayoutWebLink.getSBML">[docs]</a>    <span class="k">def</span> <span class="nf">getSBML</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">sbml</span></div>
+
+<div class="viewcode-block" id="SBWLayoutWebLink.getSBMLlayout"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesLink.SBWLayoutWebLink.getSBMLlayout">[docs]</a>    <span class="k">def</span> <span class="nf">getSBMLlayout</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">sbmllayout</span></div>
+
+<div class="viewcode-block" id="SBWLayoutWebLink.getSVG"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesLink.SBWLayoutWebLink.getSVG">[docs]</a>    <span class="k">def</span> <span class="nf">getSVG</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">svg</span></div></div>
+
+
+<div class="viewcode-block" id="METATOOLlink"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesLink.METATOOLlink">[docs]</a><span class="k">class</span> <span class="nc">METATOOLlink</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;New interface to METATOOL binaries&quot;&quot;&quot;</span>
+
+    <span class="n">__metatool_path__</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="fm">__mod__</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">__emode_exe_int__</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">__emode_exe_dbl__</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">__emode_intmode__</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">__emode_userout__</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">__emode_file__</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">__metatool_file__</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="c1">#EModes = &#39;&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mod</span><span class="p">,</span> <span class="n">__metatool_path__</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="c1"># Initialise elementary modes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="fm">__mod__</span> <span class="o">=</span> <span class="n">mod</span>
+        <span class="k">if</span> <span class="n">__metatool_path__</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__metatool_path__</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">mod</span><span class="o">.</span><span class="n">__pysces_directory__</span><span class="p">,</span> <span class="s1">&#39;metatool&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__metatool_path__</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">__metatool_path__</span><span class="p">,</span> <span class="s1">&#39;metatool&#39;</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">__metatool_path__</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">PySCeS not found&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__emode_file__</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__mod__</span><span class="o">.</span><span class="n">ModelFile</span><span class="p">[:</span><span class="o">-</span><span class="mi">4</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;_emodes&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__metatool_file__</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__mod__</span><span class="o">.</span><span class="n">ModelFile</span><span class="p">[:</span><span class="o">-</span><span class="mi">4</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;_metatool&#39;</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">sys</span><span class="o">.</span><span class="n">platform</span> <span class="o">==</span> <span class="s1">&#39;win32&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__emode_exe_int__</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__metatool_path__</span><span class="p">,</span><span class="s1">&#39;meta43_int.exe&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__emode_exe_dbl__</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__metatool_path__</span><span class="p">,</span><span class="s1">&#39;meta43_double.exe&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__emode_exe_int__</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__metatool_path__</span><span class="p">,</span><span class="s1">&#39;meta43_int&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__emode_exe_dbl__</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__metatool_path__</span><span class="p">,</span><span class="s1">&#39;meta43_double&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__emode_exe_int__</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Using METATOOL int&#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__emode_intmode__</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__emode_exe_int__</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__emode_exe_dbl__</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\b\b\b\b</span><span class="s1">dbl&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__emode_intmode__</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__emode_exe_dbl__</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">__emode_exe_dbl__</span> <span class="o">!=</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">__emode_exe_int__</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">METATOOL binaries not available&quot;</span>
+
+<div class="viewcode-block" id="METATOOLlink.doEModes"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesLink.METATOOLlink.doEModes">[docs]</a>    <span class="k">def</span> <span class="nf">doEModes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        doEModes()</span>
+
+<span class="sd">        Calculate the elementary modes by way of an interface to MetaTool.</span>
+
+<span class="sd">        METATOOL is a C program developed from 1998 to 2000 by Thomas Pfeiffer (Berlin)</span>
+<span class="sd">        in cooperation with Stefan Schuster and Ferdinand Moldenhauer (Berlin) and Juan Carlos Nuno (Madrid).</span>
+<span class="sd">        http://www.biologie.hu-berlin.de/biophysics/Theory/tpfeiffer/metatool.html</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">        None</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;METATOOL is a C program developed from 1998 to 2000 by Thomas Pfeiffer (Berlin)&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;in cooperation with Stefan Schuster and Ferdinand Moldenhauer (Berlin) and Juan Carlos Nuno (Madrid).&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;http://www.biologie.hu-berlin.de/biophysics/Theory/tpfeiffer/metatool.html&#39;</span><span class="p">)</span>
+
+        <span class="n">goMode</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">fileIn</span> <span class="o">=</span> <span class="s1">&#39;pysces_metatool.dat&#39;</span>
+        <span class="n">fileOut</span> <span class="o">=</span> <span class="s1">&#39;pysces_metatool.out&#39;</span>
+
+        <span class="n">goMode</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">goMode</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="c1"># Build MetaTool input file</span>
+            <span class="n">File</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="fm">__mod__</span><span class="o">.</span><span class="n">ModelOutput</span><span class="p">,</span><span class="n">fileIn</span><span class="p">),</span><span class="s1">&#39;w&#39;</span><span class="p">)</span>
+            <span class="c1"># Determine type of reaction</span>
+            <span class="n">out1</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__mod__</span><span class="o">.</span><span class="n">__nDict__</span><span class="p">:</span>
+                <span class="c1">#print key</span>
+                <span class="c1">#print self.__mod__.__nDict__[key][&#39;Type&#39;]</span>
+                <span class="n">out1</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">key</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="fm">__mod__</span><span class="o">.</span><span class="n">__nDict__</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s1">&#39;Type&#39;</span><span class="p">]))</span>
+            <span class="c1">#print &#39;\nExtracting metatool information from network dictionary ...\n&#39;</span>
+            <span class="n">File</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;-ENZREV</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">out1</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;Rever&#39;</span><span class="p">:</span>
+                    <span class="n">File</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span><span class="p">)</span>
+            <span class="n">File</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">File</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;-ENZIRREV</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">out1</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;Irrev&#39;</span><span class="p">:</span>
+                    <span class="n">File</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span><span class="p">)</span>
+            <span class="n">File</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">File</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;-METINT</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__mod__</span><span class="o">.</span><span class="n">__species__</span><span class="p">:</span>
+                <span class="n">File</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span><span class="p">)</span>
+            <span class="n">File</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">File</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;-METEXT</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__mod__</span><span class="o">.</span><span class="n">__fixed_species__</span><span class="p">:</span>
+                <span class="n">File</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span><span class="p">)</span>
+            <span class="n">File</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+            <span class="n">output</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">allInt</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__mod__</span><span class="o">.</span><span class="n">__nDict__</span><span class="p">:</span>
+                <span class="n">reList</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__mod__</span><span class="o">.</span><span class="n">__nDict__</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="s1">&#39;Reagents&#39;</span><span class="p">]</span>
+                <span class="n">subs</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+                <span class="n">prods</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+                <span class="c1">#print &#39;Reaction: &#39; + x</span>
+                <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">reList</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__emode_intmode__</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span> <span class="c1"># use int elementary modes</span>
+                        <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">reList</span><span class="p">[</span><span class="n">y</span><span class="p">]))</span><span class="o">/</span><span class="nb">abs</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">reList</span><span class="p">[</span><span class="n">y</span><span class="p">]))</span> <span class="o">!=</span> <span class="mf">1.0</span><span class="p">:</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;INFO: Coefficient not integer = &#39;</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="n">reList</span><span class="p">[</span><span class="n">y</span><span class="p">]))</span>
+                            <span class="n">allInt</span> <span class="o">=</span> <span class="mi">0</span>
+                        <span class="k">if</span> <span class="n">reList</span><span class="p">[</span><span class="n">y</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                            <span class="c1">#print y.replace(&#39;self.&#39;,&#39;&#39;) + &#39; : substrate&#39;</span>
+                            <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">reList</span><span class="p">[</span><span class="n">y</span><span class="p">]))</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+                                <span class="n">subs</span> <span class="o">+=</span> <span class="nb">repr</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">reList</span><span class="p">[</span><span class="n">y</span><span class="p">])))</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span>
+                            <span class="n">subs</span> <span class="o">+=</span> <span class="n">y</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;self.&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+                            <span class="n">subs</span> <span class="o">+=</span> <span class="s1">&#39; + &#39;</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="c1">#print y.replace(&#39;self.&#39;,&#39;&#39;) + &#39; : product &#39;</span>
+                            <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">reList</span><span class="p">[</span><span class="n">y</span><span class="p">]))</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+                                <span class="n">prods</span> <span class="o">+=</span> <span class="nb">repr</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">reList</span><span class="p">[</span><span class="n">y</span><span class="p">])))</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span>
+                            <span class="n">prods</span> <span class="o">+=</span> <span class="n">y</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;self.&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+                            <span class="n">prods</span> <span class="o">+=</span> <span class="s1">&#39; + &#39;</span>
+                        <span class="c1">#output.append(x + &#39; : &#39; + subs[:-3] + &#39; = &#39; + prods[:-3] + &#39; .&#39;)</span>
+                    <span class="k">else</span><span class="p">:</span> <span class="c1"># use float/double elementary mode</span>
+                        <span class="k">if</span> <span class="n">reList</span><span class="p">[</span><span class="n">y</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mf">0.0</span><span class="p">:</span>
+                            <span class="c1">#print y.replace(&#39;self.&#39;,&#39;&#39;) + &#39; : substrate&#39;</span>
+                            <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">reList</span><span class="p">[</span><span class="n">y</span><span class="p">]))</span> <span class="o">!=</span> <span class="mf">1.0</span><span class="p">:</span>
+                                <span class="n">subs</span> <span class="o">+=</span> <span class="nb">repr</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">reList</span><span class="p">[</span><span class="n">y</span><span class="p">])))</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span>
+                            <span class="n">subs</span> <span class="o">+=</span> <span class="n">y</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;self.&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+                            <span class="n">subs</span> <span class="o">+=</span> <span class="s1">&#39; + &#39;</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="c1">#print y.replace(&#39;self.&#39;,&#39;&#39;) + &#39; : product &#39;</span>
+                            <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">reList</span><span class="p">[</span><span class="n">y</span><span class="p">]))</span> <span class="o">!=</span> <span class="mf">1.0</span><span class="p">:</span>
+                                <span class="n">prods</span> <span class="o">+=</span> <span class="nb">repr</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">reList</span><span class="p">[</span><span class="n">y</span><span class="p">])))</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span>
+                            <span class="n">prods</span> <span class="o">+=</span> <span class="n">y</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;self.&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+                            <span class="n">prods</span> <span class="o">+=</span> <span class="s1">&#39; + &#39;</span>
+                <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="s1">&#39; : &#39;</span> <span class="o">+</span> <span class="n">subs</span><span class="p">[:</span><span class="o">-</span><span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39; = &#39;</span> <span class="o">+</span> <span class="n">prods</span><span class="p">[:</span><span class="o">-</span><span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39; .&#39;</span><span class="p">)</span>
+
+            <span class="n">File</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;-CAT</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">output</span><span class="p">:</span>
+                <span class="n">File</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">File</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+            <span class="n">File</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+            <span class="n">File</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="n">allInt</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__emode_intmode__</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">eModeExe</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__emode_exe_int__</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">eModeExe</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__emode_exe_dbl__</span>
+
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Metatool running ...</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="c1">######### UPDATE:</span>
+                <span class="c1"># Actually works fine on windows and posix - johann 20081128</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Generic run&#39;</span><span class="p">)</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">spawnl</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">P_WAIT</span><span class="p">,</span> <span class="n">eModeExe</span><span class="p">,</span> <span class="n">eModeExe</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="fm">__mod__</span><span class="o">.</span><span class="n">ModelOutput</span><span class="p">,</span><span class="n">fileIn</span><span class="p">),</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="fm">__mod__</span><span class="o">.</span><span class="n">ModelOutput</span><span class="p">,</span><span class="n">fileOut</span><span class="p">))</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Metatool analysis complete</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+                <span class="c1"># Parse MetaTool output file and store the result in a string</span>
+                <span class="n">go</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">go2</span>  <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+                <span class="n">end</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">file2</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="fm">__mod__</span><span class="o">.</span><span class="n">ModelOutput</span><span class="p">,</span><span class="n">fileOut</span><span class="p">),</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">file2</span><span class="p">:</span>
+                        <span class="n">c</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s1">&#39;ELEMENTARY MODES&#39;</span><span class="p">,</span><span class="n">line</span><span class="p">)</span>
+                        <span class="n">d</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s1">&#39; enzymes&#39;</span><span class="p">,</span><span class="n">line</span><span class="p">)</span>
+                        <span class="n">e</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s1">&#39;The elementary mode&#39;</span><span class="p">,</span><span class="n">line</span><span class="p">)</span>
+                        <span class="n">f</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span><span class="n">line</span><span class="p">)</span>
+                        <span class="n">g</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s1">&#39;The elementary&#39;</span><span class="p">,</span><span class="n">line</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">c</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+                            <span class="n">go</span> <span class="o">=</span> <span class="mi">1</span>
+                            <span class="n">go2</span> <span class="o">=</span> <span class="mi">0</span>
+                        <span class="k">if</span> <span class="n">d</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+                            <span class="n">go2</span> <span class="o">=</span> <span class="mi">1</span>
+                        <span class="k">if</span> <span class="n">e</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+                            <span class="n">go2</span> <span class="o">=</span> <span class="mi">0</span>
+                        <span class="k">if</span> <span class="n">go</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">go2</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">f</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+                            <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;reversible&#39;</span><span class="p">,</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">  reversible</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                            <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;ir</span><span class="se">\n</span><span class="s1">  &#39;</span><span class="p">,</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">  ir&#39;</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__emode_intmode__</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                                <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;] &#39;</span><span class="p">,</span><span class="s1">&#39;]</span><span class="se">\n</span><span class="s1"> &#39;</span><span class="p">)</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;) &#39;</span><span class="p">,</span><span class="s1">&#39;)</span><span class="se">\n</span><span class="s1"> &#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+                            <span class="n">result</span> <span class="o">+=</span> <span class="n">line</span>
+                        <span class="k">if</span> <span class="n">go</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">g</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+                            <span class="n">end</span> <span class="o">+=</span> <span class="n">line</span>
+                    <span class="n">result</span> <span class="o">+=</span> <span class="n">end</span>
+                    <span class="n">result</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+                    <span class="n">file2</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__emode_userout__</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="n">fileo</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="fm">__mod__</span><span class="o">.</span><span class="n">ModelOutput</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">__metatool_file__</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.in&#39;</span><span class="p">,</span><span class="s1">&#39;w&#39;</span><span class="p">)</span>
+                        <span class="n">filer</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="fm">__mod__</span><span class="o">.</span><span class="n">ModelOutput</span><span class="p">,</span><span class="n">fileIn</span><span class="p">),</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+                        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">filer</span><span class="p">:</span>
+                            <span class="n">fileo</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+                        <span class="n">fileo</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                        <span class="n">filer</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                        <span class="n">fileo</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                        <span class="n">filer</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="fm">__mod__</span><span class="o">.</span><span class="n">ModelOutput</span><span class="p">,</span><span class="n">fileOut</span><span class="p">),</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+                        <span class="n">fileo</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="fm">__mod__</span><span class="o">.</span><span class="n">ModelOutput</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">__metatool_file__</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.out&#39;</span><span class="p">,</span><span class="s1">&#39;w&#39;</span><span class="p">)</span>
+                        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">filer</span><span class="p">:</span>
+                            <span class="n">fileo</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+                        <span class="n">filer</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                        <span class="n">fileo</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="fm">__mod__</span><span class="o">.</span><span class="n">ModelOutput</span><span class="p">,</span><span class="n">fileIn</span><span class="p">))</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="fm">__mod__</span><span class="o">.</span><span class="n">ModelOutput</span><span class="p">,</span><span class="n">fileOut</span><span class="p">))</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">EX</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;doEmode:&#39;</span><span class="p">,</span> <span class="n">EX</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;WARNING: Unable to open MetaTool output file</span><span class="se">\n</span><span class="s1">Please check the MetaTool executables: &#39;</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;posix&#39;</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;/MetaTool/meta43_double /MetaTool/meta43_int</span><span class="se">\n</span><span class="s1">and their permissions&#39;</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;/MetaTool/meta43_double.exe /MetaTool/meta43_int.exe&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">INFO: non-integer coefficients</span><span class="se">\</span>
+<span class="s1">                </span><span class="se">\n</span><span class="s1">Try using the double eMode function: self.__emode_intmode__=0&#39;</span><span class="p">)</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="s1">&#39;Elementary modes not calculated</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">No elementary mode calculation possible - no meta43_xxx.exe&#39;</span><span class="p">)</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="s1">&#39;Elementary modes not calculated</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">EModes</span> <span class="o">=</span> <span class="n">result</span></div>
+
+<div class="viewcode-block" id="METATOOLlink.getEModes"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesLink.METATOOLlink.getEModes">[docs]</a>    <span class="k">def</span> <span class="nf">getEModes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        getEModes()</span>
+
+<span class="sd">        Returns the elementary modes as a linked list of fluxes</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">EModes</span>
+            <span class="n">FF</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">StringIO</span><span class="p">()</span>
+            <span class="n">FF</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">EModes</span><span class="p">)</span>
+            <span class="n">FF</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+            <span class="n">output</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">FF</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s1">&#39;  &#39;</span><span class="p">,</span><span class="n">line</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s1">&#39;  reversible&#39;</span><span class="p">,</span><span class="n">line</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s1">&#39;  irreversible&#39;</span><span class="p">,</span><span class="n">line</span><span class="p">):</span>
+                    <span class="n">tmp</span> <span class="o">=</span> <span class="p">[</span><span class="n">el</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">line</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">el</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">]</span>
+                    <span class="n">tmpOut</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">skip</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tmp</span><span class="p">)):</span>
+                        <span class="k">if</span> <span class="n">skip</span><span class="p">:</span>
+                            <span class="n">skip</span> <span class="o">=</span> <span class="kc">False</span>
+                        <span class="k">elif</span> <span class="n">tmp</span><span class="p">[</span><span class="n">el</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;(&#39;</span><span class="p">:</span>
+                            <span class="n">tmpOut</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmp</span><span class="p">[</span><span class="n">el</span><span class="p">])</span>
+                        <span class="k">elif</span> <span class="n">tmp</span><span class="p">[</span><span class="n">el</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;(&#39;</span><span class="p">:</span>
+                            <span class="n">tmpOut</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmp</span><span class="p">[</span><span class="n">el</span><span class="p">]</span><span class="o">+</span><span class="s1">&#39;)&#39;</span><span class="o">+</span><span class="n">tmp</span><span class="p">[</span><span class="n">el</span><span class="o">+</span><span class="mi">1</span><span class="p">][:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+                            <span class="n">skip</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmpOut</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">output</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span> <span class="k">as</span> <span class="n">atx</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">atx</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">INFO: Please run doEModes() first</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="METATOOLlink.showEModes"><a class="viewcode-back" href="../../modules_doc.html#pysces.PyscesLink.METATOOLlink.showEModes">[docs]</a>    <span class="k">def</span> <span class="nf">showEModes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">File</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        showEModes(File=None)</span>
+
+<span class="sd">        Print the results of an elementary mode analysis, generated with doEModes(),</span>
+<span class="sd">        to screen or file.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">        File [default=None]: Boolean, if True write parsed elementary modes to file</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">File</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1">#assert type(File) == file, &#39;showEmodes() needs an open file object&#39;</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Elementary modes written to file</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="fm">__mod__</span><span class="o">.</span><span class="n">ModelOutput</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">__emode_file__</span> <span class="o">+</span> <span class="s1">&#39;.out&#39;</span><span class="p">),</span><span class="s1">&#39;w&#39;</span><span class="p">)</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">## Elementary modes</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">EModes</span><span class="p">)</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Elementary modes</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">EModes</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span> <span class="k">as</span> <span class="n">atx</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">atx</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">INFO: Please run doEModes() first</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span></div></div>
+
+
+
+
+
+
+<span class="c1">#stochsim link</span>
+
+
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">_HAVE_STOMPY = False</span>
+<span class="sd">_STOMPY_LOAD_ERROR = &#39;&#39;</span>
+<span class="sd">try:</span>
+<span class="sd">    ##  import stompy</span>
+<span class="sd">    import stochpy as stompy</span>
+<span class="sd">    _HAVE_STOMPY = True</span>
+<span class="sd">except Exception, ex:</span>
+<span class="sd">    _STOMPY_LOAD_ERROR = &#39;%s&#39; % ex</span>
+<span class="sd">    _HAVE_STOMPY = False</span>
+
+
+<span class="sd">class StomPyInterface(object):</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    StomPy interface to PySCeS this may move to pysces.link in the future</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    SSA = None</span>
+<span class="sd">    SSA_REACTIONS = None</span>
+<span class="sd">    SSA_SPECIES = None</span>
+<span class="sd">    stompy = None</span>
+<span class="sd">    _MOD2PSC = None</span>
+
+<span class="sd">    TMP_FNAME = None</span>
+<span class="sd">    TMP_PATH = None</span>
+<span class="sd">    MODEL_PATH = None</span>
+<span class="sd">    OUTPUT_PATH = None</span>
+
+<span class="sd">    STP_IS_TIME_SIM = False</span>
+<span class="sd">    STP_METHOD = &#39;Direct&#39;</span>
+<span class="sd">    STP_TIMEEND = 1</span>
+<span class="sd">    STP_TRAJ = 1</span>
+<span class="sd">    STP_INTERACTIVE = True</span>
+<span class="sd">    STP_TRACK_PROPENSITIES = True</span>
+<span class="sd">    STP_WAITING_TIMES = True</span>
+<span class="sd">    STP_STEPS = 10</span>
+<span class="sd">    STP_INITIAL_SPECIES = True</span>
+<span class="sd">    STP_KEEP_PSC_FILES = False</span>
+
+<span class="sd">    def __init__(self, model_path, output_path):</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        An interface class to the StomPy stochastic simulator</span>
+
+<span class="sd">         - *model_path* the default PySCeS model directory</span>
+<span class="sd">         - *output_path* the default PySCeS output directory</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        self.stompy = stompy</span>
+<span class="sd">        self.OUTPUT_PATH = output_path</span>
+<span class="sd">        self.MODEL_PATH = model_path</span>
+<span class="sd">        self.TMP_PATH = os.path.join(model_path, &#39;orca&#39;)</span>
+<span class="sd">        self._MOD2PSC = interface.writeMod2PSC</span>
+
+
+<span class="sd">    def setProperty(self, **kwargs):</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        Sets a StomPy simulation parameter</span>
+
+<span class="sd">         - *method* [default=&#39;Direct&#39;] select simulation algorithm</span>
+<span class="sd">         - *trajectories* [default=1]</span>
+<span class="sd">         - *interactive* [default=True]</span>
+<span class="sd">         - *track_propensities* [default=True]</span>
+<span class="sd">         - *steps* [default=10]</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        ##  print kwargs</span>
+
+<span class="sd">        if kwargs.has_key(&#39;method&#39;):</span>
+<span class="sd">            self.STP_METHOD = kwargs[&#39;method&#39;]</span>
+<span class="sd">            ##  print &#39;%s = %s&#39; % (&#39;method&#39;, kwargs[&#39;method&#39;])</span>
+<span class="sd">        if kwargs.has_key(&#39;trajectories&#39;):</span>
+<span class="sd">            self.STP_TRAJ = kwargs[&#39;trajectories&#39;]</span>
+<span class="sd">            self.STP_TRAJ = 1 # TODO I need to look into this</span>
+<span class="sd">            ##  print &#39;Currently only single trajectories are supported via the PySCeS interface&#39;</span>
+<span class="sd">            ##  print &#39;%s = %s&#39; % (&#39;trajectories&#39;, self.STP_TRAJ)</span>
+<span class="sd">        if kwargs.has_key(&#39;interactive&#39;):</span>
+<span class="sd">            self.STP_INTERACTIVE = kwargs[&#39;interactive&#39;]</span>
+<span class="sd">            ##  print &#39;%s = %s&#39; % (&#39;interactive&#39;, kwargs[&#39;interactive&#39;])</span>
+<span class="sd">        if kwargs.has_key(&#39;track_propensities&#39;):</span>
+<span class="sd">            self.STP_TRACK_PROPENSITIES = kwargs[&#39;track_propensities&#39;]</span>
+<span class="sd">            ##  print &#39;%s = %s&#39; % (&#39;track_propensities&#39;, kwargs[&#39;track_propensities&#39;])</span>
+<span class="sd">        if kwargs.has_key(&#39;steps&#39;):</span>
+<span class="sd">            self.STP_STEPS = kwargs[&#39;steps&#39;]</span>
+<span class="sd">            ##  print &#39;%s = %s&#39; % (&#39;steps&#39;, kwargs[&#39;steps&#39;])</span>
+<span class="sd">        if kwargs.has_key(&#39;species_initial&#39;):</span>
+<span class="sd">            self.STP_INITIAL_SPECIES = kwargs[&#39;initial_species&#39;]</span>
+<span class="sd">            ##  print &#39;%s = %s&#39; % (&#39;initial_species&#39;, kwargs[&#39;initial_species&#39;])</span>
+<span class="sd">        if kwargs.has_key(&#39;keep_psc_files&#39;):</span>
+<span class="sd">            self.STP_KEEP_PSC_FILES = kwargs[&#39;keep_psc_files&#39;]</span>
+<span class="sd">            ##  print &#39;%s = %s&#39; % (&#39;keep_psc_files&#39;, kwargs[&#39;keep_psc_files&#39;])</span>
+
+<span class="sd">    def initModelFromMod(self, pscmod, iValues=False):</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        Initialise a StomPy SSA instance from a PySCeS model.</span>
+
+<span class="sd">         - *pscmod* an initialised PySCeS model</span>
+<span class="sd">         - *iValues* [default=False] use initial values (not current)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        self.TMP_FNAME = str(time.time()).replace(&#39;.&#39;,&#39;&#39;)+&#39;.psc&#39;</span>
+
+<span class="sd">        if self.STP_INITIAL_SPECIES:</span>
+<span class="sd">            for s in pscmod.species:</span>
+<span class="sd">                setattr(pscmod, s, pscmod.__sDict__[s][&#39;initial&#39;])</span>
+
+<span class="sd">        self._MOD2PSC(pscmod, self.TMP_FNAME, self.TMP_PATH, iValues=iValues)</span>
+
+<span class="sd">        self.SSA = self.stompy.SSA(Method=self.STP_METHOD, File=self.TMP_FNAME, dir=self.TMP_PATH, IsInteractive=self.STP_INTERACTIVE)</span>
+<span class="sd">        self.SSA.Trajectories(self.STP_TRAJ)</span>
+<span class="sd">        self.SSA_REACTIONS = self.SSA.SSA.rate_names</span>
+<span class="sd">        self.SSA_SPECIES = self.SSA.SSA.species</span>
+
+<span class="sd">        if self.STP_TRACK_PROPENSITIES:</span>
+<span class="sd">            self.SSA.TrackPropensities()</span>
+<span class="sd">        try:</span>
+<span class="sd">            print os.path.join(self.TMP_PATH, self.TMP_FNAME)</span>
+<span class="sd">            if not self.STP_KEEP_PSC_FILES and self.TMP_PATH != None and self.TMP_FNAME != None:</span>
+<span class="sd">                os.remove(os.path.join(self.TMP_PATH, self.TMP_FNAME))</span>
+<span class="sd">        except:</span>
+<span class="sd">            print &#39;Could not delete intermediatery StomPy PSC file: %s&#39; % os.path.join(self.TMP_PATH, self.TMP_FNAME)</span>
+<span class="sd">        self.TMP_FNAME = None</span>
+<span class="sd">        print &#39;StomPy model ... initialised.&#39;</span>
+
+<span class="sd">    def runTimeSimulation(self, pscmod, endtime=None, method=&#39;Direct&#39;, iValues=False):</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        Run a stochastic simulation</span>
+
+<span class="sd">         - *pscmod* and instanitiated PySCeS model</span>
+<span class="sd">         - *endtime* [default=1] the end time **Note: this could take a long time i.e. generate ahuge amount of steps**</span>
+<span class="sd">         - *method* [default=&#39;Direct&#39;] select the simulation method, one of:</span>
+
+<span class="sd">          - *Direct*</span>
+<span class="sd">          - *FirstReactionMethod*</span>
+<span class="sd">          - *NextReactionMethod*</span>
+<span class="sd">          - *TauLeaping*</span>
+
+<span class="sd">         - *iValues* [default=False] use initial values (not current)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+<span class="sd">        if method not in [&#39;Direct&#39;,&#39;FirstReactionMethod&#39;,&#39;NextReactionMethod&#39;,&#39;TauLeaping&#39;]:</span>
+<span class="sd">            print &#39;Method: %s does not exist using - Direct&#39; % method</span>
+<span class="sd">            self.STP_METHOD = &#39;Direct&#39;</span>
+<span class="sd">        else:</span>
+<span class="sd">            self.STP_METHOD = method</span>
+<span class="sd">        if endtime != None:</span>
+<span class="sd">            self.STP_TIMEEND = endtime</span>
+<span class="sd">        self.initModelFromMod(pscmod, iValues=iValues)</span>
+
+<span class="sd">        ##  self.SSA.Timesteps(self.STP_STEPS)</span>
+<span class="sd">        self.SSA.Endtime(self.STP_TIMEEND)</span>
+<span class="sd">        self.SSA.Run()</span>
+<span class="sd">        self.STP_IS_TIME_SIM = True</span>
+<span class="sd">        ##  self.SSA.PlotTimeSim()</span>
+
+<span class="sd">        print &#39;StomPy time simulation ... done.&#39;</span>
+
+<span class="sd">        # TODO STOCHPY</span>
+
+<span class="sd">        ##  if self.SSA.SSA.output[0][-1] == &#39;&#39;:</span>
+<span class="sd">            ##  self.SSA.SSA.output[0][-1] = 0.0</span>
+<span class="sd">        ##  sim_dat = numpy.array(self.SSA.SSA.output, &#39;d&#39;)</span>
+
+<span class="sd">        ##  pscmod.data_stochsim = IntegrationStochasticDataObj()</span>
+<span class="sd">        ##  pscmod.data_stochsim.setTime(sim_dat[:,0])</span>
+<span class="sd">        ##  pscmod.data_stochsim.setSpecies(sim_dat[:,1:-1], self.SSA_SPECIES)</span>
+
+<span class="sd">        pscmod.data_stochsim = self.SSA.data_stochsim</span>
+
+<span class="sd">        if self.STP_WAITING_TIMES:</span>
+<span class="sd">            wtimes, wt_lbls = self.getWaitingtimesData(reactions=None,lbls=True)</span>
+<span class="sd">            pscmod.data_stochsim.setWaitingtimes(wtimes, wt_lbls)</span>
+<span class="sd">        if self.STP_TRACK_PROPENSITIES:</span>
+<span class="sd">            pscmod.data_stochsim.setPropensities(self.SSA.SSA.propensities_output)</span>
+<span class="sd">        pscmod.data_stochsim.TYPE_INFO = &#39;Stochastic&#39;</span>
+
+<span class="sd">    def runStepSimulation(self, pscmod, steps=None, method=&#39;Direct&#39;, iValues=False):</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        Run a stochastic simulation</span>
+
+<span class="sd">         - *pscmod* and instanitiated PySCeS model</span>
+<span class="sd">         - *steps* [default=10] the number of steps to simulate</span>
+<span class="sd">         - *method* [default=&#39;Direct&#39;] select the simulation method, one of:</span>
+
+<span class="sd">          - *Direct*</span>
+<span class="sd">          - *FirstReactionMethod*</span>
+<span class="sd">          - *NextReactionMethod*</span>
+<span class="sd">          - *TauLeaping*</span>
+
+<span class="sd">        - *iValues* [default=False] use initial values (not current)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+<span class="sd">        if method not in [&#39;Direct&#39;,&#39;FirstReactionMethod&#39;,&#39;NextReactionMethod&#39;,&#39;TauLeaping&#39;]:</span>
+<span class="sd">            print &#39;Method: %s does not exist using - Direct&#39; % method</span>
+<span class="sd">            self.STP_METHOD = &#39;Direct&#39;</span>
+<span class="sd">        else:</span>
+<span class="sd">            self.STP_METHOD = method</span>
+<span class="sd">        if steps != None:</span>
+<span class="sd">            self.STP_STEPS = steps</span>
+<span class="sd">        self.initModelFromMod(pscmod, iValues=iValues)</span>
+
+<span class="sd">        self.SSA.Timesteps(self.STP_STEPS)</span>
+<span class="sd">        ##  self.SSA.Endtime(self.STP_TIMEEND)</span>
+<span class="sd">        self.SSA.Run()</span>
+<span class="sd">        self.STP_IS_TIME_SIM = False</span>
+
+<span class="sd">        print &#39;StomPy step simulation ... done.&#39;</span>
+<span class="sd">        ##  print self.SSA.SSA.output[0]</span>
+<span class="sd">        ##  print self.SSA.SSA.output[1]</span>
+<span class="sd">        ##  print self.SSA.SSA.output[-1]</span>
+<span class="sd">        ##  header_line = self.SSA.SSA.output.pop(0)</span>
+<span class="sd">        ##  if self.SSA.SSA.output[0][-1] == &#39;&#39;:</span>
+<span class="sd">            ##  self.SSA.SSA.output[0][-1] = 0.0</span>
+<span class="sd">        ##  sim_dat = numpy.array(self.SSA.SSA.output, &#39;d&#39;)</span>
+
+<span class="sd">        ##  pscmod.data_stochsim = IntegrationStochasticDataObj()</span>
+<span class="sd">        ##  pscmod.data_stochsim.setTime(sim_dat[:,0])</span>
+<span class="sd">        ##  pscmod.data_stochsim.setSpecies(sim_dat[:,1:-1], self.SSA_SPECIES)</span>
+
+<span class="sd">        pscmod.data_stochsim = self.SSA.data_stochsim</span>
+
+<span class="sd">        if self.STP_WAITING_TIMES:</span>
+<span class="sd">            wtimes, wt_lbls = self.getWaitingtimesData(reactions=None,lbls=True)</span>
+<span class="sd">            pscmod.data_stochsim.setWaitingtimes(wtimes, wt_lbls)</span>
+<span class="sd">        if self.STP_TRACK_PROPENSITIES:</span>
+<span class="sd">            pscmod.data_stochsim.setPropensities(self.SSA.SSA.propensities_output)</span>
+<span class="sd">        pscmod.data_stochsim.TYPE_INFO = &#39;Stochastic&#39;</span>
+
+
+<span class="sd">    def getWaitingtimesData(self,reactions=None,lbls=False):</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        Plots the waiting times for each reaction in the model. Makes use of ObtainWaitingtimes to derive the waiting times out of the SSA output.</span>
+
+<span class="sd">        Input:</span>
+
+<span class="sd">         - *reactions* [default=0] a list of reactions to plot defualts to all reactions</span>
+<span class="sd">         - *traj* [default=0] trajectory to plot (defaults to first one)</span>
+<span class="sd">         - *lbls* [default=False] if True return (data_array, column_labels) otherwise just data_array</span>
+
+<span class="sd">        This method is derived from StomPy 0.9 (http://stompy.sf.net) Analysis.py</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        if self.SSA.IsTauLeaping:</span>
+<span class="sd">            print &#39;INFO: waiting times not available when method is Tau Leaping&#39;</span>
+<span class="sd">            if not lbls:</span>
+<span class="sd">                return None</span>
+<span class="sd">            else:</span>
+<span class="sd">                return None, None</span>
+<span class="sd">        self.SSA.GetWaitingtimes()</span>
+<span class="sd">        if reactions == None:</span>
+<span class="sd">            reactions = self.SSA_REACTIONS</span>
+<span class="sd">        vect = []</span>
+<span class="sd">        vect_lbls = []</span>
+<span class="sd">        for r in reactions:</span>
+<span class="sd">            if r in self.SSA_REACTIONS:</span>
+<span class="sd">                vect.append(self.SSA_REACTIONS.index(r)+1)</span>
+<span class="sd">                vect_lbls.append(&#39;wt&#39;+str(r))</span>
+<span class="sd">            else:</span>
+<span class="sd">                print &quot;INFO: &#39;%s&#39; is not a valid reaction name&quot; % r</span>
+<span class="sd">        OUTPUT = []</span>
+<span class="sd">        ##  for t in range(len(self.SSA.data_stochsim.waiting_times)):</span>
+<span class="sd">        T_OUTPUT = []</span>
+<span class="sd">        for i in vect:</span>
+<span class="sd">            if self.SSA.data_stochsim.waiting_times.has_key(i):</span>
+<span class="sd">                waiting_time = self.SSA.data_stochsim.waiting_times[i]</span>
+<span class="sd">                if len(waiting_time) &gt; 1:			# At least 2 waiting times are necessary per reaction</span>
+<span class="sd">                    T_OUTPUT.append(self.stompy.modules.Analysis.LogBin(waiting_time, 1.5)) 	# Create logarithmic bins</span>
+<span class="sd">                else:</span>
+<span class="sd">                    T_OUTPUT.append(None)</span>
+<span class="sd">            else:</span>
+<span class="sd">                T_OUTPUT.append(None)</span>
+<span class="sd">        OUTPUT.append(T_OUTPUT)</span>
+<span class="sd">        if not lbls:</span>
+<span class="sd">            return OUTPUT</span>
+<span class="sd">        else:</span>
+<span class="sd">            return OUTPUT, vect_lbls</span>
+
+
+<span class="sd">class IntegrationStochasticDataObj(object):</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    This class is specifically designed to store the</span>
+<span class="sd">    results of a stochastic time simulation</span>
+<span class="sd">    It has methods for setting the Time, Labels, Species and Propensity data and</span>
+<span class="sd">    getting Time, Species and Rate (including time) arrays. However, of more use:</span>
+
+<span class="sd">    - getOutput(\*args) feed this method species/rate labels and it will return</span>
+<span class="sd">      an array of [time, sp1, r1, ....]</span>
+<span class="sd">    - getDataAtTime(time) the data generated at time point &quot;time&quot;.</span>
+<span class="sd">    - getDataInTimeInterval(time, bounds=None) more intelligent version of the above</span>
+<span class="sd">      returns an array of all data points where: time-bounds &lt;= time &lt;= time+bounds</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    time = None</span>
+<span class="sd">    waiting_times = None</span>
+<span class="sd">    species = None</span>
+<span class="sd">    propensities = None</span>
+<span class="sd">    xdata = None</span>
+<span class="sd">    time_label = &#39;Time&#39;</span>
+<span class="sd">    waiting_time_labels = None</span>
+<span class="sd">    species_labels = None</span>
+<span class="sd">    propensities_labels = None</span>
+<span class="sd">    xdata_labels = None</span>
+<span class="sd">    HAS_SPECIES = False</span>
+<span class="sd">    HAS_WAITING_TIMES = False</span>
+<span class="sd">    HAS_PROPENSITIES = False</span>
+<span class="sd">    HAS_TIME = False</span>
+<span class="sd">    HAS_XDATA = False</span>
+<span class="sd">    IS_VALID = True</span>
+<span class="sd">    TYPE_INFO = &#39;Stochastic&#39;</span>
+
+<span class="sd">    def setLabels(self, species):</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        Set the species</span>
+
+<span class="sd">         - *species* a list of species labels</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        self.species_labels = species</span>
+
+<span class="sd">    def setTime(self, time, lbl=None):</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        Set the time vector</span>
+
+<span class="sd">         - *time* a 1d array of time points</span>
+<span class="sd">         - *lbl* [default=None] is &quot;Time&quot; set as required</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        self.time = time.reshape(len(time), 1)</span>
+<span class="sd">        self.HAS_TIME = True</span>
+<span class="sd">        if lbl != None:</span>
+<span class="sd">            self.time_label = lbl</span>
+
+<span class="sd">    def setSpecies(self, species, lbls=None):</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        Set the species array</span>
+
+<span class="sd">         - *species* an array of species vs time data</span>
+<span class="sd">         - *lbls* [default=None] a list of species labels</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        self.species = species</span>
+<span class="sd">        self.HAS_SPECIES = True</span>
+<span class="sd">        if lbls != None:</span>
+<span class="sd">            self.species_labels = lbls</span>
+
+<span class="sd">    def setWaitingtimes(self, waiting_times, lbls=None):</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        Set the `waiting_times` this data structure is not an array but a nested list of: waiting time log bins per reaction per trajectory::</span>
+
+<span class="sd">        waiting_times = [traj_1, ..., traj_n]</span>
+<span class="sd">        traj_1 = [wt_J1, ..., wt_Jn] # in order of SSA_REACTIONS</span>
+<span class="sd">        wt_J1 = (xval, yval, nbin)</span>
+<span class="sd">        xval =[x_1, ..., x_n]</span>
+<span class="sd">        yval =[y_1, ..., y_n]</span>
+<span class="sd">        nbin = n</span>
+
+<span class="sd">         - *waiting_times* a list of waiting times</span>
+<span class="sd">         - *lbls* [default=None] a list of matching reaction names</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        self.waiting_times = waiting_times</span>
+<span class="sd">        self.HAS_WAITING_TIMES = True</span>
+<span class="sd">        if lbls != None:</span>
+<span class="sd">            self.waiting_time_labels = lbls</span>
+
+
+<span class="sd">    def setPropensities(self, propensities, lbls=None):</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        Sets an array of propensities.</span>
+
+<span class="sd">         - *propensities* a list of propensities</span>
+<span class="sd">         - *lbls* [default=None] a list of matching reaction names</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+<span class="sd">        if lbls == None:</span>
+<span class="sd">            LB = copy.copy(propensities[0])</span>
+<span class="sd">            lbls = LB[1:]</span>
+<span class="sd">            lbls = [&#39;p&#39;+str(r) for r in lbls]</span>
+<span class="sd">        P_ARR = numpy.zeros((len(propensities), len(propensities[0])-1), &#39;d&#39;)</span>
+<span class="sd">        P_ARR[-1,:] = numpy.NaN</span>
+<span class="sd">        for r in range(1, P_ARR.shape[0]):</span>
+<span class="sd">            P_ARR[r, :] = propensities[r][1:]</span>
+<span class="sd">        self.propensities = P_ARR</span>
+<span class="sd">        self.HAS_PROPENSITIES = True</span>
+<span class="sd">        if lbls != None:</span>
+<span class="sd">            self.propensities_labels = lbls</span>
+<span class="sd">        ##  print self.propensities_labels</span>
+<span class="sd">        ##  print self.propensities</span>
+
+
+<span class="sd">    def setXData(self, xdata, lbls=None):</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        Sets an array of extra simulation data</span>
+
+<span class="sd">        - *xdata* an array of xdata vs time</span>
+<span class="sd">        - *lbls* [default=None] a list of xdata labels</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        self.xdata = xdata</span>
+<span class="sd">        self.HAS_XDATA = True</span>
+<span class="sd">        if lbls != None:</span>
+<span class="sd">            self.xdata_labels = lbls</span>
+
+<span class="sd">    def getTime(self, lbls=False):</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        Return the time vector</span>
+
+<span class="sd">         - *lbls* [default=False] return only the time array or optionally both the time array and time label</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        output = None</span>
+<span class="sd">        if self.HAS_TIME:</span>
+<span class="sd">            output = self.time.reshape(len(self.time),)</span>
+<span class="sd">        if not lbls:</span>
+<span class="sd">            return output</span>
+<span class="sd">        else:</span>
+<span class="sd">            return output, [self.time_label]</span>
+
+<span class="sd">    def getSpecies(self, lbls=False):</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        Return an array fo time+species</span>
+
+<span class="sd">        - *lbls* [default=False] return only the time+species array or optionally both the data array and a list of column label</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        output = None</span>
+<span class="sd">        if self.HAS_SPECIES:</span>
+<span class="sd">            output = numpy.hstack((self.time, self.species))</span>
+<span class="sd">            labels = [self.time_label]+self.species_labels</span>
+<span class="sd">        else:</span>
+<span class="sd">            output = self.time</span>
+<span class="sd">            labels = [self.time_label]</span>
+<span class="sd">        if not lbls:</span>
+<span class="sd">            return output</span>
+<span class="sd">        else:</span>
+<span class="sd">            return output, labels</span>
+
+<span class="sd">    def getWaitingtimes(self, lbls=False, traj=[]):</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        Return waiting times, time+waiting_time array</span>
+
+<span class="sd">         - *lbls* [default=False] return only the time+waiting_time array or optionally both the data array and a list of column label</span>
+<span class="sd">         - *traj* [default=[0]] return the firs or trajectories defined in this list</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        output = None</span>
+<span class="sd">        labels = None</span>
+<span class="sd">        if self.HAS_WAITING_TIMES:</span>
+<span class="sd">            output = []</span>
+<span class="sd">            if len(traj) == 0:</span>
+<span class="sd">                traj = range(len(self.waiting_times))</span>
+<span class="sd">            ##  if len(traj) == 1:</span>
+<span class="sd">                ##  output = self.waiting_times[0]</span>
+<span class="sd">            ##  else:</span>
+<span class="sd">            for t in traj:</span>
+<span class="sd">                output.append(self.waiting_times[t])</span>
+<span class="sd">            labels = self.waiting_time_labels</span>
+<span class="sd">        else:</span>
+<span class="sd">            output = []</span>
+<span class="sd">            labels = []</span>
+<span class="sd">        if not lbls:</span>
+<span class="sd">            return output</span>
+<span class="sd">        else:</span>
+<span class="sd">            return output, labels</span>
+
+<span class="sd">    def getPropensities(self, lbls=False):</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        Return time+propensity array</span>
+
+<span class="sd">         - *lbls* [default=False] return only the time+propensity array or optionally both the data array and a list of column label</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        #assert self.propensities != None, &quot;\nNo propensities&quot;</span>
+<span class="sd">        output = None</span>
+<span class="sd">        if self.HAS_PROPENSITIES:</span>
+<span class="sd">            print self.time.shape</span>
+<span class="sd">            print self.propensities.shape</span>
+<span class="sd">            output = numpy.hstack((self.time, self.propensities))</span>
+<span class="sd">            labels = [self.time_label]+self.propensities_labels</span>
+<span class="sd">        else:</span>
+<span class="sd">            output = self.time</span>
+<span class="sd">            labels = [self.time_label]</span>
+<span class="sd">        if not lbls:</span>
+<span class="sd">            return output</span>
+<span class="sd">        else:</span>
+<span class="sd">            return output, labels</span>
+
+<span class="sd">    def getXData(self, lbls=False):</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        Return time+xdata array</span>
+
+<span class="sd">        - *lbls* [default=False] return only the time+xdata array or optionally both the data array and a list of column label</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        output = None</span>
+<span class="sd">        if self.HAS_XDATA:</span>
+<span class="sd">            output = numpy.hstack((self.time, self.xdata))</span>
+<span class="sd">            labels = [self.time_label]+self.xdata_labels</span>
+<span class="sd">        else:</span>
+<span class="sd">            output = self.time</span>
+<span class="sd">            labels = [self.time_label]</span>
+<span class="sd">        if not lbls:</span>
+<span class="sd">            return output</span>
+<span class="sd">        else:</span>
+<span class="sd">            return output, labels</span>
+
+<span class="sd">    def getDataAtTime(self, time):</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        Return all data generated at &quot;time&quot;</span>
+
+<span class="sd">         - *time* the required exact time point</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        #TODO add rate rule data</span>
+<span class="sd">        t = None</span>
+<span class="sd">        sp = None</span>
+<span class="sd">        ra = None</span>
+<span class="sd">        ru = None</span>
+<span class="sd">        xd = None</span>
+<span class="sd">        temp_t = self.time.reshape(len(self.time),)</span>
+<span class="sd">        for tt in range(len(temp_t)):</span>
+<span class="sd">            if temp_t[tt] == time:</span>
+<span class="sd">                t = tt</span>
+<span class="sd">                if self.HAS_SPECIES:</span>
+<span class="sd">                    sp = self.species.take([tt], axis=0)</span>
+<span class="sd">                if self.HAS_PROPENSITIES:</span>
+<span class="sd">                    ru = self.propensities.take([tt], axis=0)</span>
+<span class="sd">                if self.HAS_XDATA:</span>
+<span class="sd">                    xd = self.xdata.take([tt], axis=0)</span>
+<span class="sd">                break</span>
+
+<span class="sd">        output = None</span>
+<span class="sd">        if t is not None:</span>
+<span class="sd">            output = numpy.array([[temp_t[t]]])</span>
+<span class="sd">            if sp is not None:</span>
+<span class="sd">                output = numpy.hstack((output,sp))</span>
+<span class="sd">            if ra is not None:</span>
+<span class="sd">                output = numpy.hstack((output,ra))</span>
+<span class="sd">            if ru is not None:</span>
+<span class="sd">                output = numpy.hstack((output,ru))</span>
+<span class="sd">            if xd is not None:</span>
+<span class="sd">                output = numpy.hstack((output,xd))</span>
+
+<span class="sd">        return output</span>
+
+<span class="sd">    def getDataInTimeInterval(self, time, bounds=None):</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        Returns an array of all data in interval: time-bounds &lt;= time &lt;= time+bounds</span>
+<span class="sd">        where bound defaults to stepsize</span>
+
+<span class="sd">         - *time* the interval midpoint</span>
+<span class="sd">         - *bounds* [default=None] interval halfspan defaults to stepsize</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+<span class="sd">        temp_t = self.time.reshape(len(self.time),)</span>
+<span class="sd">        if bounds == None:</span>
+<span class="sd">            bounds = temp_t[1] - temp_t[0]</span>
+<span class="sd">        c1 = (temp_t &gt;= time-bounds)</span>
+<span class="sd">        c2 = (temp_t &lt;= time+bounds)</span>
+<span class="sd">        print &#39;Searching (%s:%s:%s)&#39; % (time-bounds, time, time+bounds)</span>
+
+<span class="sd">        t = []</span>
+<span class="sd">        sp = None</span>
+<span class="sd">        ra = None</span>
+
+<span class="sd">        for tt in range(len(c1)):</span>
+<span class="sd">            if c1[tt] and c2[tt]:</span>
+<span class="sd">                t.append(tt)</span>
+<span class="sd">        output = None</span>
+<span class="sd">        if len(t) &gt; 0:</span>
+<span class="sd">            output = self.time.take(t)</span>
+<span class="sd">            output = output.reshape(len(output),1)</span>
+<span class="sd">            if self.HAS_SPECIES and self.HAS_TIME:</span>
+<span class="sd">                output = numpy.hstack((output, self.species.take(t, axis=0)))</span>
+<span class="sd">            if self.HAS_PROPENSITIES:</span>
+<span class="sd">                output = numpy.hstack((output, self.propensities.take(t, axis=0)))</span>
+<span class="sd">            if self.HAS_XDATA:</span>
+<span class="sd">                output = numpy.hstack((output, self.xdata.take(t, axis=0)))</span>
+<span class="sd">        return output</span>
+
+<span class="sd">    def getAllSimData(self,lbls=False):</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        Return an array of time + all available simulation data</span>
+
+<span class="sd">         - *lbls* [default=False] return only the data array or (data array, list of labels)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        labels = [self.time_label]</span>
+<span class="sd">        if self.HAS_SPECIES and self.HAS_TIME:</span>
+<span class="sd">            output = numpy.hstack((self.time, self.species))</span>
+<span class="sd">            labels += self.species_labels</span>
+<span class="sd">        if self.HAS_PROPENSITIES:</span>
+<span class="sd">            output = numpy.hstack((output, self.propensities))</span>
+<span class="sd">            labels += self.propensities_labels</span>
+<span class="sd">        if self.HAS_XDATA:</span>
+<span class="sd">            output = numpy.hstack((output, self.xdata))</span>
+<span class="sd">            labels += self.xdata_labels</span>
+<span class="sd">        if not lbls:</span>
+<span class="sd">            return output</span>
+<span class="sd">        else:</span>
+<span class="sd">            return output, labels</span>
+
+<span class="sd">    def getSimData(self, *args, **kwargs):</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        Feed this method species/xdata labels and it will return an array of [time, sp1, ....]</span>
+
+<span class="sd">         - &#39;speces_l&#39;, &#39;xdatal&#39; ...</span>
+<span class="sd">         - *lbls* [default=False] return only the data array or (data array, list of labels)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        output = self.time</span>
+
+<span class="sd">        if kwargs.has_key(&#39;lbls&#39;):</span>
+<span class="sd">            lbls = kwargs[&#39;lbls&#39;]</span>
+<span class="sd">        else:</span>
+<span class="sd">            lbls = False</span>
+<span class="sd">        lout = [self.time_label]</span>
+<span class="sd">        for roc in args:</span>
+<span class="sd">            if self.HAS_SPECIES and roc in self.species_labels:</span>
+<span class="sd">                lout.append(roc)</span>
+<span class="sd">                output = numpy.hstack((output, self.species.take([self.species_labels.index(roc)], axis=-1)))</span>
+<span class="sd">            if self.HAS_PROPENSITIES and roc in self.propensities_labels:</span>
+<span class="sd">                lout.append(roc)</span>
+<span class="sd">                output = numpy.hstack((output, self.propensities.take([self.propensities_labels.index(roc)], axis=-1)))</span>
+<span class="sd">            if self.HAS_XDATA and roc in self.xdata_labels:</span>
+<span class="sd">                lout.append(roc)</span>
+<span class="sd">                output = numpy.hstack((output, self.xdata.take([self.xdata_labels.index(roc)], axis=-1)))</span>
+<span class="sd">        if not lbls:</span>
+<span class="sd">            return output</span>
+<span class="sd">        else:</span>
+<span class="sd">            return output, lout</span>
+
+
+<span class="sd">class PysMod:</span>
+<span class="sd">#STOMPY INSERT START</span>
+<span class="sd">    def StochSimPlot(self, plot=&#39;species&#39;, filename=None, title=None, log=None, format=&#39;points&#39;):</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        Plot the Stochastic simulation results, uses the new UPI pysces.plt interface:</span>
+
+<span class="sd">        - *plot* [default=&#39;species&#39;] output to plot, can be one of:</span>
+
+<span class="sd">         - &#39;all&#39; species and propensities</span>
+<span class="sd">         - &#39;species&#39; species</span>
+<span class="sd">         - &#39;waiting_times&#39; waiting_times</span>
+<span class="sd">         - &#39;propensities&#39; propensities</span>
+<span class="sd">         - `[&#39;S1&#39;, &#39;R1&#39;, ]` a list of model attributes (&#39;species&#39;)</span>
+
+<span class="sd">        - *filename* [default=None] if defined file is exported to filename</span>
+<span class="sd">        - *title* [default=None] the plot title</span>
+<span class="sd">        - *log* [default=None] use log axis for axis &#39;x&#39;, &#39;y&#39;, &#39;xy&#39;</span>
+<span class="sd">        - *format* [default=&#39;lines&#39;] use UPI or backend specific keys</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        data = None</span>
+<span class="sd">        labels = None</span>
+<span class="sd">        allowedplots = [&#39;all&#39;, &#39;species&#39;, &#39;propensities&#39;,&#39;waiting_times&#39;]</span>
+<span class="sd">        ##  allowedplots = [&#39;all&#39;, &#39;species&#39;, &#39;waiting_times&#39;]</span>
+<span class="sd">        if type(plot) != list and plot not in allowedplots:</span>
+<span class="sd">            raise RuntimeError, &#39;\nPlot must be one of %s not \&quot;%s\&quot;&#39; % (str(allowedplots), plot)</span>
+<span class="sd">        if plot == &#39;all&#39;:</span>
+<span class="sd">            ##  data, labels = self.data_stochsim.getSpecies(lbls=True)</span>
+<span class="sd">            data, labels = self.data_stochsim.getAllSimData(lbls=True)</span>
+<span class="sd">        elif plot == &#39;species&#39;:</span>
+<span class="sd">            data, labels = self.data_stochsim.getSpecies(lbls=True)</span>
+<span class="sd">        elif plot == &#39;propensities&#39;:</span>
+<span class="sd">            data, labels = self.data_stochsim.getPropensities(lbls=True)</span>
+<span class="sd">            ##  data, labels = self.data_stochsim.getRates(lbls=True)</span>
+<span class="sd">        elif plot == &#39;waiting_times&#39;:</span>
+<span class="sd">            dataLst, labels = self.data_stochsim.getWaitingtimes(lbls=True)</span>
+<span class="sd">            format=&#39;points&#39;</span>
+<span class="sd">            ##  data, labels = self.data_stochsim.getRates(lbls=True)</span>
+<span class="sd">        else:</span>
+<span class="sd">            plot = [at for at in plot if at in self.__species__+[self.data_stochsim.time_label]+self.data_stochsim.propensities_labels]</span>
+<span class="sd">            kwargs = {&#39;lbls&#39; : True}</span>
+<span class="sd">            print plot</span>
+<span class="sd">            if len(plot) &gt; 0:</span>
+<span class="sd">                data, labels = self.data_stochsim.getSimData(*plot, **kwargs)</span>
+<span class="sd">        del allowedplots</span>
+
+<span class="sd">        xu = &#39;Time (%(multiplier)s x %(kind)s x 10**%(scale)s)**%(exponent)s&#39; % self.__uDict__[&#39;time&#39;]</span>
+
+<span class="sd">        if plot == &#39;waiting_times&#39;:</span>
+<span class="sd">            xu = &#39;Inter-arrival time (%s)&#39; % xu</span>
+
+<span class="sd">            xrng_start = 0.1</span>
+<span class="sd">            xrng_end = 0.1</span>
+<span class="sd">            yrng_start = 0.1</span>
+<span class="sd">            yrng_end = 0.1</span>
+<span class="sd">            for wt in range(len(dataLst)):</span>
+<span class="sd">                for d in range(len(dataLst[wt])):</span>
+<span class="sd">                    D = dataLst[wt][d]</span>
+<span class="sd">                    if plt.__USE_MATPLOTLIB__ and d &gt; 0:</span>
+<span class="sd">                        plt.m.hold(True)</span>
+<span class="sd">                    if D != None and len(D[0]) &gt; 0 and len(D[1]) &gt; 0:</span>
+<span class="sd">                        data = numpy.vstack([D[0], D[1]]).transpose()</span>
+<span class="sd">                        if min(D[0]) &lt; xrng_start and min(D[0]) &gt; 0.0:</span>
+<span class="sd">                            xrng_start = min(D[0])</span>
+<span class="sd">                        if max(D[0]) &gt; xrng_end:</span>
+<span class="sd">                            xrng_end = max(D[0])</span>
+<span class="sd">                        if min(D[1]) &lt; yrng_start and min(D[1]) &gt; 0.0:</span>
+<span class="sd">                            yrng_start = min(D[1])</span>
+<span class="sd">                        if max(D[1]) &gt; yrng_end:</span>
+<span class="sd">                            yrng_end = max(D[1])</span>
+<span class="sd">                        plt.plotLines(data, 0, [1], titles=[&#39;Time&#39;]+[labels[d]], formats=[format])</span>
+<span class="sd">            plt.setRange(&#39;x&#39;, xrng_start*0.8, xrng_end*1.2)</span>
+<span class="sd">            plt.setRange(&#39;y&#39;, yrng_start*0.8, yrng_end*1.2)</span>
+<span class="sd">            if plt.__USE_MATPLOTLIB__:</span>
+<span class="sd">                plt.m.hold(False)</span>
+<span class="sd">        else:</span>
+<span class="sd">            plt.plotLines(data, 0, range(1, data.shape[1]), titles=labels, formats=[format])</span>
+<span class="sd">            # set the x-axis range so that it is original range + 0.2*sim_end</span>
+<span class="sd">            # this is a sceintifcally dtermned amount of space that is needed for the title at the</span>
+<span class="sd">            # end of the line :-) - brett 20040209</span>
+<span class="sd">            RngTime = self.data_stochsim.getTime()</span>
+<span class="sd">            end = RngTime[-1] + 0.2*RngTime[-1]</span>
+<span class="sd">            plt.setRange(&#39;x&#39;, RngTime[0], end)</span>
+<span class="sd">            del RngTime</span>
+
+<span class="sd">        # For now StochPy results are plotted as Amounts directly from StochPy</span>
+<span class="sd">        M = &#39;Amount&#39;</span>
+<span class="sd">        ##  if self.__KeyWords__[&#39;Output_In_Conc&#39;]:</span>
+<span class="sd">            ##  M = &#39;Concentration&#39;</span>
+<span class="sd">        ##  else:</span>
+<span class="sd">            ##  M = &#39;Amount (%(multiplier)s x %(kind)s x 10**%(scale)s)**%(exponent)s&#39; % self.__uDict__[&#39;substance&#39;]</span>
+
+<span class="sd">        if plot == &#39;all&#39;:</span>
+<span class="sd">            yl = &#39;Amount, propensities&#39;</span>
+<span class="sd">        elif plot == &#39;propensities&#39;:</span>
+<span class="sd">            yl = &#39;Propensities&#39;</span>
+<span class="sd">        elif plot == &#39;waiting_times&#39;:</span>
+<span class="sd">            yl = &#39;Frequency&#39;</span>
+<span class="sd">            if log == None:</span>
+<span class="sd">                log = &#39;xy&#39;</span>
+<span class="sd">        elif plot == &#39;species&#39;:</span>
+<span class="sd">            yl = &#39;%s&#39; % M</span>
+<span class="sd">        else:</span>
+<span class="sd">            yl = &#39;User defined&#39;</span>
+<span class="sd">        plt.setAxisLabel(&#39;x&#39;, xu)</span>
+<span class="sd">        plt.setAxisLabel(&#39;y&#39;, yl)</span>
+<span class="sd">        if log != None:</span>
+<span class="sd">            plt.setLogScale(log)</span>
+<span class="sd">        if title == None:</span>
+<span class="sd">            plt.setGraphTitle(&#39;PySCeS/StochPy simulation (&#39; + self.ModelFile + &#39;) &#39; + time.strftime(&quot;%a, %d %b %Y %H:%M:%S&quot;))</span>
+<span class="sd">        else:</span>
+<span class="sd">            plt.setGraphTitle(title)</span>
+<span class="sd">        plt.replot()</span>
+<span class="sd">        if filename != None:</span>
+<span class="sd">            plt.export(filename, directory=self.ModelOutput, type=&#39;png&#39;)</span>
+
+
+<span class="sd">    def doStochSim(self,end=10,mode=&#39;steps&#39;,method=&#39;Direct&#39;,trajectories=1):</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        doStochSim(end=10, mode=&#39;steps&#39;, method=&#39;Direct&#39;)</span>
+
+<span class="sd">        Run a stochastic simulation for until `end` is reached. This can be either steps or end time (which could be a *HUGE* number of steps).</span>
+
+<span class="sd">        Arguments:</span>
+
+<span class="sd">         - *end* [default=10] simulation end (steps or time)</span>
+<span class="sd">         - *mode* [default=&#39;steps&#39;] simulation mode, can be one of:</span>
+
+<span class="sd">          - *steps* total number of steps to simulate</span>
+<span class="sd">          - *time* simulate until time is reached</span>
+
+<span class="sd">         - *method* [default=&#39;Direct&#39;] stochastic algorithm, can be one of:</span>
+
+<span class="sd">          - Direct</span>
+<span class="sd">          - FirstReactionMethod</span>
+<span class="sd">          - NextReactionMethod</span>
+<span class="sd">          - TauLeaping</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+<span class="sd">        if method not in [&#39;Direct&#39;, &#39;FirstReactionMethod&#39;,&#39;NextReactionMethod&#39;,&#39;TauLeaping&#39;]:</span>
+<span class="sd">            print &#39;Method &quot;%s&quot; not recognised using: &quot;Direct&quot;&#39; % method</span>
+<span class="sd">            method = &#39;Direct&#39;</span>
+<span class="sd">        if mode not in [&#39;steps&#39;,&#39;time&#39;]:</span>
+<span class="sd">            print &#39;Mode &quot;%s&quot; not recognised using: &quot;steps&quot;&#39; % mode</span>
+<span class="sd">            mode = &#39;steps&#39;</span>
+
+<span class="sd">        stompy_track_propensities = True</span>
+<span class="sd">        stompy_keep_psc_files = False</span>
+<span class="sd">        self.__STOMPY__.setProperty(method=method, trajectories=trajectories, interactive=True, track_propensities=stompy_track_propensities, keep_psc_files=stompy_keep_psc_files)</span>
+
+<span class="sd">        if mode == &#39;time&#39;:</span>
+<span class="sd">            self.__STOMPY__.runTimeSimulation(self, endtime=end, method=method)</span>
+<span class="sd">        else:</span>
+<span class="sd">            self.__STOMPY__.runStepSimulation(self, steps=end, method=method)</span>
+
+
+<span class="sd">    def doStochSimPlot(self, end=10.0, mode=&#39;steps&#39;, method=&#39;Direct&#39;, plot=&#39;species&#39;, fmt=&#39;points&#39;, log=None, filename=None):</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        doStochSimPlot(end=10.0, mode=&#39;steps&#39;, method=&#39;Direct&#39;, plot=&#39;species&#39;, fmt=&#39;points&#39;, log=None, filename=None)</span>
+
+<span class="sd">        Run a stochastic simulation for until `end` is reached and plot the results. This can be either steps or end time (which could be a *HUGE* number of steps).</span>
+
+<span class="sd">        Arguments:</span>
+
+<span class="sd">         - *end* [default=10] simulation end (steps or time)</span>
+<span class="sd">         - *mode* [default=&#39;steps&#39;] simulation mode, can be one of:</span>
+
+<span class="sd">          - *steps* total number of &#39;steps&#39; to simulate</span>
+<span class="sd">          - *time* simulate until &#39;time&#39; is reached</span>
+
+<span class="sd">         - *method* [default=&#39;Direct&#39;] stochastic algorithm, can be one of:</span>
+
+<span class="sd">          - Direct</span>
+<span class="sd">          - FirstReactionMethod</span>
+<span class="sd">          - NextReactionMethod</span>
+<span class="sd">          - TauLeaping</span>
+
+<span class="sd">        - *plot* [default=&#39;species&#39;] output to plot, can be one of:</span>
+
+<span class="sd">         - &#39;all&#39; species and propensities</span>
+<span class="sd">         - &#39;species&#39; species</span>
+<span class="sd">         - &#39;waiting_times&#39; waiting_times</span>
+<span class="sd">         - &#39;propensities&#39; propensities</span>
+<span class="sd">         - `[&#39;S1&#39;, &#39;R1&#39;, ]` a list of model attributes (&#39;species&#39;)</span>
+
+<span class="sd">        - *filename* [default=None] if defined file is exported to filename</span>
+<span class="sd">        - *title* [default=None] the plot title</span>
+<span class="sd">        - *log* [default=None] use log axis for axis &#39;x&#39;, &#39;y&#39;, &#39;xy&#39;</span>
+<span class="sd">        - *fmt* [default=&#39;lines&#39;] use UPI or backend specific keys</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+<span class="sd">        self.doStochSim(end=end, mode=mode, method=method,trajectories=1)</span>
+<span class="sd">        self.StochSimPlot(plot=&#39;species&#39;, filename=filename, log=log, format=fmt)</span>
+
+<span class="sd">#STOMPY INSERT START</span>
+
+<span class="sd">if not _HAVE_STOMPY:</span>
+<span class="sd">    def nofunc(self, *args, **kwargs):</span>
+<span class="sd">        print &#39;\nStochastic simulation not available, please download/install *StomPy* from: http://stompy.sf.net\n&#39;</span>
+<span class="sd">    PysMod.doStochSim = nofunc</span>
+<span class="sd">    PysMod.doStochSimPlot = nofunc</span>
+<span class="sd">    PysMod.StochSimPlot = nofunc</span>
+
+<span class="sd">&#39;&#39;&#39;</span>
+
+
+
+
+
+
+
+
+
+
+
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../userguide.html">
+              <img class="logo" src="../../_static/pysces_logo_2.gif" alt="Logo"/>
+            </a></p><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../userguide.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2004-2019, Brett Oliver, Johann Rohwer, Jannie Hofmeyr.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
