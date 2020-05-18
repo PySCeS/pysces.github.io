@@ -10,9 +10,8 @@
   </head>
   <body>
 	  
-<!--
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-      <a class="navbar-brand" href="#">Navbar</a>
+      <a class="navbar-brand" href="https://pysces.github.io/">PySCeS</a>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
       </button>
@@ -40,7 +39,7 @@
         </form>
       </div>
     </nav>
--->
+
 	  
     <div class="container mt-2">
       <div class="row">
@@ -48,34 +47,56 @@
           <div class="jumbotron"> 
             <img src="images/pysces_header.gif" alt="PySCeS" width="1200" height="400" class="img-fluid">
             <h3 class="text-center">A flexible, user friendly tool for the analysis of cellular systems</h3>
-<p class="text-center">Computer modelling has become an integral tool in the analysis and understanding of the reaction networks that underlie cellular processes. PySCeS, first released in 2003, is extremely flexible, user-extendible, open source, software actively used and developed by a community of researchers and developers.</p>
-</div>
+            <p class="text-center">Computer modelling has become an integral tool in the analysis and understanding of the reaction networks that underlie cellular processes. PySCeS, first released in 2003, is extremely flexible, user-extendible, open source, software actively used and developed by a community of researchers and developers.</p>
+            <p class="text-center">Latest release is PySCeS 0.9.8 (15 May 2020)</p>
+          </div>
         </div>
       </div>
     </div>
-    <div class="container">
+    <div class="container mt-4">
       <div class="row">
-        <div class="text-center col-md-6 col-12">
-          <h3>Get PySCeS</h3>
-          <p>Python software is available on major operating systems.</p>
-		  	<a class="btn btn-danger btn-lg" href="https://pypi.org/project/pysces/#files" role="button">PyPi</a>
-		  <a class="btn btn-lg btn-info" href="https://github.com/PySCeS/pysces" role="button">GitHub</a>
-			<a class="btn btn-warning btn-lg" href="https://anaconda.org/pysces/pysces" role="button">Anaconda</a>
-			<p>Latest release is PySCeS 0.9.8 (15 May 2020)</p>
+        <div class="col-sm-6">
+          <div class="card">
+<!--            <img class="card-img-top" src="images/600X300.gif" alt="Card image cap">-->
+            <div class="card-body">
+              <h3 class="card-title">Get PySCeS</h3>
+			  <p class="card-text">PySCeS is avaialable for all major operating systems. The easiest way to install PySCeS is to use a Python package manager.</p>
+				<div class="text-center">
+			    <a class="btn btn-danger btn-lg" href="https://pypi.org/project/pysces/#files" role="button">PyPi</a>
+				<a class="btn btn-lg btn-info" href="https://github.com/PySCeS/pysces" role="button">GitHub</a>
+				<a class="btn btn-warning btn-lg" href="https://anaconda.org/pysces/pysces" role="button">Anaconda</a>
+				</div>
+				<p>&nbsp;</p>
+				<p class="card-text">PyPI<br/><code>pip install pysces</code></p>
+			  <p class="card-text">Conda<br/><code>conda install -c sbmlteam -c pysces pysces</code></p>
+				<p class="card-text">Latest source (GitHub)<br/><code>git clone https://github.com/PySCeS/pysces.git</code></p>
+            </div>
+          </div>
         </div>
-        <div class="text-center col-md-6 col-12">
-          <h3>More information?</h3>
-          <p>For more information on using and citing PySCeS.</p>
-            <a class="btn btn-info btn-lg" href="https://pythonhosted.org/PySCeS/" role="button">Documentation</a>
-			<a class="btn btn-warning btn-lg" href="https://doi.org/10.1093/bioinformatics/bti046" role="button">Publication</a>
+        <div class="col-sm-6">
+          <div class="card">
+<!--            <img class="card-img-top" src="images/600X300.gif" alt="Card image cap">-->
+            <div class="card-body">
+              <h3 class="card-title">Need more information?&nbsp;</h3>
+				<p class="card-text">For more information on using and citing PySCeS try the documentation or 2005 Bioinformatics publication.</p>
+			<div class="text-center">
+				<a class="btn btn-info btn-lg" href="https://pythonhosted.org/PySCeS/" 	role="button">Documentation</a> 
+				<a class="btn btn-warning btn-lg" href="https://doi.org/10.1093/bioinformatics/bti046" role="button">Publication</a>
+			</div>
+			  <p class="card-text">&nbsp;</p>
+			  <p class="card-text">PySCeS source code, issue tracker and wiki available on <a href="https://github.com/PySCeS/pysces">GitHub</a>.</p>
+<p class="card-text">See who is citing PySCeS on <a href="https://scholar.google.nl/scholar?hl=en&as_sdt=2005&cites=17307229048471592416&scipsc=&q=&scisbd=1">Google Scholar</a>.</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
-    <hr>
-    <div class="container">
+
+	  
+	  <div class="container">
       <div class="row">
         <div class="col-lg-3 col-lg-6 col-12">
-          <h2>User features</h2>
+          <h2>User friendly</h2>
           <ul>
 		    <li>Define models with human readable, <strong>Model Description Language</strong>. </li>
 		    <li>Use the full power of Python available to <strong>test, build and share</strong> your modelling experiments. </li>			  
@@ -83,10 +104,9 @@
             <li><strong>Visualise</strong> results of simulations with&nbsp; flexible Matplotlib and Gnuplot interfaces.</li>
             <li>PySCeS supports <strong>open community standards</strong> for model exchange (SBML) and archiving (SEDML, OMEX).</li>
           </ul>
-
 	    </div>
         <div class="col-lg-3 col-lg-6 col-12">
-          <h2>Modelling details</h2>
+          <h2>Modelling features&nbsp;</h2>
           <ul>
             <li><strong>Simulate</strong> your time courses with solvers like LSODA. </li>
             <li>Efficiently determine <strong>steady states</strong> using a&nbsp; selection of non-linear, root-finding algorithms (e.g. HYBRD, NLEQ2). </li>
@@ -97,9 +117,9 @@
         </div>
       </div>
     </div>
+
 	  
-    <hr>
-	  
+  
 <!--
     <section>
       <h2 class="text-center">Video Tutorial</h2>
@@ -114,32 +134,8 @@
       </div>
     </section>
 -->
-<!--
-    <div class="container mt-4">
-      <div class="row">
-        <div class="col-sm-6">
-          <div class="card">
-            <img class="card-img-top" src="images/600X300.gif" alt="Card image cap">
-            <div class="card-body">
-              <h5 class="card-title">Feature</h5>
-              <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deserunt, at.</p>
-              <a href="#" class="btn btn-primary">Go somewhere</a>
-            </div>
-          </div>
-        </div>
-        <div class="col-sm-6">
-          <div class="card">
-            <img class="card-img-top" src="images/600X300.gif" alt="Card image cap">
-            <div class="card-body">
-              <h5 class="card-title">Feature</h5>
-              <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deserunt, at.</p>
-              <a href="#" class="btn btn-primary">Go somewhere</a>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
--->
+
+
 <!--
     <div class="container">
       <div class="row">
