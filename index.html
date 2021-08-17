@@ -17,13 +17,15 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
+<!--
           <li class="nav-item active">
-            <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+            <a class="nav-link" href="https://pysces.github.io/">Home <span class="sr-only">(current)</span></a>
           </li>
+-->
           <li class="nav-item">
-            <a class="nav-link" href="#">Link</a>
+            <a class="nav-link" href="https://github.com/PySCeS/pysces">Code</a>
           </li>
-          <li class="nav-item dropdown">
+<!--          <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Dropdown</a>
             <div class="dropdown-menu" aria-labelledby="navbarDropdown">
               <a class="dropdown-item" href="#">Action</a>
@@ -31,12 +33,14 @@
               <div class="dropdown-divider"></div>
               <a class="dropdown-item" href="#">Something else here</a>
             </div>
-          </li>
+          </li>-->
         </ul>
+<!--
         <form class="form-inline my-2 my-lg-0">
           <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
           <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
         </form>
+-->
       </div>
     </nav>
 
@@ -48,7 +52,7 @@
             <img src="images/pysces_header.gif" alt="PySCeS" width="1200" height="400" class="img-fluid">
             <h3 class="text-center">A flexible, user friendly tool for the analysis of cellular systems</h3>
             <p class="text-center">Computer modelling has become an integral tool in the analysis and understanding of the reaction networks that underlie cellular processes. PySCeS, first released in 2003, is extremely flexible, user-extendible, open source, software actively used and developed by a community of researchers and developers.</p>
-            <h5 class="text-center">The latest PySCeS release is 0.9.8 uploaded on 15 May 2020.</h5>
+            <h5 class="text-center">The latest PySCeS release is version 1.0 (expected August 2021).</h5>
           </div>
         </div>
       </div>
@@ -62,15 +66,15 @@
 		    <li>Define models with human readable, <strong>Model Description Language</strong>. </li>
 		    <li>Use the full power of Python available to <strong>test, build and share</strong> your modelling experiments. </li>			  
             <li>User friendly methods for generating and 1, 2 and n-dimension <strong>parameter scans</strong>.</li>
-            <li><strong>Visualise</strong> results of simulations with&nbsp; flexible Matplotlib and Gnuplot interfaces.</li>
+            <li><strong>Visualise</strong> results of simulations with flexible Matplotlib and Gnuplot interfaces.</li>
             <li>PySCeS supports <strong>open community standards</strong> for model exchange (SBML) and archiving (SEDML, OMEX).</li>
           </ul>
 	    </div>
         <div class="col-lg-3 col-lg-6 col-12">
-          <h2>Modelling features&nbsp;</h2>
+          <h2>Modelling features</h2>
           <ul>
             <li><strong>Simulate</strong> your time courses with solvers like LSODA. </li>
-            <li>Efficiently determine <strong>steady states</strong> using a&nbsp; selection of non-linear, root-finding algorithms (e.g. HYBRD, NLEQ2). </li>
+            <li>Efficiently determine <strong>steady states</strong> using a selection of non-linear, root-finding algorithms (e.g. HYBRD, NLEQ2). </li>
             <li>Use <strong>Metabolic Control Analysis</strong> (MCA) to investigate control and regulation of cellular systems (elasticities, flux control   and response coefficients).</li>
             <li>Perform <strong>structural analysis</strong> and determine nullspaces and reduced stoichiometric and MCA matrices</li>
             <li>Investigate systems which exhibit multiple (stable and unstable) steady-state solutions using PITCON based <strong>bifurcation analysis</strong> module.</li>
@@ -79,8 +83,6 @@
       </div>
     </div>
 
-	  
-	  
 	  <div class="container mt-4">
       <div class="row">
         <div class="col-sm-6">
@@ -96,8 +98,9 @@
 				</div>
 				<p>&nbsp;</p>
 				<p class="card-text">PyPI<br/><code>pip install pysces</code></p>
-			  <p class="card-text">Conda<br/><code>conda install -c sbmlteam -c pysces pysces</code></p>
-			  <p class="card-text">Latest source (GitHub)<br/><code>git clone https://github.com/PySCeS/pysces.git</code></p>
+			  <p class="card-text">Conda<br/><code>conda install -c conda-forge -c pysces pysces</code></p>
+			  <p class="card-text">Latest source (GitHub see <a href="https://github.com/PySCeS/pysces/blob/master/INSTALL.md">install.md</a> for instructions)<br>
+		      <code>git clone https://github.com/PySCeS/pysces.git</code></p>
             </div>
           </div>
         </div>
@@ -112,8 +115,11 @@
 				<a class="btn btn-warning btn-lg" href="https://doi.org/10.1093/bioinformatics/bti046" role="button">Publication</a>
 			</div>
 			  <p class="card-text">&nbsp;</p>
-			  <p class="card-text">PySCeS source code, issue tracker and wiki available on <a href="https://github.com/PySCeS/pysces">GitHub</a>.</p>
-<p class="card-text">See who is citing PySCeS on <a href="https://scholar.google.nl/scholar?hl=en&as_sdt=2005&cites=17307229048471592416&scipsc=&q=&scisbd=1">Google Scholar</a>.</p>
+			  <p class="card-text">PySCeS source code, issue tracker and wiki available on <a href="https://github.com/PySCeS/pysces">GitHub</a> and see who is citing PySCeS on <a href="https://scholar.google.nl/scholar?hl=en&as_sdt=2005&cites=17307229048471592416&scipsc=&q=&scisbd=1">Google Scholar</a>.</p>
+              <p class="card-text">PySCeS releases are archived on <a href="https://zenodo.org/">Zenodo&nbsp;</a>and can be referred to as DOI: <a href="https://doi.org/10.5281/zenodo.2600905">10.5281/zenodo.2600905</a><br>
+              </p>
+              <p class="card-text"><strong>Contact</strong> <br>
+                Would you like to report an issue, discuss existing or new functionality? Raise an <a href="https://github.com/PySCeS/pysces/issues">issue</a> on GitHub or contact a developer on <a href="https://twitter.com/brett_olivier">Twitter</a>.</p>
             </div>
           </div>
         </div>
@@ -289,7 +295,7 @@
       <div class="container">
         <div class="row">
           <div class="col-12">
-			  <p>Copyright © Brett G. Olivier, Amsterdam 2020. All rights reserved.</p>
+			  <p>Copyright © Brett G. Olivier, Amsterdam 2021. All rights reserved.</p>
 			  <div id="lastUpdate">&nbsp;</div>
           </div>
         </div>
