@@ -1,0 +1,57 @@
+{
+  "content": [
+    {
+      "content": null,
+      "created": "2024-10-17T10:20:00.663587Z",
+      "format": null,
+      "hash": null,
+      "hash_algorithm": null,
+      "last_modified": "2024-10-17T08:50:23.143473Z",
+      "mimetype": null,
+      "name": "Test_ipympl.ipynb",
+      "path": "Test_ipympl.ipynb",
+      "size": 105977,
+      "type": "notebook",
+      "writable": true
+    },
+    {
+      "content": null,
+      "created": "2024-10-17T10:20:00.663587Z",
+      "format": null,
+      "hash": null,
+      "hash_algorithm": null,
+      "last_modified": "2024-10-17T10:20:00.663587Z",
+      "mimetype": null,
+      "name": "models",
+      "path": "models",
+      "size": null,
+      "type": "directory",
+      "writable": true
+    },
+    {
+      "content": null,
+      "created": "2024-10-17T10:32:17.856936Z",
+      "format": null,
+      "hash": null,
+      "hash_algorithm": null,
+      "last_modified": "2024-10-17T10:31:30.000268Z",
+      "mimetype": null,
+      "name": "Test_pysces.ipynb",
+      "path": "Test_pysces.ipynb",
+      "size": 12160,
+      "type": "notebook",
+      "writable": true
+    }
+  ],
+  "created": "2024-10-17T10:32:17.856936Z",
+  "format": "json",
+  "hash": null,
+  "hash_algorithm": null,
+  "last_modified": "2024-10-17T10:32:17.856936Z",
+  "mimetype": null,
+  "name": "",
+  "path": "",
+  "size": null,
+  "type": "directory",
+  "writable": true
+}

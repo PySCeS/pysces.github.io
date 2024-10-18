@@ -1,0 +1,43 @@
+{
+  "content": [
+    {
+      "content": null,
+      "created": "2024-10-17T10:06:58.053571Z",
+      "format": null,
+      "hash": null,
+      "hash_algorithm": null,
+      "last_modified": "2021-08-16T13:53:17.258080Z",
+      "mimetype": "text/xml",
+      "name": "BIOMD0000000012_url.xml",
+      "path": "models/BIOMD0000000012_url.xml",
+      "size": 46274,
+      "type": "file",
+      "writable": true
+    },
+    {
+      "content": null,
+      "created": "2024-10-17T10:06:58.053571Z",
+      "format": null,
+      "hash": null,
+      "hash_algorithm": null,
+      "last_modified": "2008-12-11T14:56:01Z",
+      "mimetype": null,
+      "name": "rohwer_sucrose2.psc",
+      "path": "models/rohwer_sucrose2.psc",
+      "size": 6804,
+      "type": "file",
+      "writable": true
+    }
+  ],
+  "created": "2024-10-17T10:06:58.053571Z",
+  "format": "json",
+  "hash": null,
+  "hash_algorithm": null,
+  "last_modified": "2024-10-17T10:06:58.053571Z",
+  "mimetype": null,
+  "name": "models",
+  "path": "models",
+  "size": null,
+  "type": "directory",
+  "writable": true
+}
